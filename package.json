@@ -73,12 +73,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/venice-ai/venice-ai-sdk-apl.git"
+    "url": "https://github.com/georgeglarson/venice-dev-tools.git"
   },
   "bugs": {
-    "url": "https://github.com/venice-ai/venice-ai-sdk-apl/issues"
+    "url": "https://github.com/georgeglarson/venice-dev-tools/issues"
   },
-  "homepage": "https://github.com/venice-ai/venice-ai-sdk-apl#readme",
+  "homepage": "https://github.com/georgeglarson/venice-dev-tools#readme",
   "dependencies": {
     "axios": "^1.6.7",
     "commander": "^13.1.0",
