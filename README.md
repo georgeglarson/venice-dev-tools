@@ -421,6 +421,52 @@ When debug mode is enabled, the CLI will:
 2. Show detailed request and response information
 3. Display raw API responses and metadata
 
+### Programmatic CLI Usage
+
+For developers who want to use the CLI commands directly in their code without learning the full SDK API, the package exports a `cli` object that provides the same functionality:
+
+```javascript
+import { cli } from 'veniceai-sdk';
+
+// Use the same commands you're familiar with from the CLI
+async function main() {
+  try {
+    // Configure your API key
+    cli.commands.configure('your-api-key');
+    
+    // Enable debug mode (optional)
+    cli.commands.enableDebug();
+    
+    // Chat with the AI
+    const response = await cli.commands.chat('Tell me about AI', {
+      model: 'llama-3.3-70b',
+      webSearch: true
+    });
+    console.log(response);
+    
+    // List API keys
+    const keys = await cli.commands.listKeys();
+    console.log(keys);
+    
+    // Generate an image
+    const image = await cli.commands.generateImage('A beautiful sunset', {
+      style: 'Photographic',
+      outputPath: 'sunset.png'
+    });
+    console.log(`Image saved to: ${image.savedTo}`);
+  } catch (error) {
+    console.error('Error:', error.message);
+  }
+}
+
+main();
+```
+
+This approach allows developers to:
+1. Use the same commands they're familiar with from the CLI
+2. Avoid learning the full SDK API for simple use cases
+3. Easily integrate Venice AI capabilities into their applications
+
 ## Examples
 
 For more examples, check out the [examples](./examples) directory:

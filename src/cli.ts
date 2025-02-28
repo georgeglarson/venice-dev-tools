@@ -19,6 +19,268 @@ try {
   // Config file doesn't exist yet
 }
 
+// Helper function for debug logging
+const debugLog = (message: string, data?: any) => {
+  if ((global as any).debug) {
+    console.log(`Debug - ${message}:`, data ? JSON.stringify(data, null, 2) : '');
+  }
+};
+
+// Create a function to get the Venice client
+const getClient = () => {
+  const apiKey = process.env.VENICE_API_KEY || config.apiKey;
+  
+  if (!apiKey) {
+    console.error('Error: API key not found. Please set the VENICE_API_KEY environment variable or run "venice configure"');
+    process.exit(1);
+  }
+  
+  const client = new VeniceAI({
+    apiKey,
+  });
+  
+  // Enable debug logging in the SDK if debug flag is set
+  if ((global as any).debug) {
+    client.enableDebugLogging();
+  }
+  
+  return client;
+};
+
+// Command implementations for programmatic usage
+export const commands = {
+  // Chat command implementation
+  chat: async (prompt: string, options: { model?: string; webSearch?: boolean; system?: string } = {}) => {
+    try {
+      const venice = getClient();
+      
+      const messages: { role: 'system' | 'user' | 'assistant' | 'function' | 'tool'; content: string }[] = [];
+      
+      if (options.system) {
+        messages.push({ role: 'system', content: options.system });
+      }
+      
+      messages.push({ role: 'user', content: prompt });
+      
+      if ((global as any).debug) {
+        debugLog('Chat request', { model: options.model, messages, webSearch: options.webSearch });
+      }
+      
+      const response = await venice.chat.completions.create({
+        model: options.model || 'llama-3.3-70b',
+        messages,
+        venice_parameters: options.webSearch ? {
+          enable_web_search: 'on'
+        } : undefined
+      });
+      
+      if ((global as any).debug) {
+        debugLog('Chat response', response);
+      }
+      
+      return response.choices[0].message.content;
+    } catch (error) {
+      throw new Error(`Chat error: ${(error as Error).message}`);
+    }
+  },
+  
+  // List keys command implementation
+  listKeys: async () => {
+    try {
+      const venice = getClient();
+      const response = await venice.apiKeys.list();
+      
+      if (response.keys.length === 0) {
+        return { keys: [] };
+      }
+      
+      if ((global as any).debug) {
+        debugLog('First key details', response.keys[0]);
+        debugLog('Response metadata', response._metadata);
+      }
+      
+      return {
+        keys: response.keys.map((key: any) => ({
+          id: key.id,
+          name: key.name || key.description,
+          created: key.createdAt ? new Date(key.createdAt) : null,
+          expires: key.expiresAt ? new Date(key.expiresAt) : null,
+          type: key.apiKeyType,
+          lastUsed: key.lastUsedAt ? new Date(key.lastUsedAt) : null,
+          usage: key.usage
+        }))
+      };
+    } catch (error) {
+      throw new Error(`List keys error: ${(error as Error).message}`);
+    }
+  },
+  
+  // Create key command implementation
+  createKey: async (name: string) => {
+    try {
+      const venice = getClient();
+      const response = await venice.apiKeys.create({
+        name
+      });
+      
+      if ((global as any).debug) {
+        debugLog('Create key response', response);
+      }
+      
+      return {
+        id: response.key.id,
+        key: response.key.key,
+        name: response.key.description || name,
+        created: new Date(response.key.createdAt),
+        expires: response.key.expiresAt ? new Date(response.key.expiresAt) : null
+      };
+    } catch (error) {
+      throw new Error(`Create key error: ${(error as Error).message}`);
+    }
+  },
+  
+  // Delete key command implementation
+  deleteKey: async (id: string) => {
+    try {
+      const venice = getClient();
+      const response = await venice.apiKeys.delete({
+        id
+      });
+      
+      if ((global as any).debug) {
+        debugLog('Delete key response', response);
+      }
+      
+      return { success: response.success };
+    } catch (error) {
+      throw new Error(`Delete key error: ${(error as Error).message}`);
+    }
+  },
+  
+  // List models command implementation
+  listModels: async () => {
+    try {
+      const venice = getClient();
+      const response = await venice.models.list();
+      
+      if ((global as any).debug) {
+        debugLog('List models response', response);
+      }
+      
+      return {
+        models: response.data.map((model: any) => ({
+          id: model.id,
+          name: model.name || model.id,
+          type: model.type || 'Unknown'
+        }))
+      };
+    } catch (error) {
+      throw new Error(`List models error: ${(error as Error).message}`);
+    }
+  },
+  
+  // Generate image command implementation
+  generateImage: async (prompt: string, options: {
+    model?: string;
+    negative?: string;
+    style?: string;
+    height?: number;
+    width?: number;
+    outputPath?: string;
+  } = {}) => {
+    try {
+      const venice = getClient();
+      
+      const imageParams = {
+        model: options.model || 'fluently-xl',
+        prompt: prompt,
+        negative_prompt: options.negative,
+        style_preset: options.style,
+        height: options.height || 1024,
+        width: options.width || 1024
+      };
+      
+      if ((global as any).debug) {
+        debugLog('Image generation request', imageParams);
+      }
+      
+      const response = await venice.image.generate(imageParams);
+      
+      if ((global as any).debug) {
+        debugLog('Image generation response', response);
+      }
+      
+      const result = { url: response.images[0].url };
+      
+      // If outputPath is provided, download the image
+      if (options.outputPath && response.images[0].url) {
+        await new Promise<void>((resolve, reject) => {
+          const file = fs.createWriteStream(options.outputPath!);
+          https.get(response.images[0].url!, function(response) {
+            response.pipe(file);
+            file.on('finish', () => {
+              resolve();
+            });
+          }).on('error', (err) => {
+            reject(new Error(`Error downloading image: ${err.message}`));
+          });
+        });
+        
+        return { ...result, savedTo: options.outputPath };
+      }
+      
+      return result;
+    } catch (error) {
+      throw new Error(`Generate image error: ${(error as Error).message}`);
+    }
+  },
+  
+  // List styles command implementation
+  listStyles: async () => {
+    try {
+      const venice = getClient();
+      const response = await venice.image.styles.list();
+      
+      if ((global as any).debug) {
+        debugLog('List styles response', response);
+      }
+      
+      return {
+        styles: response.styles.map((style: any) => ({
+          id: style.id,
+          name: style.name || style.id,
+          description: style.description || 'No description'
+        }))
+      };
+    } catch (error) {
+      throw new Error(`List styles error: ${(error as Error).message}`);
+    }
+  },
+  
+  // Configure API key
+  configure: (apiKey: string) => {
+    try {
+      fs.writeFileSync(configPath, JSON.stringify({ apiKey }));
+      return { success: true };
+    } catch (error) {
+      throw new Error(`Configure error: ${(error as Error).message}`);
+    }
+  },
+  
+  // Enable debug mode
+  enableDebug: () => {
+    (global as any).debug = true;
+    return { debug: true };
+  },
+  
+  // Disable debug mode
+  disableDebug: () => {
+    (global as any).debug = false;
+    return { debug: false };
+  }
+};
+
+// Setup CLI commands
 const program = new Command();
 
 program
@@ -47,34 +309,6 @@ program
       rl.close();
     });
   });
-
-// Helper function for debug logging
-const debugLog = (message: string, data?: any) => {
-  if ((global as any).debug) {
-    console.log(`Debug - ${message}:`, data ? JSON.stringify(data, null, 2) : '');
-  }
-};
-
-// Create a function to get the Venice client
-const getClient = () => {
-  const apiKey = process.env.VENICE_API_KEY || config.apiKey;
-  
-  if (!apiKey) {
-    console.error('Error: API key not found. Please set the VENICE_API_KEY environment variable or run "venice configure"');
-    process.exit(1);
-  }
-  
-  const client = new VeniceAI({
-    apiKey,
-  });
-  
-  // Enable debug logging in the SDK if debug flag is set
-  if ((global as any).debug) {
-    client.enableDebugLogging();
-  }
-  
-  return client;
-};
 
 // List API keys
 program
@@ -314,4 +548,12 @@ program
     }
   });
 
-program.parse(process.argv);
+// Function to run the CLI
+export const runCli = () => {
+  program.parse(process.argv);
+};
+
+// Only run the CLI when this file is executed directly
+if (require.main === module) {
+  runCli();
+}
