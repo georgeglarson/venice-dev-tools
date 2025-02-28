@@ -1,5 +1,5 @@
 {
-  "name": "veniceai-sdk",
+  "name": "venice-dev-tools",
   "version": "1.3.0",
   "description": "A comprehensive SDK for the Venice AI API with CLI support, programmatic CLI usage, and CLI-style interface",
   "repository": {
@@ -9,6 +9,23 @@
   "homepage": "https://github.com/georgeglarson/venice-dev-tools#readme",
   "bugs": {
     "url": "https://github.com/georgeglarson/venice-dev-tools/issues"
+  },
+  "keywords": [
+    "venice",
+    "ai",
+    "sdk",
+    "cli",
+    "api",
+    "client",
+    "chat",
+    "image",
+    "generation",
+    "llm"
+  ],
+  "author": "George Larson",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
