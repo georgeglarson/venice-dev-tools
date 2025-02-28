@@ -428,12 +428,54 @@ When debug mode is enabled, the CLI will:
 
 ### Programmatic CLI Usage
 
-For developers who want to use the CLI commands directly in their code without learning the full SDK API, the package exports a `cli` object that provides the same functionality:
+The SDK provides two ways to use CLI commands in your code:
+
+#### 1. CLI-Style Interface (Recommended)
+
+The most intuitive approach that mirrors the CLI syntax exactly:
+
+```javascript
+import { VeniceAI } from 'veniceai-sdk';
+
+const venice = new VeniceAI({ apiKey: 'your-api-key' });
+
+// Use the exact same commands as the CLI
+async function main() {
+  try {
+    // CLI-style with string arguments (just like the terminal)
+    const styles = await venice.cli('list-styles --limit 5');
+    console.log(`Found ${styles.total} styles`);
+    
+    // Chat with web search
+    const response = await venice.cli('chat "Tell me about AI" --web-search');
+    console.log(response);
+    
+    // Generate an image
+    const image = await venice.cli('generate-image "A beautiful sunset" --style Photographic --output sunset.png');
+    console.log(`Image saved to: ${image.savedTo}`);
+    
+    // You can also use object arguments instead of string arguments
+    const models = await venice.cli('list-models', {
+      limit: 5,
+      raw: true
+    });
+    console.log(`Found ${models.data.length} models`);
+  } catch (error) {
+    console.error('Error:', error.message);
+  }
+}
+
+main();
+```
+
+#### 2. Command Object Interface
+
+An alternative approach using the command object:
 
 ```javascript
 import { cli } from 'veniceai-sdk';
 
-// Use the same commands you're familiar with from the CLI
+// Use the commands object
 async function main() {
   try {
     // Configure your API key
@@ -455,18 +497,10 @@ async function main() {
       type: 'ADMIN'  // Filter by key type
     });
     console.log(`Showing ${keys.keys.length} of ${keys.total} keys`);
-    console.log(keys);
     
     // Get raw API response
     const rawStyles = await cli.commands.listStyles({ raw: true });
     console.log(`Found ${rawStyles.styles.length} styles`);
-    
-    // Generate an image
-    const image = await cli.commands.generateImage('A beautiful sunset', {
-      style: 'Photographic',
-      outputPath: 'sunset.png'
-    });
-    console.log(`Image saved to: ${image.savedTo}`);
   } catch (error) {
     console.error('Error:', error.message);
   }
@@ -475,7 +509,7 @@ async function main() {
 main();
 ```
 
-This approach allows developers to:
+These approaches allow developers to:
 1. Use the same commands they're familiar with from the CLI
 2. Avoid learning the full SDK API for simple use cases
 3. Control output format and limits programmatically
