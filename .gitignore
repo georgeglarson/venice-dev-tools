@@ -42,3 +42,6 @@ coverage/
 
 # Generated files
 examples/image/generated-image.png
+
+# Documentation
+api-docs/
