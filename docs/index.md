@@ -7,21 +7,6 @@ title: Venice AI SDK Documentation
 
 Welcome to the Venice AI SDK documentation. This SDK provides a simple, intuitive interface for interacting with the Venice AI API.
 
-## Table of Contents
-
-- [Installation](#installation)
-- [Getting Started](#getting-started)
-- [Authentication](#authentication)
-- [API Resources](#api-resources)
-  - [Chat](#chat)
-  - [Image](#image)
-  - [Models](#models)
-  - [API Keys](#api-keys)
-- [Error Handling](#error-handling)
-- [Rate Limiting](#rate-limiting)
-- [Advanced Usage](#advanced-usage)
-- [Examples](#examples)
-
 ## Installation
 
 Install the Venice AI SDK using npm:
