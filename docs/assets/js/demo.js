@@ -246,7 +246,7 @@ console.log(response.images[0].url);`;
             // You can update this URL to your own Vercel deployment
             // If you deployed to the root of your project, use: https://your-project-name.vercel.app/api/
             // If you deployed to the vercel-api-proxy folder, use: https://your-project-name.vercel.app/vercel-api-proxy/api/
-            const apiBaseUrl = 'https://venice-dev-tools-86eh3gouo-georgeglarsons-projects.vercel.app/api';
+            const apiBaseUrl = 'https://venice-dev-tools-2u0iwgjye-georgeglarsons-projects.vercel.app/api';
             
             const response = await fetch(`${apiBaseUrl}/${endpoint}`, {
                 method: 'POST',
