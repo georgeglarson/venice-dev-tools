@@ -39,6 +39,20 @@ async function main() {
     console.log(`Raw data contains ${rawModels.data.length} models`);
     // console.log(JSON.stringify(rawModels, null, 2)); // Uncomment to see full raw data
     
+    // Get rate limits with raw option
+    console.log('\nGetting rate limits...');
+    const rateLimits = await cli.commands.rateLimits({ raw: true });
+    console.log('Rate limits retrieved successfully');
+    // console.log(JSON.stringify(rateLimits, null, 2)); // Uncomment to see full raw data
+    
+    // Create a key with raw option (commented out to avoid creating unnecessary keys)
+    /*
+    console.log('\nCreating a new API key...');
+    const newKey = await cli.commands.createKey('test-key', { raw: true });
+    console.log('API key created successfully');
+    console.log(`Key: ${newKey.key.key}`);
+    */
+    
     // Generate an image (commented out to avoid accidental API usage)
     /*
     console.log('\nGenerating an image...');

@@ -50,7 +50,12 @@ const getClient = () => {
 // Command implementations for programmatic usage
 export const commands = {
   // Chat command implementation
-  chat: async (prompt: string, options: { model?: string; webSearch?: boolean; system?: string } = {}) => {
+  chat: async (prompt: string, options: {
+    model?: string;
+    webSearch?: boolean;
+    system?: string;
+    raw?: boolean;
+  } = {}) => {
     try {
       const venice = getClient();
       
@@ -76,6 +81,11 @@ export const commands = {
       
       if ((global as any).debug) {
         debugLog('Chat response', response);
+      }
+      
+      // Return raw response if requested
+      if (options.raw) {
+        return response;
       }
       
       return response.choices[0].message.content;
@@ -138,7 +148,7 @@ export const commands = {
   },
   
   // Create key command implementation
-  createKey: async (name: string) => {
+  createKey: async (name: string, options: { raw?: boolean } = {}) => {
     try {
       const venice = getClient();
       const response = await venice.apiKeys.create({
@@ -147,6 +157,11 @@ export const commands = {
       
       if ((global as any).debug) {
         debugLog('Create key response', response);
+      }
+      
+      // Return raw response if requested
+      if (options.raw) {
+        return response;
       }
       
       return {
@@ -162,7 +177,7 @@ export const commands = {
   },
   
   // Delete key command implementation
-  deleteKey: async (id: string) => {
+  deleteKey: async (id: string, options: { raw?: boolean } = {}) => {
     try {
       const venice = getClient();
       const response = await venice.apiKeys.delete({
@@ -171,6 +186,11 @@ export const commands = {
       
       if ((global as any).debug) {
         debugLog('Delete key response', response);
+      }
+      
+      // Return raw response if requested
+      if (options.raw) {
+        return response;
       }
       
       return { success: response.success };
@@ -231,6 +251,7 @@ export const commands = {
     height?: number;
     width?: number;
     outputPath?: string;
+    raw?: boolean;
   } = {}) => {
     try {
       const venice = getClient();
@@ -252,6 +273,11 @@ export const commands = {
       
       if ((global as any).debug) {
         debugLog('Image generation response', response);
+      }
+      
+      // Return raw response if requested
+      if (options.raw) {
+        return response;
       }
       
       const result = { url: response.images[0].url };
@@ -335,6 +361,48 @@ export const commands = {
   disableDebug: () => {
     (global as any).debug = false;
     return { debug: false };
+  },
+  
+  // Get rate limits command implementation
+  rateLimits: async (options: { model?: string; raw?: boolean } = {}) => {
+    try {
+      const venice = getClient();
+      
+      if (options.model) {
+        const modelLimits = await venice.apiKeys.getModelRateLimits(options.model);
+        
+        if ((global as any).debug) {
+          debugLog('Model rate limits response', modelLimits);
+        }
+        
+        // Return raw response if requested
+        if (options.raw) {
+          return modelLimits;
+        }
+        
+        return {
+          model: options.model,
+          limits: modelLimits
+        };
+      } else {
+        const response = await venice.apiKeys.rateLimits();
+        
+        if ((global as any).debug) {
+          debugLog('Rate limits response', response);
+        }
+        
+        // Return raw response if requested
+        if (options.raw) {
+          return response;
+        }
+        
+        return {
+          limits: response.rate_limits
+        };
+      }
+    } catch (error) {
+      throw new Error(`Rate limits error: ${(error as Error).message}`);
+    }
   }
 };
 
