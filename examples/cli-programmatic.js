@@ -21,17 +21,23 @@ async function main() {
     console.log('\nResponse:');
     console.log(response);
     
-    // List available models
-    console.log('\nListing available models...');
-    const models = await cli.commands.listModels();
-    console.log('Available models:');
-    console.table(models.models.slice(0, 5)); // Show first 5 models
+    // List available models with limit
+    console.log('\nListing available models (limited to 5)...');
+    const models = await cli.commands.listModels({ limit: 5 });
+    console.log(`Showing ${models.models.length} of ${models.total} models:`);
+    console.table(models.models);
     
-    // List available image styles
-    console.log('\nListing available image styles...');
-    const styles = await cli.commands.listStyles();
-    console.log('Available styles:');
-    console.table(styles.styles.slice(0, 5)); // Show first 5 styles
+    // List available image styles with limit
+    console.log('\nListing available image styles (limited to 5)...');
+    const styles = await cli.commands.listStyles({ limit: 5 });
+    console.log(`Showing ${styles.styles.length} of ${styles.total} styles:`);
+    console.table(styles.styles);
+    
+    // Get raw response for models (useful for scripting)
+    console.log('\nGetting raw model data for scripting...');
+    const rawModels = await cli.commands.listModels({ raw: true });
+    console.log(`Raw data contains ${rawModels.data.length} models`);
+    // console.log(JSON.stringify(rawModels, null, 2)); // Uncomment to see full raw data
     
     // Generate an image (commented out to avoid accidental API usage)
     /*

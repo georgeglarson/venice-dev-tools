@@ -399,6 +399,11 @@ venice generate-image "A beautiful sunset" --model fluently-xl --style "3D Model
 venice list-keys --debug
 venice chat "Hello" --debug
 
+# Get raw JSON output (useful for scripting)
+venice list-styles --raw
+venice list-models --raw > models.json
+venice chat "Hello" --raw | jq .choices[0].message.content
+
 # Get help for any command
 venice --help
 venice chat --help
@@ -444,9 +449,17 @@ async function main() {
     });
     console.log(response);
     
-    // List API keys
-    const keys = await cli.commands.listKeys();
+    // List API keys with options
+    const keys = await cli.commands.listKeys({
+      limit: 10,     // Only return 10 keys
+      type: 'ADMIN'  // Filter by key type
+    });
+    console.log(`Showing ${keys.keys.length} of ${keys.total} keys`);
     console.log(keys);
+    
+    // Get raw API response
+    const rawStyles = await cli.commands.listStyles({ raw: true });
+    console.log(`Found ${rawStyles.styles.length} styles`);
     
     // Generate an image
     const image = await cli.commands.generateImage('A beautiful sunset', {
@@ -465,7 +478,9 @@ main();
 This approach allows developers to:
 1. Use the same commands they're familiar with from the CLI
 2. Avoid learning the full SDK API for simple use cases
-3. Easily integrate Venice AI capabilities into their applications
+3. Control output format and limits programmatically
+4. Get raw API responses when needed
+5. Easily integrate Venice AI capabilities into their applications
 
 ## Examples
 
