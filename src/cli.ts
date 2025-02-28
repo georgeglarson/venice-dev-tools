@@ -24,7 +24,12 @@ const program = new Command();
 program
   .name('venice')
   .description('Venice AI CLI - Interact with Venice AI API from the command line')
-  .version(version);
+  .version(version)
+  .option('-d, --debug', 'Enable debug output')
+  .hook('preAction', (thisCommand) => {
+    // Store debug flag in a global variable
+    (global as any).debug = thisCommand.opts().debug;
+  });
 
 // Configure API key
 program
@@ -43,6 +48,13 @@ program
     });
   });
 
+// Helper function for debug logging
+const debugLog = (message: string, data?: any) => {
+  if ((global as any).debug) {
+    console.log(`Debug - ${message}:`, data ? JSON.stringify(data, null, 2) : '');
+  }
+};
+
 // Create a function to get the Venice client
 const getClient = () => {
   const apiKey = process.env.VENICE_API_KEY || config.apiKey;
@@ -52,9 +64,16 @@ const getClient = () => {
     process.exit(1);
   }
   
-  return new VeniceAI({
+  const client = new VeniceAI({
     apiKey,
   });
+  
+  // Enable debug logging in the SDK if debug flag is set
+  if ((global as any).debug) {
+    client.enableDebugLogging();
+  }
+  
+  return client;
 };
 
 // List API keys
@@ -71,11 +90,18 @@ program
         return;
       }
       
+      // Log detailed information in debug mode
+      if (response.keys.length > 0) {
+        debugLog('First key details', response.keys[0]);
+        debugLog('Response metadata', response._metadata);
+      }
+      
       console.log('API Keys:');
       console.table(response.keys.map((key: any) => ({
         id: key.id,
         name: key.name || key.description,
-        created: key.createdAt ? new Date(key.createdAt).toLocaleString() : 'N/A'
+        created: key.createdAt ? new Date(key.createdAt).toLocaleString() : 'N/A',
+        expires: key.expiresAt ? new Date(key.expiresAt).toLocaleString() : 'N/A'
       })));
     } catch (error) {
       console.error('Error:', (error as Error).message);
@@ -94,6 +120,7 @@ program
         name: options.name
       });
       
+      debugLog('Create key response', response);
       console.log('API Key created successfully:');
       console.log(`ID: ${response.key.id}`);
       console.log(`Key: ${response.key.key}`);
@@ -116,6 +143,7 @@ program
         id: options.id
       });
       
+      debugLog('Delete key response', response);
       if (response.success) {
         console.log(`API Key ${options.id} deleted successfully.`);
       } else {
@@ -137,10 +165,12 @@ program
       
       if (options.model) {
         const modelLimits = await venice.apiKeys.getModelRateLimits(options.model);
+        debugLog('Model rate limits response', modelLimits);
         console.log(`Rate limits for model ${options.model}:`);
         console.log(modelLimits);
       } else {
         const response = await venice.apiKeys.rateLimits();
+        debugLog('Rate limits response', response);
         console.log('Rate limits for all models:');
         console.log(response.rate_limits);
       }
@@ -158,6 +188,7 @@ program
       const venice = getClient();
       const response = await venice.models.list();
       
+      debugLog('List models response', response);
       console.log('Available Models:');
       console.table(response.data.map((model: any) => ({
         id: model.id,
@@ -189,6 +220,8 @@ program
       
       messages.push({ role: 'user', content: prompt });
       
+      debugLog('Chat request', { model: options.model, messages, webSearch: options.webSearch });
+      
       const response = await venice.chat.completions.create({
         model: options.model,
         messages,
@@ -197,6 +230,7 @@ program
         } : undefined
       });
       
+      debugLog('Chat response', response);
       console.log(response.choices[0].message.content);
     } catch (error) {
       console.error('Error:', (error as Error).message);
@@ -220,14 +254,20 @@ program
       
       console.log('Generating image...');
       
-      const response = await venice.image.generate({
+      const imageParams = {
         model: options.model,
         prompt: prompt,
         negative_prompt: options.negative,
         style_preset: options.style,
         height: parseInt(options.height),
         width: parseInt(options.width)
-      });
+      };
+      
+      debugLog('Image generation request', imageParams);
+      
+      const response = await venice.image.generate(imageParams);
+      
+      debugLog('Image generation response', response);
       
       // Download the image
       console.log('Downloading image...');
@@ -262,6 +302,7 @@ program
       const venice = getClient();
       const response = await venice.image.styles.list();
       
+      debugLog('List styles response', response);
       console.log('Available Image Styles:');
       console.table(response.styles.map((style: any) => ({
         id: style.id,
