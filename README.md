@@ -395,10 +395,31 @@ venice chat "What are the latest developments in AI?" --web-search
 # Generate an image with specific parameters
 venice generate-image "A beautiful sunset" --model fluently-xl --style "3D Model" --width 1024 --height 768 --output sunset.png
 
+# Enable debug output for any command
+venice list-keys --debug
+venice chat "Hello" --debug
+
 # Get help for any command
 venice --help
 venice chat --help
 ```
+
+### Debugging
+
+The CLI includes a global `--debug` flag that can be used with any command to enable detailed debug output. This is useful for troubleshooting issues or understanding the API responses in detail:
+
+```bash
+# Show detailed debug information for API key listing
+venice list-keys --debug
+
+# Debug a chat completion request and response
+venice chat "Hello" --debug
+```
+
+When debug mode is enabled, the CLI will:
+1. Enable debug logging in the SDK
+2. Show detailed request and response information
+3. Display raw API responses and metadata
 
 ## Examples
 
