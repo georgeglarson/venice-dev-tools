@@ -71,8 +71,10 @@ module.exports = async (req, res) => {
     // Get API key from environment variable
     const apiKey = process.env.VENICE_API_KEY;
     if (!apiKey) {
+      console.error('API key not found in environment variables');
       return res.status(500).json({ error: 'API key not configured' });
     }
+    console.log('API key found, making request to Venice API');
     
     // Prepare request to Venice API
     const messages = [{ role: 'user', content: prompt }];
@@ -96,13 +98,20 @@ module.exports = async (req, res) => {
       content: response.data.choices[0].message.content
     });
   } catch (error) {
-    console.error('Error calling Venice API:', error);
+    console.error('Error calling Venice API:', error.message);
     
-    // Handle API errors
+    // Log more details about the error
     if (error.response) {
+      console.error('Response status:', error.response.status);
+      console.error('Response data:', JSON.stringify(error.response.data));
       return res.status(error.response.status).json({
         error: error.response.data.error || 'Error from Venice API'
       });
+    } else if (error.request) {
+      console.error('No response received:', error.request);
+      return res.status(500).json({ error: 'No response received from Venice API' });
+    } else {
+      console.error('Error setting up request:', error.message);
     }
     
     return res.status(500).json({ error: 'Internal server error' });
