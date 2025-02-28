@@ -20,7 +20,16 @@
     "chat",
     "image",
     "generation",
-    "llm"
+    "llm",
+    "apl",
+    "streaming",
+    "web3",
+    "command-line",
+    "artificial-intelligence",
+    "machine-learning",
+    "openai-alternative",
+    "text-generation",
+    "image-generation"
   ],
   "author": "George Larson",
   "license": "MIT",
@@ -49,36 +58,6 @@
     "docs": "typedoc --out docs src",
     "examples": "node examples/index.js"
   },
-  "keywords": [
-    "venice",
-    "ai",
-    "api",
-    "sdk",
-    "apl",
-    "llm",
-    "chat",
-    "image",
-    "generation",
-    "streaming",
-    "web3",
-    "cli",
-    "command-line",
-    "artificial-intelligence",
-    "machine-learning",
-    "openai-alternative",
-    "text-generation",
-    "image-generation"
-  ],
-  "author": "Venice AI",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/georgeglarson/venice-dev-tools.git"
-  },
-  "bugs": {
-    "url": "https://github.com/georgeglarson/venice-dev-tools/issues"
-  },
-  "homepage": "https://github.com/georgeglarson/venice-dev-tools#readme",
   "dependencies": {
     "axios": "^1.6.7",
     "commander": "^13.1.0",
