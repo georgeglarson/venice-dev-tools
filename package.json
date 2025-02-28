@@ -38,10 +38,11 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && chmod +x dist/cli.js",
     "clean": "rimraf dist",
     "prebuild": "npm run clean",
     "prepare": "npm run build",
+    "postinstall": "node -e \"try { require('fs').chmodSync(require.resolve('./dist/cli.js'), '755') } catch (e) { console.error('Failed to set CLI permissions:', e) }\"",
     "test": "jest",
     "lint": "eslint src --ext .ts",
     "format": "prettier --write \"src/**/*.ts\"",
