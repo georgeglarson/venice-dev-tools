@@ -52,32 +52,136 @@ export const commands = {
   // Chat command implementation
   chat: async (prompt: string, options: {
     model?: string;
-    webSearch?: boolean;
+    webSearch?: boolean | string;
     system?: string;
     raw?: boolean;
+    image?: string;
+    stream?: boolean;
+    noSystemPrompt?: boolean;
+    character?: string;
+    functions?: string;
+    functionsFile?: string;
+    forceFunctionCall?: boolean;
+    modelFeatures?: string;
   } = {}) => {
     try {
       const venice = getClient();
       
-      const messages: { role: 'system' | 'user' | 'assistant' | 'function' | 'tool'; content: string }[] = [];
+      const messages: { role: 'system' | 'user' | 'assistant' | 'function' | 'tool'; content: string | any[] }[] = [];
       
       if (options.system) {
         messages.push({ role: 'system', content: options.system });
       }
       
-      messages.push({ role: 'user', content: prompt });
-      
-      if ((global as any).debug) {
-        debugLog('Chat request', { model: options.model, messages, webSearch: options.webSearch });
+      // Handle complex message content (for vision models)
+      if (options.image) {
+        const content = [];
+        content.push({ type: 'text', text: prompt });
+        
+        // Handle image input (base64, URL, or file path)
+        if (options.image.startsWith('data:') || options.image.match(/^[A-Za-z0-9+/=]+$/)) {
+          content.push({
+            type: 'image_url',
+            image_url: { url: options.image }
+          });
+        } else if (options.image.startsWith('http')) {
+          content.push({
+            type: 'image_url',
+            image_url: { url: options.image }
+          });
+        } else {
+          const imageBuffer = fs.readFileSync(options.image);
+          const base64Image = imageBuffer.toString('base64');
+          const mimeType = options.image.endsWith('.png') ? 'image/png' :
+                          options.image.endsWith('.jpg') || options.image.endsWith('.jpeg') ? 'image/jpeg' :
+                          'application/octet-stream';
+          
+          content.push({
+            type: 'image_url',
+            image_url: { url: `data:${mimeType};base64,${base64Image}` }
+          });
+        }
+        
+        messages.push({ role: 'user', content });
+      } else {
+        messages.push({ role: 'user', content: prompt });
       }
       
-      const response = await venice.chat.completions.create({
-        model: options.model || 'llama-3.3-70b',
+      // Handle functions if provided
+      let functions;
+      if (options.functionsFile) {
+        const functionsContent = fs.readFileSync(options.functionsFile, 'utf8');
+        functions = JSON.parse(functionsContent);
+      } else if (options.functions) {
+        functions = JSON.parse(options.functions);
+      }
+      
+      // Prepare venice_parameters
+      const veniceParameters: any = {};
+      
+      // Web search options
+      if (options.webSearch === 'on' || options.webSearch === true) {
+        veniceParameters.enable_web_search = 'on';
+      } else if (options.webSearch === 'off') {
+        veniceParameters.enable_web_search = 'off';
+      } else if (options.webSearch === 'auto') {
+        veniceParameters.enable_web_search = 'auto';
+      }
+      
+      // System prompt control
+      if (options.noSystemPrompt) {
+        veniceParameters.include_venice_system_prompt = false;
+      }
+      
+      // Character interaction
+      if (options.character) {
+        veniceParameters.character_slug = options.character;
+      }
+      
+      // Determine model
+      let model = options.model || 'llama-3.3-70b';
+      
+      // Handle character in model parameter (character:slug format)
+      if (model && model.startsWith('character:')) {
+        veniceParameters.character_slug = model.replace('character:', '');
+        model = 'default'; // Use default model when specifying character
+      }
+      
+      // Handle model feature suffix
+      if (options.modelFeatures) {
+        model = `${model}:${options.modelFeatures}`;
+      }
+      
+      // Create request parameters
+      const requestParams: any = {
+        model,
         messages,
-        venice_parameters: options.webSearch ? {
-          enable_web_search: 'on'
-        } : undefined
-      });
+        stream: options.stream,
+      };
+      
+      // Add functions if provided
+      if (functions) {
+        requestParams.functions = functions;
+        if (options.forceFunctionCall) {
+          requestParams.function_call = 'auto';
+        }
+      }
+      
+      // Add venice_parameters if any are set
+      if (Object.keys(veniceParameters).length > 0) {
+        requestParams.venice_parameters = veniceParameters;
+      }
+      
+      if ((global as any).debug) {
+        debugLog('Chat request', requestParams);
+      }
+      
+      // Handle streaming
+      if (options.stream) {
+        return { stream: true, requestParams };
+      }
+      
+      const response = await venice.chat.completions.create(requestParams);
       
       if ((global as any).debug) {
         debugLog('Chat response', response);
@@ -469,13 +573,28 @@ export const commands = {
         return response;
       }
       
-      return {
-        circulating_supply: response.circulating_supply,
-        total_supply: response.total_supply,
-        percentage_circulating: response.percentage_circulating ||
-          (response.circulating_supply / response.total_supply * 100).toFixed(2) + '%',
-        timestamp: new Date(response.timestamp).toLocaleString()
-      };
+      // Handle both new and old response formats
+      if (response.result) {
+        // New format
+        const circulatingSupply = parseFloat(response.result);
+        return {
+          circulating_supply: circulatingSupply,
+          result: response.result,
+          timestamp: new Date().toLocaleString()
+        };
+      } else if (response.circulating_supply) {
+        // Old format
+        return {
+          circulating_supply: response.circulating_supply,
+          total_supply: response.total_supply,
+          percentage_circulating: response.percentage_circulating ||
+            (response.circulating_supply / response.total_supply! * 100).toFixed(2) + '%',
+          timestamp: response.timestamp ? new Date(response.timestamp).toLocaleString() : new Date().toLocaleString()
+        };
+      }
+      
+      // Fallback
+      return response;
     } catch (error) {
       throw new Error(`VVV circulating supply error: ${(error as Error).message}`);
     }
@@ -496,13 +615,26 @@ export const commands = {
         return response;
       }
       
-      return {
-        utilization_percentage: response.utilization_percentage + '%',
-        capacity: response.capacity,
-        usage: response.usage,
-        timestamp: new Date(response.timestamp).toLocaleString(),
-        historical_data: response.historical_data
-      };
+      // Handle the new API response format
+      if (response.percentage !== undefined) {
+        return {
+          utilization_percentage: (response.percentage * 100).toFixed(4) + '%',
+          timestamp: new Date().toLocaleString()
+        };
+      }
+      // Handle the old API response format
+      else if (response.utilization_percentage !== undefined) {
+        return {
+          utilization_percentage: response.utilization_percentage + '%',
+          capacity: response.capacity,
+          usage: response.usage,
+          timestamp: response.timestamp ? new Date(response.timestamp).toLocaleString() : new Date().toLocaleString(),
+          historical_data: response.historical_data
+        };
+      }
+      
+      // Fallback
+      return response;
     } catch (error) {
       throw new Error(`VVV utilization error: ${(error as Error).message}`);
     }
@@ -523,13 +655,29 @@ export const commands = {
         return response;
       }
       
-      return {
-        current_apy: response.current_apy + '%',
-        total_staked: response.total_staked,
-        percentage_staked: response.percentage_staked + '%',
-        timestamp: new Date(response.timestamp).toLocaleString(),
-        historical_data: response.historical_data
-      };
+      // Handle the new API response format
+      if (response.stakingYield !== undefined && response.totalStaked !== undefined) {
+        return {
+          current_apy: (parseFloat(response.stakingYield) * 100).toFixed(4) + '%',
+          total_staked: parseFloat(response.totalStaked),
+          total_emission: response.totalEmission,
+          staker_distribution: response.stakerDistribution,
+          timestamp: new Date().toLocaleString()
+        };
+      }
+      // Handle the old API response format
+      else if (response.current_apy !== undefined && response.total_staked !== undefined) {
+        return {
+          current_apy: response.current_apy + '%',
+          total_staked: response.total_staked,
+          percentage_staked: response.percentage_staked ? response.percentage_staked + '%' : 'N/A',
+          timestamp: response.timestamp ? new Date(response.timestamp).toLocaleString() : new Date().toLocaleString(),
+          historical_data: response.historical_data
+        };
+      }
+      
+      // Fallback
+      return response;
     } catch (error) {
       throw new Error(`VVV staking yield error: ${(error as Error).message}`);
     }
@@ -710,24 +858,101 @@ program
 program
   .command('list-models')
   .description('List available Venice AI models')
-  .action(async () => {
+  .option('-t, --type <type>', 'Model type (all, text, code, image)', 'all')
+  .option('-l, --limit <number>', 'Limit the number of models displayed')
+  .action(async (options) => {
     try {
       const venice = getClient();
       const response = await venice.models.list();
       
       debugLog('List models response', response);
       
-      if ((global as any).raw) {
+      // Filter models by type if specified
+      let filteredModels = response.data;
+      if (options.type && options.type !== 'all') {
+        filteredModels = response.data.filter((model: any) =>
+          model.type && model.type.toLowerCase() === options.type.toLowerCase()
+        );
+      }
+      
+      // Apply limit if specified
+      let displayModels = [...filteredModels];
+      if (options.limit && !isNaN(parseInt(options.limit))) {
+        const limit = parseInt(options.limit);
+        displayModels = displayModels.slice(0, limit);
+      }
+      
+      if ((global as any).raw || options.raw) {
         // Output raw JSON for scripting
         console.log(JSON.stringify(response, null, 2));
       } else {
         // Pretty output for human consumption
         console.log('Available Models:');
         console.log(`Total models: ${response.data.length}`);
-        console.table(response.data.map((model: any) => ({
+        
+        if (filteredModels.length !== response.data.length) {
+          console.log(`Filtered to ${filteredModels.length} ${options.type} models`);
+        }
+        
+        if (displayModels.length !== filteredModels.length) {
+          console.log(`Showing ${displayModels.length} of ${filteredModels.length} models`);
+        }
+        
+        console.table(displayModels.map((model: any) => ({
           id: model.id,
           name: model.name || model.id,
           type: model.type || 'Unknown'
+        })));
+      }
+    } catch (error) {
+      console.error('Error:', (error as Error).message);
+    }
+  });
+
+// List model traits
+program
+  .command('list-model-traits')
+  .description('List model traits')
+  .option('-t, --type <type>', 'Model type (text, image)', 'text')
+  .option('-r, --raw', 'Output raw JSON response')
+  .action(async (options) => {
+    try {
+      const venice = getClient();
+      const response = await venice.models.traits();
+      
+      if ((global as any).raw || options.raw) {
+        console.log(JSON.stringify(response, null, 2));
+      } else {
+        console.log('Model Traits:');
+        console.log(`Type: ${options.type}`);
+        console.log(`Total traits: ${response.traits.length}`);
+        console.table(response.traits);
+      }
+    } catch (error) {
+      console.error('Error:', (error as Error).message);
+    }
+  });
+
+// List model compatibility
+program
+  .command('list-model-compatibility')
+  .description('List model compatibility mappings')
+  .option('-t, --type <type>', 'Model type (text, image)', 'text')
+  .option('-r, --raw', 'Output raw JSON response')
+  .action(async (options) => {
+    try {
+      const venice = getClient();
+      const response = await venice.models.compatibility();
+      
+      if ((global as any).raw || options.raw) {
+        console.log(JSON.stringify(response, null, 2));
+      } else {
+        console.log('Model Compatibility Mappings:');
+        console.log(`Type: ${options.type}`);
+        console.log(`Total mappings: ${Object.keys(response.mappings).length}`);
+        console.table(Object.entries(response.mappings).map(([key, value]) => ({
+          'External Model': key,
+          'Venice Model': value
         })));
       }
     } catch (error) {
@@ -740,39 +965,233 @@ program
   .command('chat')
   .description('Generate a chat completion')
   .argument('<prompt>', 'The prompt to send to the AI')
-  .option('-m, --model <model>', 'Model to use', 'llama-3.3-70b')
-  .option('-w, --web-search', 'Enable web search')
+  .option('-m, --model <model>', 'Model to use (or character:slug for character chat)', 'llama-3.3-70b')
+  .option('-w, --web-search <mode>', 'Web search mode (on, off, auto)', 'off')
   .option('-s, --system <system>', 'System message')
+  .option('-i, --image <path>', 'Path to image file, URL, or base64 data (for vision models)')
+  .option('-f, --functions <json>', 'JSON string of function definitions')
+  .option('-F, --functions-file <path>', 'Path to JSON file with function definitions')
+  .option('--force-function-call', 'Force the model to call a function')
+  .option('--stream', 'Stream the response')
+  .option('--no-system-prompt', 'Remove Venice system prompt')
+  .option('--character <slug>', 'Character slug to use')
+  .option('--model-features <features>', 'Model feature suffix (e.g., "enable_web_search=on")')
+  .option('-r, --raw', 'Output raw JSON response')
   .action(async (prompt, options) => {
     try {
       const venice = getClient();
       
-      const messages: { role: 'system' | 'user' | 'assistant' | 'function' | 'tool'; content: string }[] = [];
-      
-      if (options.system) {
-        messages.push({ role: 'system', content: options.system });
+      if (options.stream) {
+        // Handle streaming
+        console.log('Streaming response:');
+        
+        const messages: { role: 'system' | 'user' | 'assistant' | 'function' | 'tool'; content: string }[] = [];
+        
+        if (options.system) {
+          messages.push({ role: 'system', content: options.system });
+        }
+        
+        messages.push({ role: 'user', content: prompt });
+        
+        // Prepare venice_parameters
+        const veniceParameters: any = {};
+        
+        // Web search options
+        if (options.webSearch === 'on') {
+          veniceParameters.enable_web_search = 'on';
+        } else if (options.webSearch === 'auto') {
+          veniceParameters.enable_web_search = 'auto';
+        }
+        
+        // System prompt control
+        if (options.noSystemPrompt === false) {
+          veniceParameters.include_venice_system_prompt = false;
+        }
+        
+        // Character interaction
+        if (options.character) {
+          veniceParameters.character_slug = options.character;
+        }
+        
+        // Determine model
+        let model = options.model || 'llama-3.3-70b';
+        
+        // Handle character in model parameter (character:slug format)
+        if (model.startsWith('character:')) {
+          veniceParameters.character_slug = model.replace('character:', '');
+          model = 'default'; // Use default model when specifying character
+        }
+        
+        // Create stream
+        const stream = await venice.chat.completions.createStream({
+          model,
+          messages,
+          stream: true,
+          venice_parameters: Object.keys(veniceParameters).length > 0 ? veniceParameters : undefined
+        });
+        
+        // Process stream
+        for await (const chunk of stream) {
+          process.stdout.write(chunk.choices[0]?.delta?.content || '');
+        }
+        console.log(); // Add newline at end
+      } else {
+        // Non-streaming request
+        const result = await commands.chat(prompt, {
+          model: options.model,
+          webSearch: options.webSearch,
+          system: options.system,
+          image: options.image,
+          functions: options.functions,
+          functionsFile: options.functionsFile,
+          forceFunctionCall: options.forceFunctionCall,
+          noSystemPrompt: !options.systemPrompt,
+          character: options.character,
+          modelFeatures: options.modelFeatures,
+          raw: options.raw || (global as any).raw
+        });
+        
+        if ((global as any).raw || options.raw) {
+          console.log(JSON.stringify(result, null, 2));
+        } else {
+          console.log(result);
+        }
       }
-      
-      messages.push({ role: 'user', content: prompt });
-      
-      debugLog('Chat request', { model: options.model, messages, webSearch: options.webSearch });
-      
-      const response = await venice.chat.completions.create({
+    } catch (error) {
+      console.error('Error:', (error as Error).message);
+    }
+  });
+
+// Vision chat command
+program
+  .command('vision-chat')
+  .description('Generate a chat completion with image input')
+  .argument('<prompt>', 'The text prompt to send to the AI')
+  .requiredOption('-i, --image <path>', 'Path to image file, URL, or base64 data')
+  .option('-m, --model <model>', 'Model to use', 'qwen-2.5-vl')
+  .option('-w, --web-search', 'Enable web search')
+  .option('-s, --system <system>', 'System message')
+  .option('--character <slug>', 'Character slug to use')
+  .option('-r, --raw', 'Output raw JSON response')
+  .action(async (prompt, options) => {
+    try {
+      // Use the existing chat command with image parameter
+      const result = await commands.chat(prompt, {
         model: options.model,
-        messages,
-        venice_parameters: options.webSearch ? {
-          enable_web_search: 'on'
-        } : undefined
+        webSearch: options.webSearch ? 'on' : undefined,
+        system: options.system,
+        image: options.image,
+        character: options.character,
+        raw: options.raw || (global as any).raw
       });
       
-      debugLog('Chat response', response);
-      
-      if ((global as any).raw) {
-        // Output raw JSON for scripting
-        console.log(JSON.stringify(response, null, 2));
+      if ((global as any).raw || options.raw) {
+        console.log(JSON.stringify(result, null, 2));
       } else {
-        // Pretty output for human consumption
-        console.log(response.choices[0].message.content);
+        console.log(result);
+      }
+    } catch (error) {
+      console.error('Error:', (error as Error).message);
+    }
+  });
+
+// Function calling command
+program
+  .command('function-chat')
+  .description('Generate a chat completion with function calling')
+  .argument('<prompt>', 'The prompt to send to the AI')
+  .option('-m, --model <model>', 'Model to use', 'mistral-codestral-22b')
+  .option('-f, --functions <json>', 'JSON string of function definitions')
+  .option('-F, --functions-file <path>', 'Path to JSON file with function definitions')
+  .option('--force-function-call', 'Force the model to call a function')
+  .option('--character <slug>', 'Character slug to use')
+  .option('-r, --raw', 'Output raw JSON response')
+  .action(async (prompt, options) => {
+    try {
+      // Use the existing chat command with function parameters
+      const result = await commands.chat(prompt, {
+        model: options.model,
+        functions: options.functions,
+        functionsFile: options.functionsFile,
+        forceFunctionCall: options.forceFunctionCall,
+        character: options.character,
+        raw: true // Always get raw response to check for function calls
+      });
+      
+      if ((global as any).raw || options.raw) {
+        console.log(JSON.stringify(result, null, 2));
+      } else {
+        // Check if result is a ChatCompletionResponse
+        if (result && typeof result === 'object' && 'choices' in result &&
+            result.choices && result.choices.length > 0) {
+          const choice = result.choices[0];
+          if (choice.message && 'function_call' in choice.message && choice.message.function_call) {
+            console.log('Function Call:');
+            console.log(`Name: ${choice.message.function_call.name}`);
+            console.log(`Arguments: ${choice.message.function_call.arguments}`);
+          } else if (choice.message && choice.message.content) {
+            console.log(choice.message.content);
+          } else {
+            console.log('No content or function call in response');
+          }
+        } else {
+          // Fallback for other response types
+          console.log(result);
+        }
+      }
+    } catch (error) {
+      console.error('Error:', (error as Error).message);
+    }
+  });
+
+// Upscale image command
+program
+  .command('upscale-image')
+  .description('Upscale an image')
+  .argument('<image>', 'Path to the image file')
+  .option('-s, --scale <factor>', 'Scale factor (2 or 4)', '2')
+  .option('-o, --output <filename>', 'Output filename', 'upscaled-image.png')
+  .option('-r, --raw', 'Output raw JSON response')
+  .action(async (image, options) => {
+    try {
+      console.log('Upscaling image...');
+      
+      // Read image file
+      const imageBuffer = fs.readFileSync(image);
+      const base64Image = imageBuffer.toString('base64');
+      
+      const venice = getClient();
+      const response = await venice.image.upscale({
+        model: 'upscale-model',
+        image: base64Image,
+        scale: parseInt(options.scale) || 2
+      });
+      
+      if ((global as any).raw || options.raw) {
+        console.log(JSON.stringify(response, null, 2));
+        return;
+      }
+      
+      // Save image if output path is provided
+      if (response.url) {
+        console.log('Downloading upscaled image...');
+        
+        const file = fs.createWriteStream(options.output);
+        https.get(response.url, function(response) {
+          response.pipe(file);
+          file.on('finish', () => {
+            console.log(`Image upscaled and saved to ${options.output}`);
+          });
+        }).on('error', (err) => {
+          console.error('Error downloading image:', err.message);
+        });
+      } else if (response.b64_json) {
+        // Handle base64 response
+        const imageData = response.b64_json.replace(/^data:image\/\w+;base64,/, '');
+        fs.writeFileSync(options.output, Buffer.from(imageData, 'base64'));
+        console.log(`Image upscaled and saved to ${options.output}`);
+      } else {
+        console.error('Error: No image data returned from the API');
       }
     } catch (error) {
       console.error('Error:', (error as Error).message);
@@ -929,7 +1348,6 @@ program
       console.error('Error:', (error as Error).message);
     }
   });
-
 // Get VVV circulating supply
 program
   .command('vvv-supply')
@@ -947,17 +1365,44 @@ program
       } else {
         // Pretty output for human consumption
         console.log('VVV Circulating Supply:');
-        console.log(`Circulating Supply: ${response.circulating_supply.toLocaleString()}`);
-        console.log(`Total Supply: ${response.total_supply.toLocaleString()}`);
         
-        const percentCirculating = response.percentage_circulating ||
-          (response.circulating_supply / response.total_supply * 100).toFixed(2);
-        
-        console.log(`Percentage Circulating: ${percentCirculating}%`);
-        console.log(`Timestamp: ${new Date(response.timestamp).toLocaleString()}`);
+        // Handle both new and old response formats
+        if (response.result) {
+          // New format
+          const circulatingSupply = parseFloat(response.result);
+          console.log(`Circulating Supply: ${circulatingSupply.toLocaleString()}`);
+          console.log(`Raw Result: ${response.result}`);
+          console.log(`Timestamp: ${new Date().toLocaleString()}`);
+        } else if (response.circulating_supply) {
+          // Old format
+          console.log(`Circulating Supply: ${response.circulating_supply.toLocaleString()}`);
+          
+          if (response.total_supply) {
+            console.log(`Total Supply: ${response.total_supply.toLocaleString()}`);
+            
+            const percentCirculating = response.percentage_circulating ||
+              ((response.circulating_supply / response.total_supply) * 100).toFixed(2);
+            
+            console.log(`Percentage Circulating: ${percentCirculating}%`);
+          }
+          
+          if (response.timestamp) {
+            console.log(`Timestamp: ${new Date(response.timestamp).toLocaleString()}`);
+          } else {
+            console.log(`Timestamp: ${new Date().toLocaleString()}`);
+          }
+        } else {
+          // Fallback
+          console.log(response);
+        }
       }
     } catch (error) {
-      console.error('Error:', (error as Error).message);
+      if ((error as any).response?.data?.error === 'API route not found') {
+        console.error('Error: VVV API endpoints require admin privileges or are not available in this API version.');
+        console.error('Please contact Venice AI support for access to these endpoints.');
+      } else {
+        console.error('Error:', (error as Error).message);
+      }
     }
   });
 
@@ -978,10 +1423,38 @@ program
       } else {
         // Pretty output for human consumption
         console.log('VVV Network Utilization:');
-        console.log(`Utilization: ${response.utilization_percentage}%`);
-        console.log(`Capacity: ${response.capacity.toLocaleString()}`);
-        console.log(`Usage: ${response.usage.toLocaleString()}`);
-        console.log(`Timestamp: ${new Date(response.timestamp).toLocaleString()}`);
+        
+        // Check if there's an error
+        if (response._error) {
+          console.error(`Error: ${response._error}`);
+          return;
+        }
+        
+        // Handle the new API response format
+        if (response.percentage !== undefined) {
+          console.log(`Utilization: ${(response.percentage * 100).toFixed(4)}%`);
+          console.log(`Timestamp: ${new Date().toLocaleString()}`);
+        }
+        // Handle the old API response format
+        else if (response.utilization_percentage !== undefined) {
+          console.log(`Utilization: ${response.utilization_percentage}%`);
+          
+          if (response.capacity !== undefined) {
+            console.log(`Capacity: ${response.capacity.toLocaleString()}`);
+          }
+          
+          if (response.usage !== undefined) {
+            console.log(`Usage: ${response.usage.toLocaleString()}`);
+          }
+          
+          if (response.timestamp) {
+            console.log(`Timestamp: ${new Date(response.timestamp).toLocaleString()}`);
+          } else {
+            console.log(`Timestamp: ${new Date().toLocaleString()}`);
+          }
+        } else {
+          console.log('No utilization data available');
+        }
         
         if (response.historical_data && response.historical_data.length > 0) {
           console.log('\nHistorical Data:');
@@ -992,7 +1465,12 @@ program
         }
       }
     } catch (error) {
-      console.error('Error:', (error as Error).message);
+      if ((error as any).response?.data?.error === 'API route not found') {
+        console.error('Error: VVV API endpoints require admin privileges or are not available in this API version.');
+        console.error('Please contact Venice AI support for access to these endpoints.');
+      } else {
+        console.error('Error:', (error as Error).message);
+      }
     }
   });
 
@@ -1013,10 +1491,45 @@ program
       } else {
         // Pretty output for human consumption
         console.log('VVV Staking Yield:');
-        console.log(`Current APY: ${response.current_apy}%`);
-        console.log(`Total Staked: ${response.total_staked.toLocaleString()}`);
-        console.log(`Percentage Staked: ${response.percentage_staked}%`);
-        console.log(`Timestamp: ${new Date(response.timestamp).toLocaleString()}`);
+        
+        // Check if there's an error
+        if (response._error) {
+          console.error(`Error: ${response._error}`);
+          return;
+        }
+        
+        // Handle the new API response format
+        if (response.stakingYield !== undefined && response.totalStaked !== undefined) {
+          console.log(`Current APY: ${(parseFloat(response.stakingYield) * 100).toFixed(4)}%`);
+          console.log(`Total Staked: ${parseFloat(response.totalStaked).toLocaleString()}`);
+          
+          if (response.totalEmission) {
+            console.log(`Total Emission: ${response.totalEmission}`);
+          }
+          
+          if (response.stakerDistribution) {
+            console.log(`Staker Distribution: ${response.stakerDistribution}`);
+          }
+          
+          console.log(`Timestamp: ${new Date().toLocaleString()}`);
+        }
+        // Handle the old API response format
+        else if (response.current_apy !== undefined && response.total_staked !== undefined) {
+          console.log(`Current APY: ${response.current_apy}%`);
+          console.log(`Total Staked: ${response.total_staked.toLocaleString()}`);
+          
+          if (response.percentage_staked !== undefined) {
+            console.log(`Percentage Staked: ${response.percentage_staked}%`);
+          }
+          
+          if (response.timestamp) {
+            console.log(`Timestamp: ${new Date(response.timestamp).toLocaleString()}`);
+          } else {
+            console.log(`Timestamp: ${new Date().toLocaleString()}`);
+          }
+        } else {
+          console.log('No staking yield data available');
+        }
         
         if (response.historical_data && response.historical_data.length > 0) {
           console.log('\nHistorical Data:');
@@ -1027,7 +1540,12 @@ program
         }
       }
     } catch (error) {
-      console.error('Error:', (error as Error).message);
+      if ((error as any).response?.data?.error === 'API route not found') {
+        console.error('Error: VVV API endpoints require admin privileges or are not available in this API version.');
+        console.error('Please contact Venice AI support for access to these endpoints.');
+      } else {
+        console.error('Error:', (error as Error).message);
+      }
     }
   });
 
