@@ -21,6 +21,8 @@ import { ChatResource } from './resources/chat';
 import { ImageResource } from './resources/image';
 import { ModelsResource } from './resources/models';
 import { ApiKeysResource } from './resources/api-keys';
+import { CharactersResource } from './resources/characters';
+import { VVVResource } from './resources/vvv';
 import { ClientConfig } from './types/common';
 import { HttpClient } from './utils/http';
 import { Logger, LogLevel } from './utils/logger';
@@ -70,6 +72,16 @@ export class VeniceAI {
   public apiKeys: ApiKeysResource;
 
   /**
+   * Characters resource
+   */
+  public characters: CharactersResource;
+
+  /**
+   * VVV resource
+   */
+  public vvv: VVVResource;
+
+  /**
    * Creates a new Venice AI API client
    * 
    * @param config - Client configuration
@@ -99,6 +111,8 @@ export class VeniceAI {
     this.image = new ImageResource(this.httpClient);
     this.models = new ModelsResource(this.httpClient);
     this.apiKeys = new ApiKeysResource(this.httpClient);
+    this.characters = new CharactersResource(this.httpClient);
+    this.vvv = new VVVResource(this.httpClient);
   }
 
   /**
@@ -229,6 +243,18 @@ export class VeniceAI {
         
       case 'list-styles':
         return commands.listStyles(options);
+        
+      case 'list-characters':
+        return commands.listCharacters(options);
+        
+      case 'vvv-supply':
+        return commands.vvvCirculatingSupply(options);
+        
+      case 'vvv-utilization':
+        return commands.vvvUtilization(options);
+        
+      case 'vvv-yield':
+        return commands.vvvStakingYield(options);
         
       case 'configure':
         if (options._args && options._args.length > 0) {
