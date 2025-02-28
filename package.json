@@ -1,6 +1,6 @@
 {
   "name": "venice-dev-tools",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "A comprehensive SDK for the Venice AI API with CLI support, programmatic CLI usage, CLI-style interface, and interactive demo",
   "repository": {
     "type": "git",
