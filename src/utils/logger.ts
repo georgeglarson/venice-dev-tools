@@ -129,8 +129,52 @@ export class Logger {
   }
 
   /**
+   * Sanitizes an object to exclude image data
+   *
+   * @param data - Object to sanitize
+   * @returns Sanitized object
+   */
+  private static sanitizeImageData(data: any): any {
+    if (!data || typeof data !== 'object') {
+      return data;
+    }
+
+    // Create a shallow copy of the object
+    const sanitized = Array.isArray(data) ? [...data] : { ...data };
+
+    // Check each property for potential image data
+    for (const key in sanitized) {
+      if (Object.prototype.hasOwnProperty.call(sanitized, key)) {
+        const value = sanitized[key];
+        
+        // Check for common image field names
+        if (['image', 'data', 'content', 'file', 'buffer', 'base64'].includes(key.toLowerCase())) {
+          // Check if value is likely image data (string longer than 1000 chars or Buffer)
+          if ((typeof value === 'string' && value.length > 1000) ||
+              (value && typeof value === 'object' && 'buffer' in value) ||
+              (value instanceof Buffer)) {
+            sanitized[key] = '[IMAGE DATA EXCLUDED]';
+          }
+        } else if (typeof value === 'string' && value.length > 1000 &&
+                  (value.startsWith('data:image') ||
+                   value.startsWith('/9j/') || // JPEG
+                   value.startsWith('iVBOR') || // PNG
+                   /^[A-Za-z0-9+/=]{1000,}$/.test(value))) {
+          // Also check for base64 encoded images in other fields
+          sanitized[key] = '[IMAGE DATA EXCLUDED]';
+        } else if (typeof value === 'object' && value !== null) {
+          // Recursively sanitize nested objects
+          sanitized[key] = Logger.sanitizeImageData(value);
+        }
+      }
+    }
+
+    return sanitized;
+  }
+
+  /**
    * Log a message at the specified level
-   * 
+   *
    * @param message - Message to log
    * @param level - Log level
    * @param data - Additional data to log
@@ -147,13 +191,24 @@ export class Logger {
     if (data !== undefined) {
       if (typeof data === 'object') {
         try {
-          const dataStr = JSON.stringify(data, null, 2);
+          // Sanitize object to exclude image data before stringifying
+          const sanitizedData = Logger.sanitizeImageData(data);
+          const dataStr = JSON.stringify(sanitizedData, null, 2);
           logMessage += `\n${dataStr}`;
         } catch (error) {
           logMessage += `\n[Object could not be stringified]`;
         }
       } else {
-        logMessage += ` ${data}`;
+        // For non-object data, check if it's a string that might be base64 encoded image
+        if (typeof data === 'string' && data.length > 1000 &&
+            (data.startsWith('data:image') ||
+             data.startsWith('/9j/') || // JPEG
+             data.startsWith('iVBOR') || // PNG
+             /^[A-Za-z0-9+/=]{1000,}$/.test(data))) {
+          logMessage += ' [IMAGE DATA EXCLUDED]';
+        } else {
+          logMessage += ` ${data}`;
+        }
       }
     }
 

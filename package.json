@@ -1,6 +1,6 @@
 {
   "name": "venice-dev-tools",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "A comprehensive SDK for the Venice AI API with CLI support, programmatic CLI usage, CLI-style interface, and interactive demo",
   "repository": {
     "type": "git",
@@ -56,12 +56,15 @@
     "lint": "eslint src --ext .ts",
     "format": "prettier --write \"src/**/*.ts\"",
     "docs": "typedoc --out docs src",
-    "examples": "node examples/index.js"
+    "examples": "node examples/index.js",
+    "postman:fetch": "node scripts/postman/fetch-collection.js",
+    "postman:extract": "node scripts/postman/fetch-collection.js --extract"
   },
   "dependencies": {
-    "axios": "^1.6.7",
+    "axios": "^1.8.1",
+    "canvas": "^3.1.0",
     "commander": "^13.1.0",
-    "form-data": "^4.0.0"
+    "form-data": "^4.0.2"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",

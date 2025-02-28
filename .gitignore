@@ -45,3 +45,7 @@ examples/image/generated-image.png
 
 # Documentation
 api-docs/
+
+# Postman
+postman/collections/
+postman/endpoints/

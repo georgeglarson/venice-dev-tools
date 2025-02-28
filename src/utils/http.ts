@@ -301,7 +301,7 @@ export class HttpClient {
 
   /**
    * Sanitizes data for logging
-   * 
+   *
    * @param data - Data to sanitize
    * @returns Sanitized data
    */
@@ -310,8 +310,16 @@ export class HttpClient {
       return data;
     }
     
-    // For simple types, return as is
-    if (typeof data !== 'object') {
+    // For simple types, check if it's a string that might be image data
+    if (typeof data === 'string') {
+      // Check if it's likely base64 encoded image data
+      if (data.length > 1000 &&
+          (data.startsWith('data:image') ||
+           data.startsWith('/9j/') || // JPEG
+           data.startsWith('iVBOR') || // PNG
+           /^[A-Za-z0-9+/=]{1000,}$/.test(data))) {
+        return '[IMAGE DATA EXCLUDED]';
+      }
       return data;
     }
     
@@ -323,6 +331,11 @@ export class HttpClient {
     // For streams, return a placeholder
     if (typeof data.pipe === 'function') {
       return '[Stream]';
+    }
+    
+    // For Buffer or ArrayBuffer, check if it might be image data
+    if (data instanceof Buffer || data instanceof ArrayBuffer) {
+      return '[BINARY DATA EXCLUDED]';
     }
     
     // For objects, create a copy and sanitize sensitive fields
@@ -337,6 +350,23 @@ export class HttpClient {
       // Sanitize authorization headers
       if (sanitized.headers && sanitized.headers.Authorization) {
         sanitized.headers.Authorization = 'Bearer [REDACTED]';
+      }
+      
+      // Sanitize image data
+      for (const key in sanitized) {
+        if (Object.prototype.hasOwnProperty.call(sanitized, key)) {
+          // Check for common image field names
+          if (['image', 'data', 'content', 'file', 'buffer', 'base64'].includes(key.toLowerCase())) {
+            const value = sanitized[key];
+            // Check if value is likely image data (string longer than 1000 chars)
+            if (typeof value === 'string' && value.length > 1000) {
+              sanitized[key] = '[IMAGE DATA EXCLUDED]';
+            }
+          } else if (typeof sanitized[key] === 'object' && sanitized[key] !== null) {
+            // Recursively sanitize nested objects
+            sanitized[key] = this.sanitizeData(sanitized[key]);
+          }
+        }
       }
       
       return sanitized;
