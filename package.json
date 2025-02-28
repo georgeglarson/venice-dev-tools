@@ -1,7 +1,7 @@
 {
   "name": "veniceai-sdk",
-  "version": "1.0.0",
-  "description": "A comprehensive SDK for the Venice AI API with CLI support",
+  "version": "1.1.0",
+  "description": "A comprehensive SDK for the Venice AI API with CLI support and programmatic CLI usage",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
