@@ -1,0 +1,32 @@
+# Source files
+src/
+
+# Development files
+.git/
+.github/
+.vscode/
+.idea/
+.DS_Store
+.gitignore
+.npmignore
+.eslintrc.js
+.prettierrc
+jest.config.js
+tsconfig.json
+
+# Documentation files
+docs/
+api-docs/
+CONTRIBUTING.md
+PROJECT_STRUCTURE.md
+TESTING_SUMMARY.md
+WHY_VENICE_SDK.md
+
+# Test files
+tests/
+test-improvements.js
+*.test.ts
+*.spec.ts
+
+# Examples (keep them in the package)
+# examples/

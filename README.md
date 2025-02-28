@@ -45,23 +45,28 @@ The SDK is built for production use with:
 - **Models Management**: List models, traits, and compatibility mappings
 - **API Key Management**: Create, list, delete, and check rate limits for API keys
 - **Web3 Integration**: Generate API keys using Web3 wallets
+- **Command Line Interface**: Interact with the API directly from your terminal
 - **Error Handling**: Comprehensive error handling with specific error classes
 - **Rate Limiting**: Automatic rate limit tracking and handling
 - **Debug Logging**: Robust logging system with multiple log levels and runtime configuration
 
 ## Installation
 
-This SDK is not yet published to npm. To use it in your project:
+You can install the SDK using npm:
+
+```bash
+# Install as a dependency in your project
+npm install veniceai-sdk
+
+# Or install globally to use the CLI
+npm install -g veniceai-sdk
+```
+
+For development:
 
 1. Clone this repository
 2. Build the SDK with `npm run build`
-3. Link it to your project or copy the built files
-
-Once published, you'll be able to install it using npm:
-
-```bash
-npm install venice-ai-sdk-apl
-```
+3. Link it to your project with `npm link`
 
 ## Authentication
 
@@ -340,6 +345,60 @@ const response = await venice.chat.completions.create({
 ```
 
 This is equivalent to using the `venice_parameters` object but can be more convenient in some cases.
+
+## Command Line Interface (CLI)
+
+The SDK includes a command-line interface that allows you to interact with the Venice AI API directly from your terminal:
+
+```bash
+# Install globally
+npm install -g veniceai-sdk
+
+# Configure your API key
+venice configure
+
+# Generate a chat completion
+venice chat "Tell me about AI"
+
+# Generate an image
+venice generate-image "A beautiful sunset over a mountain range" -o sunset.png
+
+# List available models
+venice list-models
+
+# Manage API keys
+venice list-keys
+venice create-key --name "My New Key"
+venice delete-key --id "key-id"
+```
+
+### Available Commands
+
+| Command | Description |
+|---------|-------------|
+| `venice configure` | Configure your Venice API key |
+| `venice chat <prompt>` | Generate a chat completion |
+| `venice generate-image <prompt>` | Generate an image |
+| `venice list-models` | List available models |
+| `venice list-styles` | List available image styles |
+| `venice list-keys` | List your API keys |
+| `venice create-key` | Create a new API key |
+| `venice delete-key` | Delete an API key |
+| `venice rate-limits` | Get rate limits for your API key |
+
+### CLI Options
+
+```bash
+# Chat with web search enabled
+venice chat "What are the latest developments in AI?" --web-search
+
+# Generate an image with specific parameters
+venice generate-image "A beautiful sunset" --model fluently-xl --style "3D Model" --width 1024 --height 768 --output sunset.png
+
+# Get help for any command
+venice --help
+venice chat --help
+```
 
 ## Examples
 

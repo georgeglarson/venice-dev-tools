@@ -1,9 +1,12 @@
 {
-  "name": "venice-ai-sdk-apl",
-  "version": "0.1.0",
-  "description": "A comprehensive SDK for the Venice AI API following API Programming Library (APL) principles",
+  "name": "veniceai-sdk",
+  "version": "1.0.0",
+  "description": "A comprehensive SDK for the Venice AI API with CLI support",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "bin": {
+    "venice": "dist/cli.js"
+  },
   "files": [
     "dist",
     "README.md",
@@ -31,7 +34,14 @@
     "image",
     "generation",
     "streaming",
-    "web3"
+    "web3",
+    "cli",
+    "command-line",
+    "artificial-intelligence",
+    "machine-learning",
+    "openai-alternative",
+    "text-generation",
+    "image-generation"
   ],
   "author": "Venice AI",
   "license": "MIT",
@@ -45,6 +55,7 @@
   "homepage": "https://github.com/venice-ai/venice-ai-sdk-apl#readme",
   "dependencies": {
     "axios": "^1.6.7",
+    "commander": "^13.1.0",
     "form-data": "^4.0.0"
   },
   "devDependencies": {
