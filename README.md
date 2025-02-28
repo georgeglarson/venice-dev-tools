@@ -1,6 +1,6 @@
-# Venice AI SDK APL
+# Venice Dev Tools
 
-A comprehensive, fully-featured SDK for the Venice AI API following API Programming Library (APL) principles.
+A comprehensive, fully-featured SDK for the Venice AI API with CLI support, programmatic CLI usage, and CLI-style interface.
 
 ## Why Choose This SDK?
 
@@ -56,10 +56,10 @@ You can install the SDK using npm:
 
 ```bash
 # Install as a dependency in your project
-npm install veniceai-sdk
+npm install venice-dev-tools
 
 # Or install globally to use the CLI
-npm install -g veniceai-sdk
+npm install -g venice-dev-tools
 ```
 
 For development:
@@ -83,7 +83,7 @@ const venice = new VeniceAI({
 First, [create a Venice AI account](https://venice.ai/chat?ref=VB8W1j) to get your API key.
 
 ```javascript
-import { VeniceAI } from './path-to-sdk';
+import { VeniceAI } from 'venice-dev-tools';
 
 // Initialize the client
 const venice = new VeniceAI({
@@ -352,7 +352,7 @@ The SDK includes a command-line interface that allows you to interact with the V
 
 ```bash
 # Install globally
-npm install -g veniceai-sdk
+npm install -g venice-dev-tools
 
 # Configure your API key
 venice configure
@@ -435,7 +435,7 @@ The SDK provides two ways to use CLI commands in your code:
 The most intuitive approach that mirrors the CLI syntax exactly:
 
 ```javascript
-import { VeniceAI } from 'veniceai-sdk';
+import { VeniceAI } from 'venice-dev-tools';
 
 const venice = new VeniceAI({ apiKey: 'your-api-key' });
 
@@ -473,7 +473,7 @@ main();
 An alternative approach using the command object:
 
 ```javascript
-import { cli } from 'veniceai-sdk';
+import { cli } from 'venice-dev-tools';
 
 // Use the commands object
 async function main() {
@@ -527,6 +527,8 @@ For more examples, check out the [examples](./examples) directory:
 - [List Models](./examples/models/list-models.js)
 - [Manage API Keys](./examples/api-keys/manage-keys.js)
 - [Debug Logging](./examples/debug-logging.js)
+- [CLI-Style Interface](./examples/cli-style.js)
+- [Programmatic CLI Usage](./examples/cli-programmatic.js)
 
 ## Implementation Details
 
