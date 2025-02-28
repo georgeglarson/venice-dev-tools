@@ -1,84 +1,54 @@
 # Venice Dev Tools
 
-A comprehensive, fully-featured SDK for the Venice AI API with CLI support, programmatic CLI usage, and CLI-style interface.
+A comprehensive, fully-featured SDK for the Venice AI API with CLI support, programmatic CLI usage, CLI-style interface, and an interactive live demo.
 
-## Why Choose This SDK?
+## CLI Quick Start
 
-This SDK stands out with exceptional developer experience, robust error handling, streaming support done right, and production-ready features.
-
-### Privacy-First Approach
-
-[Venice AI](https://venice.ai/sign-up?ref=VB8W1j) offers unparalleled privacy advantages over other AI providers:
-
-- **No Data Storage**: Your prompts, responses, and generated content are never saved on any Venice infrastructure
-- **Local Storage Only**: Your conversation history lives in your local browser - clear your browser data, and those conversations are gone forever
-- **Decentralized Processing**: Your requests are processed on decentralized GPUs without any identifying information
-- **Transient Processing**: Once a prompt is processed, it is purged from the GPU - nothing persists
-- **SSL Encryption**: All communication is secured using SSL encryption throughout the entire journey
-
-As Venice states: **"You don't have to protect what you do not have."**
-
-This SDK enhances these privacy features with sensitive data redaction in logs, configurable logging levels, and support for local processing configurations.
-
-### Developer Experience That Delights
-
-Our SDK excels in developer experience through:
-
-- **Intuitive API Design**: The fluent, chainable API follows familiar patterns that developers already know
-- **Progressive Disclosure**: Simple use cases are simple, while advanced features are available when needed
-- **Comprehensive Examples**: Each feature has dedicated examples showing real-world usage
-
-### Reliability & Robustness for Production Use
-
-The SDK is built for production use with:
-
-- **Graceful Error Handling**: Specific error classes with detailed information
-- **Adaptive Implementation**: Handles different API response formats gracefully
-- **Automatic Retries**: Built-in retry mechanism for transient failures
-- **Rate Limit Handling**: Automatic extraction and exposure of rate limit information
-
-## Features
-
-- **Chat Completions**: Generate text responses with streaming support and web search
-- **Image Generation**: Create images with various models and styles
-- **Image Upscaling**: Enhance image resolution
-- **Models Management**: List models, traits, and compatibility mappings
-- **API Key Management**: Create, list, delete, and check rate limits for API keys
-- **Web3 Integration**: Generate API keys using Web3 wallets
-- **Command Line Interface**: Interact with the API directly from your terminal
-- **Error Handling**: Comprehensive error handling with specific error classes
-- **Rate Limiting**: Automatic rate limit tracking and handling
-- **Debug Logging**: Robust logging system with multiple log levels and runtime configuration
-
-## Installation
-
-You can install the SDK using npm:
+Get started with the Venice AI CLI in seconds:
 
 ```bash
-# Install as a dependency in your project
-npm install venice-dev-tools
-
-# Or install globally to use the CLI
+# Install globally
 npm install -g venice-dev-tools
+
+# Configure your API key
+venice configure
+
+# Generate a chat completion
+venice chat "Tell me about AI"
+
+# Generate an image
+venice generate-image "A beautiful sunset" --output sunset.png
+
+# List available models
+venice list-models
 ```
 
-For development:
+### Key CLI Commands
 
-1. Clone this repository
-2. Build the SDK with `npm run build`
-3. Link it to your project with `npm link`
+| Command | Description |
+|---------|-------------|
+| `venice configure` | Configure your Venice API key |
+| `venice chat <prompt>` | Generate a chat completion |
+| `venice generate-image <prompt>` | Generate an image |
+| `venice list-models` | List available models |
+| `venice list-styles` | List available image styles |
+| `venice list-keys` | List your API keys |
 
-## Authentication
+### Advanced CLI Options
 
-The Venice AI SDK requires an API key for authentication. You can obtain an API key from the [Venice AI website](https://venice.ai/settings/api?ref=VB8W1j).
+```bash
+# Chat with web search enabled
+venice chat "What's happening in the world today?" --web-search
 
-```javascript
-const venice = new VeniceAI({
-  apiKey: 'your-api-key',
-});
+# Generate an image with specific parameters
+venice generate-image "A futuristic city" --model fluently-xl --style "3D Model" --width 1024 --height 768
+
+# Get raw JSON output (useful for scripting)
+venice list-models --raw > models.json
+venice chat "Hello" --raw | jq .choices[0].message.content
 ```
 
-## Quick Start
+## JavaScript Quick Start
 
 First, [create a Venice AI account](https://venice.ai/sign-up?ref=VB8W1j) to get your API key.
 
@@ -99,8 +69,7 @@ async function generateChatCompletion() {
       { role: 'user', content: 'Tell me about AI' }
     ],
     venice_parameters: {
-      enable_web_search: 'on',
-      include_venice_system_prompt: true
+      enable_web_search: 'on'
     }
   });
   
@@ -109,6 +78,49 @@ async function generateChatCompletion() {
 
 generateChatCompletion();
 ```
+
+## Installation
+
+```bash
+# Install as a dependency in your project
+npm install venice-dev-tools
+
+# Or install globally to use the CLI
+npm install -g venice-dev-tools
+```
+
+## Live Demo
+
+Try out the Venice AI SDK without an API key using our [interactive live demo](https://georgeglarson.github.io/venice-dev-tools/).
+
+## Features
+
+- **Chat Completions**: Generate text responses with streaming support and web search
+- **Image Generation**: Create images with various models and styles
+- **Image Upscaling**: Enhance image resolution
+- **Models Management**: List models, traits, and compatibility mappings
+- **API Key Management**: Create, list, delete, and check rate limits for API keys
+- **Web3 Integration**: Generate API keys using Web3 wallets
+- **Command Line Interface**: Interact with the API directly from your terminal
+- **Error Handling**: Comprehensive error handling with specific error classes
+- **Rate Limiting**: Automatic rate limit tracking and handling
+- **Debug Logging**: Robust logging system with multiple log levels and runtime configuration
+
+## Why Choose This SDK?
+
+This SDK stands out with exceptional developer experience, robust error handling, streaming support done right, and production-ready features.
+
+### Privacy-First Approach
+
+[Venice AI](https://venice.ai/sign-up?ref=VB8W1j) offers unparalleled privacy advantages over other AI providers:
+
+- **No Data Storage**: Your prompts, responses, and generated content are never saved on any Venice infrastructure
+- **Local Storage Only**: Your conversation history lives in your local browser - clear your browser data, and those conversations are gone forever
+- **Decentralized Processing**: Your requests are processed on decentralized GPUs without any identifying information
+- **Transient Processing**: Once a prompt is processed, it is purged from the GPU - nothing persists
+- **SSL Encryption**: All communication is secured using SSL encryption throughout the entire journey
+
+As Venice states: **"You don't have to protect what you do not have."**
 
 ## Streaming Example
 

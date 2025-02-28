@@ -7,6 +7,17 @@ title: Venice AI SDK Documentation
 
 Welcome to the Venice AI SDK documentation. This SDK provides a simple, intuitive interface for interacting with the Venice AI API.
 
+## Command Line Interface
+
+The Venice AI SDK includes a powerful command-line interface that allows you to interact with the Venice AI API directly from your terminal.
+
+<div class="cli-highlight">
+  <h3>Try our CLI for quick access to Venice AI capabilities</h3>
+  <pre><code>npm install -g venice-dev-tools
+venice chat "Tell me about AI"</code></pre>
+  <a href="/venice-dev-tools/cli" class="cli-button">View CLI Documentation</a>
+</div>
+
 ## Installation
 
 Install the Venice AI SDK using npm:
