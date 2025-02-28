@@ -243,10 +243,8 @@ console.log(response.images[0].url);`;
     // Function to handle API calls through the proxy
     const callProxyApi = async (endpoint, data) => {
         try {
-            // You can update this URL to your own Vercel deployment
-            // If you deployed to the root of your project, use: https://your-project-name.vercel.app/api/
-            // If you deployed to the vercel-api-proxy folder, use: https://your-project-name.vercel.app/vercel-api-proxy/api/
-            const apiBaseUrl = 'https://venice-dev-tools-mvd3r9yhf-georgeglarsons-projects.vercel.app/api';
+            // Using the Vercel project URL (stable) instead of the deployment URL (changes with each deployment)
+            const apiBaseUrl = 'https://venice-dev-tools.vercel.app/api';
             
             const response = await fetch(`${apiBaseUrl}/${endpoint}`, {
                 method: 'POST',
