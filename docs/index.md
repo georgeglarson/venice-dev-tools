@@ -1,3 +1,8 @@
+---
+layout: default
+title: Venice AI SDK Documentation
+---
+
 # Venice AI SDK Documentation
 
 Welcome to the Venice AI SDK documentation. This SDK provides a simple, intuitive interface for interacting with the Venice AI API.
@@ -330,11 +335,11 @@ const venice = new VeniceAI({
 
 ## Examples
 
-For more examples, check out the [examples](../examples) directory:
+For more examples, check out the examples directory:
 
-- [Basic Chat](../examples/chat/basic-chat.js)
-- [Streaming Chat](../examples/chat/streaming.js)
-- [Web Search Chat](../examples/chat/web-search.js)
-- [Generate Image](../examples/image/generate-image.js)
-- [List Models](../examples/models/list-models.js)
-- [Manage API Keys](../examples/api-keys/manage-keys.js)
+- [Basic Chat](https://github.com/georgeglarson/venice-dev-tools/blob/main/examples/chat/basic-chat.js)
+- [Streaming Chat](https://github.com/georgeglarson/venice-dev-tools/blob/main/examples/chat/streaming.js)
+- [Web Search Chat](https://github.com/georgeglarson/venice-dev-tools/blob/main/examples/chat/web-search.js)
+- [Generate Image](https://github.com/georgeglarson/venice-dev-tools/blob/main/examples/image/generate-image.js)
+- [List Models](https://github.com/georgeglarson/venice-dev-tools/blob/main/examples/models/list-models.js)
+- [Manage API Keys](https://github.com/georgeglarson/venice-dev-tools/blob/main/examples/api-keys/manage-keys.js)

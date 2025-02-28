@@ -1,0 +1,21 @@
+# Jekyll configuration for GitHub Pages
+
+# Site settings
+title: Venice Dev Tools
+description: A comprehensive SDK for the Venice AI API
+url: "https://georgeglarson.github.io/venice-dev-tools"
+baseurl: ""
+
+# Build settings
+markdown: kramdown
+theme: jekyll-theme-cayman
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+
+# Exclude from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
