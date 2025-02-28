@@ -1,320 +1,204 @@
 ---
 layout: default
-title: Venice AI SDK - Command Line Interface
+title: Venice AI SDK - CLI Documentation
 ---
 
 # Command Line Interface (CLI)
 
-The Venice AI SDK includes a powerful command-line interface that allows you to interact with the Venice AI API directly from your terminal. This makes it easy to test API functionality, automate tasks, and integrate Venice AI capabilities into your scripts and workflows.
+The Venice AI SDK includes a powerful command-line interface that allows you to interact with the Venice AI API directly from your terminal. This makes it easy to test API functionality, automate tasks, and integrate with other command-line tools.
 
 ## Installation
 
-Install the Venice AI SDK globally to use the CLI:
+To use the CLI, you need to install the Venice AI SDK globally:
 
 ```bash
-# Install globally
 npm install -g venice-dev-tools
 ```
+
+After installation, you can access the CLI using the `venice` command.
 
 ## Configuration
 
 Before using the CLI, you need to configure your API key:
 
 ```bash
-# Configure your API key
 venice configure
 ```
 
-This will prompt you to enter your Venice AI API key, which will be stored securely in your home directory.
-
-Alternatively, you can set the API key as an environment variable:
-
-```bash
-# Set API key as environment variable
-export VENICE_API_KEY=your-api-key
-```
+This command will prompt you to enter your Venice AI API key, which will be securely stored in your user configuration.
 
 ## Available Commands
 
-| Command | Description |
-|---------|-------------|
-| `venice configure` | Configure your Venice API key |
-| `venice chat <prompt>` | Generate a chat completion |
-| `venice generate-image <prompt>` | Generate an image |
-| `venice list-models` | List available models |
-| `venice list-styles` | List available image styles |
-| `venice list-keys` | List your API keys |
-| `venice create-key` | Create a new API key |
-| `venice delete-key` | Delete an API key |
-| `venice rate-limits` | Get rate limits for your API key |
+### Chat Completions
 
-## Chat Completions
-
-Generate text responses using the chat command:
+Generate text responses from the Venice AI models:
 
 ```bash
-# Basic chat completion
-venice chat "Tell me about AI"
-
-# Chat with web search enabled
-venice chat "What are the latest developments in AI?" --web-search
-
-# Specify a different model
-venice chat "Explain quantum computing" --model llama-3.3-8b
-
-# Add a system message
-venice chat "Write a poem about the ocean" --system "You are a poetic assistant"
+venice chat "Tell me about artificial intelligence"
 ```
 
-## Image Generation
+#### Options:
 
-Generate images using the generate-image command:
+- `--model <model>` - Specify the model to use (default: llama-3.3-70b)
+- `--web-search` - Enable web search for up-to-date information
+- `--stream` - Stream the response as it's generated
+- `--raw` - Output the raw JSON response
+
+### Image Generation
+
+Create images using Venice AI's image generation models:
 
 ```bash
-# Basic image generation
 venice generate-image "A beautiful sunset over mountains"
-
-# Specify image parameters
-venice generate-image "A futuristic city" --model fluently-xl --style "3D Model" --width 1024 --height 768
-
-# Add a negative prompt
-venice generate-image "A cat wearing sunglasses" --negative "blurry, distorted, low quality"
-
-# Save the image to a file
-venice generate-image "A serene lake" --output lake.png
 ```
 
-## Managing API Keys
+#### Options:
 
-List, create, and delete API keys:
+- `--model <model>` - Specify the model to use (default: fluently-xl)
+- `--style <style>` - Specify the style preset (e.g., "Photographic", "3D Model", "Digital Art")
+- `--width <width>` - Specify the width of the generated image
+- `--height <height>` - Specify the height of the generated image
+- `--output <filename>` - Save the image to a file
+- `--raw` - Output the raw JSON response
+
+### Image Upscaling
+
+Enhance the resolution of existing images:
 
 ```bash
-# List all your API keys
-venice list-keys
-
-# Create a new API key
-venice create-key --name "My CLI Key"
-
-# Delete an API key
-venice delete-key --id "key-id"
+venice upscale-image path/to/image.jpg
 ```
 
-## Viewing Models and Styles
+#### Options:
 
-Get information about available models and image styles:
+- `--output <filename>` - Save the upscaled image to a file
+- `--raw` - Output the raw JSON response
+
+### List Models
+
+List available models and their capabilities:
 
 ```bash
-# List all available models
 venice list-models
+```
 
-# List all available image styles
+#### Options:
+
+- `--raw` - Output the raw JSON response
+
+### List Image Styles
+
+List available image generation styles:
+
+```bash
 venice list-styles
 ```
 
-## Rate Limits
+#### Options:
 
-Check your API key's rate limits:
+- `--raw` - Output the raw JSON response
+
+### API Key Management
+
+Manage your Venice AI API keys:
 
 ```bash
-# Get rate limits for all models
+venice list-keys
+venice create-key --name "My New Key"
+venice delete-key <key-id>
 venice rate-limits
-
-# Get rate limits for a specific model
-venice rate-limits --model llama-3.3-70b
 ```
 
 ## Advanced Usage
 
-### Debug Mode
+### Piping and Redirection
 
-Enable debug mode to see detailed request and response information:
-
-```bash
-# Enable debug mode for any command
-venice list-keys --debug
-venice chat "Hello" --debug
-```
-
-### Raw JSON Output
-
-Get raw JSON output for scripting and automation:
+The CLI supports standard Unix-style piping and redirection:
 
 ```bash
-# Get raw JSON output
-venice list-styles --raw
-venice list-models --raw > models.json
-venice chat "Hello" --raw | jq .choices[0].message.content
+# Save chat response to a file
+venice chat "Write a poem about the ocean" > ocean-poem.txt
+
+# Use the output of one command as input to another
+echo "Explain quantum computing" | venice chat
+
+# Process JSON output with jq
+venice list-models --raw | jq '.data[0].id'
 ```
 
-### Help
+### Scripting
 
-Get help for any command:
+You can easily use the CLI in shell scripts:
 
 ```bash
-# Get general help
-venice --help
+#!/bin/bash
 
-# Get help for a specific command
-venice chat --help
-venice generate-image --help
+# Generate an image and save it
+venice generate-image "A futuristic cityscape" --output city.png
+
+# Generate a description of the image
+venice chat "Describe this futuristic cityscape in detail" > description.txt
+
+# Combine the image and description
+echo "Image and description generated successfully!"
 ```
 
-## Programmatic CLI Usage
+### Environment Variables
 
-You can also use the CLI commands programmatically in your JavaScript code:
+You can use environment variables instead of the configuration file:
 
-```javascript
-import { VeniceAI } from 'venice-dev-tools';
-
-const venice = new VeniceAI({ apiKey: 'your-api-key' });
-
-// Use CLI-style commands in your code
-async function main() {
-  try {
-    // Chat with web search
-    const response = await venice.cli('chat "Tell me about AI" --web-search');
-    console.log(response);
-    
-    // Generate an image
-    const image = await venice.cli('generate-image "A beautiful sunset" --style Photographic --output sunset.png');
-    console.log(`Image saved to: ${image.savedTo}`);
-    
-    // List models with options
-    const models = await venice.cli('list-models', {
-      limit: 5,
-      raw: true
-    });
-    console.log(`Found ${models.data.length} models`);
-  } catch (error) {
-    console.error('Error:', error.message);
-  }
-}
-
-main();
+```bash
+VENICE_API_KEY=your-api-key venice chat "Hello, world!"
 ```
 
 ## Examples
 
-Here are some real-world examples of using the Venice AI CLI:
-
-### Creating a Simple Chat Bot
+### Generate a chat completion with web search
 
 ```bash
-#!/bin/bash
-# Simple chat bot using Venice AI CLI
-
-echo "Venice AI Chat Bot"
-echo "Type 'exit' to quit"
-
-while true; do
-  echo -n "> "
-  read prompt
-  
-  if [ "$prompt" = "exit" ]; then
-    break
-  fi
-  
-  venice chat "$prompt"
-  echo ""
-done
+venice chat "What's happening in the world today?" --web-search
 ```
 
-### Batch Image Generation
+### Generate an image with specific parameters
 
 ```bash
-#!/bin/bash
-# Generate multiple images from a list of prompts
-
-prompts_file="prompts.txt"
-output_dir="generated_images"
-
-mkdir -p "$output_dir"
-
-while IFS= read -r prompt; do
-  # Create a filename from the prompt
-  filename=$(echo "$prompt" | tr ' ' '_' | tr -cd '[:alnum:]_-' | tr '[:upper:]' '[:lower:]').png
-  
-  echo "Generating image for: $prompt"
-  venice generate-image "$prompt" --output "$output_dir/$filename"
-  
-  # Wait a bit between requests to avoid rate limiting
-  sleep 2
-done < "$prompts_file"
-
-echo "All images generated in $output_dir"
+venice generate-image "A futuristic city" --model fluently-xl --style "3D Model" --width 1024 --height 768 --output future-city.png
 ```
 
-### Automated API Key Rotation
+### List all available models and filter by type
 
 ```bash
-#!/bin/bash
-# Rotate API keys automatically
-
-# Get current date for naming
-current_date=$(date +"%Y-%m-%d")
-
-# Create a new key
-echo "Creating new API key..."
-new_key_json=$(venice create-key --name "Auto-generated $current_date" --raw)
-
-# Extract the key ID and value using jq (you need to install jq)
-new_key_id=$(echo $new_key_json | jq -r '.key.id')
-new_key_value=$(echo $new_key_json | jq -r '.key.key')
-
-# Save the new key to a file
-echo "Saving new key to keys.txt..."
-echo "$current_date: $new_key_value" >> keys.txt
-
-# Update the environment variable or configuration
-echo "Updating configuration..."
-venice configure <<< "$new_key_value"
-
-echo "API key rotation complete. New key ID: $new_key_id"
+venice list-models --raw | jq '.data[] | select(.type=="chat")'
 ```
 
 ## Troubleshooting
 
-### Authentication Issues
+### API Key Issues
 
-If you encounter authentication issues:
+If you encounter authentication errors, ensure your API key is correctly configured:
 
-1. Make sure your API key is correctly configured:
-   ```bash
-   venice configure
-   ```
-
-2. Check that your API key is valid by listing your keys:
-   ```bash
-   venice list-keys
-   ```
-
-3. Try setting the API key as an environment variable:
-   ```bash
-   export VENICE_API_KEY=your-api-key
-   ```
+```bash
+venice configure
+```
 
 ### Rate Limiting
 
-If you encounter rate limit errors:
+If you hit rate limits, you can check your current usage:
 
-1. Check your current rate limits:
-   ```bash
-   venice rate-limits
-   ```
+```bash
+venice rate-limits
+```
 
-2. Add delays between requests in scripts
-3. Consider upgrading to a higher tier if you need more requests
+### Verbose Mode
 
-### Command Not Found
+For more detailed output to help diagnose issues:
 
-If you get a "command not found" error:
+```bash
+venice chat "Hello" --verbose
+```
 
-1. Make sure the package is installed globally:
-   ```bash
-   npm install -g venice-dev-tools
-   ```
+## Further Resources
 
-2. Check that the global npm bin directory is in your PATH
-3. Try using npx:
-   ```bash
-   npx venice-dev-tools chat "Hello"
+- [Venice AI API Documentation](https://docs.venice.ai)
+- [SDK Documentation](/venice-dev-tools/)
+- [GitHub Repository](https://github.com/georgeglarson/venice-dev-tools)

@@ -1,0 +1,270 @@
+/* Terminal-style Demo Styles */
+.terminal-demo {
+    background-color: #2d2d2d;
+    border-radius: 6px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    margin: 30px 0;
+    overflow: hidden;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+}
+
+.terminal-header {
+    background-color: #383838;
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #1a1a1a;
+}
+
+.terminal-buttons {
+    display: flex;
+    margin-right: 15px;
+}
+
+.terminal-button {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+    display: inline-block;
+}
+
+.terminal-button.close {
+    background-color: #ff5f56;
+}
+
+.terminal-button.minimize {
+    background-color: #ffbd2e;
+}
+
+.terminal-button.maximize {
+    background-color: #27c93f;
+}
+
+.terminal-title {
+    color: #ddd;
+    font-size: 14px;
+    flex-grow: 1;
+    text-align: center;
+}
+
+.terminal-body {
+    padding: 20px;
+    color: #f8f8f8;
+}
+
+/* Demo Tabs */
+.demo-tabs {
+    display: flex;
+    border-bottom: 1px solid #444;
+    margin-bottom: 20px;
+}
+
+.demo-tab {
+    background-color: transparent;
+    border: none;
+    color: #aaa;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+.demo-tab:hover {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.demo-tab.active {
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--primary-color);
+}
+
+/* Demo Content */
+.demo-pane {
+    display: none;
+}
+
+.demo-pane.active {
+    display: block;
+}
+
+.demo-pane h3 {
+    color: #fff;
+    margin-top: 0;
+    font-size: 18px;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #bbb;
+}
+
+.input-group textarea,
+.input-group select {
+    width: 100%;
+    padding: 10px;
+    background-color: #383838;
+    border: 1px solid #555;
+    border-radius: 4px;
+    color: #f8f8f8;
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.input-group.checkbox {
+    display: flex;
+    align-items: center;
+}
+
+.input-group.checkbox input {
+    margin-right: 8px;
+}
+
+.input-group.checkbox label {
+    margin-bottom: 0;
+}
+
+.demo-button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+}
+
+.demo-button:hover {
+    background-color: #0256b3;
+}
+
+.demo-result {
+    margin-top: 20px;
+    background-color: #383838;
+    border-radius: 4px;
+    padding: 15px;
+}
+
+.demo-result h4 {
+    margin-top: 0;
+    color: #bbb;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.result-content {
+    min-height: 100px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.result-content .placeholder {
+    color: #888;
+    font-style: italic;
+}
+
+.result-content .error {
+    color: #ff5f56;
+}
+
+.response-content {
+    white-space: pre-wrap;
+}
+
+.image-result img {
+    max-width: 100%;
+    border-radius: 4px;
+}
+
+.demo-code {
+    margin-top: 20px;
+}
+
+.demo-code h4 {
+    color: #bbb;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.demo-code pre {
+    background-color: #282c34;
+    border-radius: 4px;
+    padding: 15px;
+    overflow-x: auto;
+    margin: 0;
+}
+
+.demo-code code {
+    color: #abb2bf;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.demo-note {
+    margin-top: 20px;
+    padding: 10px 15px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    font-size: 13px;
+    color: #bbb;
+}
+
+.demo-note a {
+    color: var(--primary-color);
+}
+
+/* Models Table */
+.models-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.models-table th,
+.models-table td {
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid #444;
+}
+
+.models-table th {
+    color: #bbb;
+    font-weight: normal;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: var(--primary-color);
+    animation: spin 1s ease-in-out infinite;
+    margin-right: 10px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .terminal-demo {
+        margin: 20px -20px;
+        border-radius: 0;
+    }
+    
+    .terminal-body {
+        padding: 15px;
+    }
+}
