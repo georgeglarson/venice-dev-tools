@@ -403,6 +403,136 @@ export const commands = {
     } catch (error) {
       throw new Error(`Rate limits error: ${(error as Error).message}`);
     }
+  },
+
+  // List characters command implementation
+  listCharacters: async (options: { limit?: number; raw?: boolean } = {}) => {
+    try {
+      const venice = getClient();
+      const response = await venice.characters.list();
+      
+      if ((global as any).debug) {
+        debugLog('List characters response', response);
+      }
+      
+      // Return raw response if requested
+      if (options.raw) {
+        return response;
+      }
+      
+      // Get characters from the data array
+      const characters = response.data || [];
+      
+      if (characters.length === 0) {
+        return {
+          characters: [],
+          total: 0,
+          filtered: 0
+        };
+      }
+      
+      // Map and potentially limit the characters
+      let mappedCharacters = characters.map((character: any) => ({
+        name: character.name || 'Unnamed',
+        slug: character.slug || 'N/A',
+        description: character.description || 'No description',
+        model: character.modelId || 'N/A'
+      }));
+      
+      // Apply limit if specified
+      if (options.limit && options.limit > 0 && options.limit < mappedCharacters.length) {
+        mappedCharacters = mappedCharacters.slice(0, options.limit);
+      }
+      
+      return {
+        characters: mappedCharacters,
+        total: characters.length,
+        filtered: mappedCharacters.length
+      };
+    } catch (error) {
+      throw new Error(`List characters error: ${(error as Error).message}`);
+    }
+  },
+
+  // Get VVV circulating supply command implementation
+  vvvCirculatingSupply: async (options: { raw?: boolean } = {}) => {
+    try {
+      const venice = getClient();
+      const response = await venice.vvv.circulatingSupply();
+      
+      if ((global as any).debug) {
+        debugLog('VVV circulating supply response', response);
+      }
+      
+      // Return raw response if requested
+      if (options.raw) {
+        return response;
+      }
+      
+      return {
+        circulating_supply: response.circulating_supply,
+        total_supply: response.total_supply,
+        percentage_circulating: response.percentage_circulating ||
+          (response.circulating_supply / response.total_supply * 100).toFixed(2) + '%',
+        timestamp: new Date(response.timestamp).toLocaleString()
+      };
+    } catch (error) {
+      throw new Error(`VVV circulating supply error: ${(error as Error).message}`);
+    }
+  },
+
+  // Get VVV network utilization command implementation
+  vvvUtilization: async (options: { raw?: boolean } = {}) => {
+    try {
+      const venice = getClient();
+      const response = await venice.vvv.utilization();
+      
+      if ((global as any).debug) {
+        debugLog('VVV utilization response', response);
+      }
+      
+      // Return raw response if requested
+      if (options.raw) {
+        return response;
+      }
+      
+      return {
+        utilization_percentage: response.utilization_percentage + '%',
+        capacity: response.capacity,
+        usage: response.usage,
+        timestamp: new Date(response.timestamp).toLocaleString(),
+        historical_data: response.historical_data
+      };
+    } catch (error) {
+      throw new Error(`VVV utilization error: ${(error as Error).message}`);
+    }
+  },
+
+  // Get VVV staking yield command implementation
+  vvvStakingYield: async (options: { raw?: boolean } = {}) => {
+    try {
+      const venice = getClient();
+      const response = await venice.vvv.stakingYield();
+      
+      if ((global as any).debug) {
+        debugLog('VVV staking yield response', response);
+      }
+      
+      // Return raw response if requested
+      if (options.raw) {
+        return response;
+      }
+      
+      return {
+        current_apy: response.current_apy + '%',
+        total_staked: response.total_staked,
+        percentage_staked: response.percentage_staked + '%',
+        timestamp: new Date(response.timestamp).toLocaleString(),
+        historical_data: response.historical_data
+      };
+    } catch (error) {
+      throw new Error(`VVV staking yield error: ${(error as Error).message}`);
+    }
   }
 };
 
@@ -733,6 +863,168 @@ program
           name: style.name || style.id,
           description: style.description || 'No description'
         })));
+      }
+    } catch (error) {
+      console.error('Error:', (error as Error).message);
+    }
+  });
+
+// List characters
+program
+  .command('list-characters')
+  .description('List available characters')
+  .option('-l, --limit <number>', 'Limit the number of characters displayed')
+  .action(async (options) => {
+    try {
+      const venice = getClient();
+      
+      // Fetch characters
+      const response = await venice.characters.list();
+      
+      // Log response in debug mode
+      if ((global as any).debug) {
+        debugLog('List characters response', response);
+      }
+      
+      // Handle raw output mode
+      if ((global as any).raw) {
+        console.log(JSON.stringify(response, null, 2));
+        return;
+      }
+      
+      // Pretty output for human consumption
+      console.log('Available Characters:');
+      
+      // Get characters from the data array
+      const characters = response.data || [];
+      
+      if (characters.length === 0) {
+        console.log('No characters available.');
+        return;
+      }
+      
+      // Display total count
+      console.log(`Total characters: ${characters.length}`);
+      
+      // Apply limit if specified
+      let displayCharacters = [...characters];
+      if (options.limit && !isNaN(parseInt(options.limit))) {
+        const limit = parseInt(options.limit);
+        displayCharacters = displayCharacters.slice(0, limit);
+        console.log(`Showing ${displayCharacters.length} of ${characters.length} characters`);
+      }
+      
+      // Format characters for display
+      const formattedCharacters = displayCharacters.map(character => ({
+        name: character.name || 'Unnamed',
+        slug: character.slug || 'N/A',
+        description: (character.description || 'No description').substring(0, 40) + '...',
+        model: character.modelId || 'N/A'
+      }));
+      
+      // Display characters in a table format
+      console.table(formattedCharacters);
+      
+    } catch (error) {
+      console.error('Error:', (error as Error).message);
+    }
+  });
+
+// Get VVV circulating supply
+program
+  .command('vvv-supply')
+  .description('Get VVV circulating supply information')
+  .action(async () => {
+    try {
+      const venice = getClient();
+      const response = await venice.vvv.circulatingSupply();
+      
+      debugLog('VVV circulating supply response', response);
+      
+      if ((global as any).raw) {
+        // Output raw JSON for scripting
+        console.log(JSON.stringify(response, null, 2));
+      } else {
+        // Pretty output for human consumption
+        console.log('VVV Circulating Supply:');
+        console.log(`Circulating Supply: ${response.circulating_supply.toLocaleString()}`);
+        console.log(`Total Supply: ${response.total_supply.toLocaleString()}`);
+        
+        const percentCirculating = response.percentage_circulating ||
+          (response.circulating_supply / response.total_supply * 100).toFixed(2);
+        
+        console.log(`Percentage Circulating: ${percentCirculating}%`);
+        console.log(`Timestamp: ${new Date(response.timestamp).toLocaleString()}`);
+      }
+    } catch (error) {
+      console.error('Error:', (error as Error).message);
+    }
+  });
+
+// Get VVV network utilization
+program
+  .command('vvv-utilization')
+  .description('Get VVV network utilization information')
+  .action(async () => {
+    try {
+      const venice = getClient();
+      const response = await venice.vvv.utilization();
+      
+      debugLog('VVV utilization response', response);
+      
+      if ((global as any).raw) {
+        // Output raw JSON for scripting
+        console.log(JSON.stringify(response, null, 2));
+      } else {
+        // Pretty output for human consumption
+        console.log('VVV Network Utilization:');
+        console.log(`Utilization: ${response.utilization_percentage}%`);
+        console.log(`Capacity: ${response.capacity.toLocaleString()}`);
+        console.log(`Usage: ${response.usage.toLocaleString()}`);
+        console.log(`Timestamp: ${new Date(response.timestamp).toLocaleString()}`);
+        
+        if (response.historical_data && response.historical_data.length > 0) {
+          console.log('\nHistorical Data:');
+          console.table(response.historical_data.map(data => ({
+            timestamp: new Date(data.timestamp).toLocaleString(),
+            utilization: data.utilization_percentage + '%'
+          })));
+        }
+      }
+    } catch (error) {
+      console.error('Error:', (error as Error).message);
+    }
+  });
+
+// Get VVV staking yield
+program
+  .command('vvv-yield')
+  .description('Get VVV staking yield information')
+  .action(async () => {
+    try {
+      const venice = getClient();
+      const response = await venice.vvv.stakingYield();
+      
+      debugLog('VVV staking yield response', response);
+      
+      if ((global as any).raw) {
+        // Output raw JSON for scripting
+        console.log(JSON.stringify(response, null, 2));
+      } else {
+        // Pretty output for human consumption
+        console.log('VVV Staking Yield:');
+        console.log(`Current APY: ${response.current_apy}%`);
+        console.log(`Total Staked: ${response.total_staked.toLocaleString()}`);
+        console.log(`Percentage Staked: ${response.percentage_staked}%`);
+        console.log(`Timestamp: ${new Date(response.timestamp).toLocaleString()}`);
+        
+        if (response.historical_data && response.historical_data.length > 0) {
+          console.log('\nHistorical Data:');
+          console.table(response.historical_data.map(data => ({
+            timestamp: new Date(data.timestamp).toLocaleString(),
+            apy: data.apy + '%'
+          })));
+        }
       }
     } catch (error) {
       console.error('Error:', (error as Error).message);
