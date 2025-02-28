@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Venice Dev Tools</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        :root {
+            --primary-color: #0066cc;
+            --secondary-color: #003366;
+            --accent-color: #ff9900;
+            --text-color: #333333;
+            --light-bg: #f8f9fa;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            padding-top: 56px;
+        }
+        
+        .navbar {
+            background-color: var(--primary-color);
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            color: white !important;
+        }
+        
+        .nav-link {
+            color: rgba(255, 255, 255, 0.85) !important;
+        }
+        
+        .nav-link:hover {
+            color: white !important;
+        }
+        
+        .hero {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 80px 0;
+            margin-bottom: 40px;
+        }
+        
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        
+        .hero p {
+            font-size: 1.25rem;
+            max-width: 800px;
+            margin: 0 auto 30px;
+        }
+        
+        .btn-primary {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+            padding: 10px 24px;
+            font-weight: 600;
+        }
+        
+        .btn-primary:hover {
+            background-color: #e68a00;
+            border-color: #e68a00;
+        }
+        
+        .feature-box {
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            background-color: var(--light-bg);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .feature-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .feature-box h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: var(--accent-color);
+        }
+        
+        .code-block {
+            background-color: #272822;
+            color: #f8f8f2;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+        
+        .code-block pre {
+            margin: 0;
+            color: #f8f8f2;
+        }
+        
+        .code-comment {
+            color: #75715e;
+        }
+        
+        .code-string {
+            color: #e6db74;
+        }
+        
+        .code-keyword {
+            color: #f92672;
+        }
+        
+        .code-function {
+            color: #a6e22e;
+        }
+        
+        .code-variable {
+            color: #66d9ef;
+        }
+        
+        footer {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 40px 0;
+            margin-top: 60px;
+        }
+        
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            margin-right: 15px;
+        }
+        
+        .footer-links a:hover {
+            color: white;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">Venice Dev Tools</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#features">Features</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#installation">Installation</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#examples">Examples</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://github.com/georgeglarson/venice-dev-tools" target="_blank">GitHub</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://www.npmjs.com/package/venice-dev-tools" target="_blank">npm</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero text-center">
+        <div class="container">
+            <h1>Venice Dev Tools</h1>
+            <p>A comprehensive SDK for the Venice AI API with CLI support, programmatic CLI usage, and CLI-style interface</p>
+            <div>
+                <a href="https://github.com/georgeglarson/venice-dev-tools" class="btn btn-primary me-3" target="_blank">View on GitHub</a>
+                <a href="https://www.npmjs.com/package/venice-dev-tools" class="btn btn-outline-light" target="_blank">View on npm</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="container" id="features">
+        <h2 class="text-center mb-5">Key Features</h2>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="feature-box text-center">
+                    <div class="feature-icon">🚀</div>
+                    <h3>Full SDK API</h3>
+                    <p>Deep integration and maximum flexibility for complex applications and advanced use cases.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-box text-center">
+                    <div class="feature-icon">⌨️</div>
+                    <h3>Command Line Interface</h3>
+                    <p>Interact with the Venice AI API directly from your terminal with a powerful CLI.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-box text-center">
+                    <div class="feature-icon">🔄</div>
+                    <h3>CLI-Style Interface</h3>
+                    <p>Use the same CLI commands directly in your code for a seamless transition from CLI to code.</p>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="feature-box text-center">
+                    <div class="feature-icon">💬</div>
+                    <h3>Chat Completions</h3>
+                    <p>Generate text responses with streaming support and web search capabilities.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-box text-center">
+                    <div class="feature-icon">🖼️</div>
+                    <h3>Image Generation</h3>
+                    <p>Create images with various models and styles, with support for upscaling.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-box text-center">
+                    <div class="feature-icon">🔑</div>
+                    <h3>API Key Management</h3>
+                    <p>Create, list, delete, and check rate limits for API keys with ease.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="container mt-5" id="installation">
+        <h2 class="text-center mb-5">Installation</h2>
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="code-block">
+                    <pre><span class="code-comment"># Install as a dependency in your project</span>
+npm install venice-dev-tools
+
+<span class="code-comment"># Or install globally to use the CLI</span>
+npm install -g venice-dev-tools</pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="container mt-5" id="examples">
+        <h2 class="text-center mb-5">Usage Examples</h2>
+        
+        <h3 class="mb-4">CLI-Style Interface</h3>
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="code-block">
+                    <pre><span class="code-comment">// Import the SDK</span>
+<span class="code-keyword">const</span> { <span class="code-variable">VeniceAI</span> } = <span class="code-function">require</span>(<span class="code-string">'venice-dev-tools'</span>);
+
+<span class="code-comment">// Initialize the client</span>
+<span class="code-keyword">const</span> <span class="code-variable">venice</span> = <span class="code-keyword">new</span> <span class="code-function">VeniceAI</span>({ <span class="code-variable">apiKey</span>: <span class="code-string">'your-api-key'</span> });
+
+<span class="code-comment">// CLI-style with string arguments (just like the terminal)</span>
+<span class="code-keyword">const</span> <span class="code-variable">styles</span> = <span class="code-keyword">await</span> <span class="code-variable">venice</span>.<span class="code-function">cli</span>(<span class="code-string">'list-styles --limit 5'</span>);
+<span class="code-function">console</span>.<span class="code-function">log</span>(`Found ${<span class="code-variable">styles</span>.<span class="code-variable">total</span>} styles`);
+
+<span class="code-comment">// Chat with web search</span>
+<span class="code-keyword">const</span> <span class="code-variable">response</span> = <span class="code-keyword">await</span> <span class="code-variable">venice</span>.<span class="code-function">cli</span>(<span class="code-string">'chat "Tell me about AI" --web-search'</span>);
+<span class="code-function">console</span>.<span class="code-function">log</span>(<span class="code-variable">response</span>);
+
+<span class="code-comment">// Generate an image</span>
+<span class="code-keyword">const</span> <span class="code-variable">image</span> = <span class="code-keyword">await</span> <span class="code-variable">venice</span>.<span class="code-function">cli</span>(<span class="code-string">'generate-image "A beautiful sunset" --style Photographic --output sunset.png'</span>);
+<span class="code-function">console</span>.<span class="code-function">log</span>(`Image saved to: ${<span class="code-variable">image</span>.<span class="code-variable">savedTo</span>}`);</pre>
+                </div>
+            </div>
+        </div>
+        
+        <h3 class="mb-4 mt-5">Full SDK API</h3>
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="code-block">
+                    <pre><span class="code-comment">// Import the SDK</span>
+<span class="code-keyword">const</span> { <span class="code-variable">VeniceAI</span> } = <span class="code-function">require</span>(<span class="code-string">'venice-dev-tools'</span>);
+
+<span class="code-comment">// Initialize the client</span>
+<span class="code-keyword">const</span> <span class="code-variable">venice</span> = <span class="code-keyword">new</span> <span class="code-function">VeniceAI</span>({ <span class="code-variable">apiKey</span>: <span class="code-string">'your-api-key'</span> });
+
+<span class="code-comment">// Generate a chat completion</span>
+<span class="code-keyword">const</span> <span class="code-variable">response</span> = <span class="code-keyword">await</span> <span class="code-variable">venice</span>.<span class="code-variable">chat</span>.<span class="code-variable">completions</span>.<span class="code-function">create</span>({
+  <span class="code-variable">model</span>: <span class="code-string">'llama-3.3-70b'</span>,
+  <span class="code-variable">messages</span>: [
+    { <span class="code-variable">role</span>: <span class="code-string">'system'</span>, <span class="code-variable">content</span>: <span class="code-string">'You are a helpful assistant'</span> },
+    { <span class="code-variable">role</span>: <span class="code-string">'user'</span>, <span class="code-variable">content</span>: <span class="code-string">'Tell me about AI'</span> }
+  ],
+  <span class="code-variable">venice_parameters</span>: {
+    <span class="code-variable">enable_web_search</span>: <span class="code-string">'on'</span>
+  }
+});
+
+<span class="code-function">console</span>.<span class="code-function">log</span>(<span class="code-variable">response</span>.<span class="code-variable">choices</span>[0].<span class="code-variable">message</span>.<span class="code-variable">content</span>);</pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>Venice Dev Tools</h4>
+                    <p>A comprehensive SDK for the Venice AI API</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <div class="footer-links">
+                        <a href="https://github.com/georgeglarson/venice-dev-tools" target="_blank">GitHub</a>
+                        <a href="https://www.npmjs.com/package/venice-dev-tools" target="_blank">npm</a>
+                        <a href="https://venice.ai" target="_blank">Venice AI</a>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-12 text-center">
+                    <p class="mb-0">&copy; 2025 Venice Dev Tools. MIT License.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
