@@ -2,6 +2,14 @@
   "name": "veniceai-sdk",
   "version": "1.3.0",
   "description": "A comprehensive SDK for the Venice AI API with CLI support, programmatic CLI usage, and CLI-style interface",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/georgeglarson/venice-dev-tools.git"
+  },
+  "homepage": "https://github.com/georgeglarson/venice-dev-tools#readme",
+  "bugs": {
+    "url": "https://github.com/georgeglarson/venice-dev-tools/issues"
+  },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
