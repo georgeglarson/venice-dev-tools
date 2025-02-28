@@ -75,7 +75,7 @@ program
       console.table(response.keys.map((key: any) => ({
         id: key.id,
         name: key.name || key.description,
-        created: new Date(key.created_at * 1000).toLocaleString()
+        created: key.createdAt ? new Date(key.createdAt).toLocaleString() : 'N/A'
       })));
     } catch (error) {
       console.error('Error:', (error as Error).message);
