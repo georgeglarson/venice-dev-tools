@@ -114,9 +114,11 @@ export class HttpClient {
       };
     }
 
-    // Handle streaming
+    // Handle streaming and responseType
     if (params.stream) {
       config.responseType = 'stream';
+    } else if (params.responseType) {
+      config.responseType = params.responseType;
     }
 
     try {
@@ -140,7 +142,7 @@ export class HttpClient {
 
   /**
    * Handles successful responses
-   * 
+   *
    * @param response - Axios response
    * @returns Response data
    */
@@ -156,14 +158,36 @@ export class HttpClient {
     // Extract balance information from headers
     const balanceInfo = this.extractBalanceInfo(response);
 
-    // Attach metadata to response
-    response.data = {
-      ...response.data,
-      _metadata: {
-        rateLimit: rateLimitInfo,
-        balance: balanceInfo,
-      },
-    };
+    // Check if the response is binary data (Buffer or ArrayBuffer)
+    const isBinaryResponse =
+      response.data instanceof Buffer ||
+      response.data instanceof ArrayBuffer ||
+      (response.config?.responseType === 'arraybuffer');
+
+    if (isBinaryResponse) {
+      // For binary responses, wrap the data in an object with the binary property
+      // and add metadata without modifying the original binary data
+      const binaryData = Buffer.isBuffer(response.data)
+        ? response.data
+        : Buffer.from(response.data);
+      
+      response.data = {
+        binary: binaryData,
+        _metadata: {
+          rateLimit: rateLimitInfo,
+          balance: balanceInfo,
+        },
+      };
+    } else {
+      // For JSON responses, add metadata to the existing object
+      response.data = {
+        ...response.data,
+        _metadata: {
+          rateLimit: rateLimitInfo,
+          balance: balanceInfo,
+        },
+      };
+    }
 
     return response;
   }

@@ -76,6 +76,17 @@ export class ImageUpscaleResource extends BaseResource {
       });
     }
 
-    return this.post<UpscaleImageResponse>('/image/upscale', params);
+    // Determine if we should return binary data
+    const returnBinary = params.return_binary === true;
+
+    if (returnBinary) {
+      // Request binary data directly
+      return this.post<UpscaleImageResponse>('/image/upscale', params, {
+        responseType: 'arraybuffer'
+      });
+    } else {
+      // Standard JSON response
+      return this.post<UpscaleImageResponse>('/image/upscale', params);
+    }
   }
 }
