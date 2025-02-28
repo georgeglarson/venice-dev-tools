@@ -8,7 +8,7 @@ This SDK stands out with exceptional developer experience, robust error handling
 
 ### Privacy-First Approach
 
-[Venice AI](https://venice.ai/chat?ref=VB8W1j) offers unparalleled privacy advantages over other AI providers:
+[Venice AI](https://venice.ai/sign-up?ref=VB8W1j) offers unparalleled privacy advantages over other AI providers:
 
 - **No Data Storage**: Your prompts, responses, and generated content are never saved on any Venice infrastructure
 - **Local Storage Only**: Your conversation history lives in your local browser - clear your browser data, and those conversations are gone forever
@@ -70,7 +70,7 @@ For development:
 
 ## Authentication
 
-The Venice AI SDK requires an API key for authentication. You can obtain an API key from the [Venice AI website](https://venice.ai/settings/api).
+The Venice AI SDK requires an API key for authentication. You can obtain an API key from the [Venice AI website](https://venice.ai/settings/api?ref=VB8W1j).
 
 ```javascript
 const venice = new VeniceAI({
@@ -80,7 +80,7 @@ const venice = new VeniceAI({
 
 ## Quick Start
 
-First, [create a Venice AI account](https://venice.ai/chat?ref=VB8W1j) to get your API key.
+First, [create a Venice AI account](https://venice.ai/sign-up?ref=VB8W1j) to get your API key.
 
 ```javascript
 import { VeniceAI } from 'venice-dev-tools';
