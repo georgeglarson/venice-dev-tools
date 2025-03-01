@@ -1,85 +1,18 @@
 {
-  "name": "venice-dev-tools",
-  "version": "1.5.2",
-  "description": "A comprehensive SDK for the Venice AI API with CLI support, programmatic CLI usage, CLI-style interface, and interactive demo",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/georgeglarson/venice-dev-tools.git"
-  },
-  "homepage": "https://georgeglarson.github.io/venice-dev-tools/",
-  "bugs": {
-    "url": "https://github.com/georgeglarson/venice-dev-tools/issues"
-  },
-  "keywords": [
-    "venice",
-    "ai",
-    "sdk",
-    "cli",
-    "api",
-    "client",
-    "chat",
-    "image",
-    "generation",
-    "llm",
-    "apl",
-    "streaming",
-    "web3",
-    "command-line",
-    "artificial-intelligence",
-    "machine-learning",
-    "openai-alternative",
-    "text-generation",
-    "image-generation"
-  ],
-  "author": "George Larson",
-  "license": "MIT",
-  "publishConfig": {
-    "access": "public"
-  },
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "bin": {
-    "venice": "dist/cli.js"
-  },
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE"
-  ],
-  "scripts": {
-    "build": "tsc && chmod +x dist/cli.js",
-    "clean": "rimraf dist",
-    "prebuild": "npm run clean",
-    "prepare": "npm run build",
-    "postinstall": "node -e \"try { require('fs').chmodSync(require.resolve('./dist/cli.js'), '755') } catch (e) { console.error('Failed to set CLI permissions:', e) }\"",
-    "test": "jest",
-    "lint": "eslint src --ext .ts",
-    "format": "prettier --write \"src/**/*.ts\"",
-    "docs": "typedoc --out docs src",
-    "examples": "node examples/index.js",
-    "postman:fetch": "node scripts/postman/fetch-collection.js",
-    "postman:extract": "node scripts/postman/fetch-collection.js --extract"
-  },
-  "dependencies": {
-    "axios": "^1.8.1",
-    "canvas": "^3.1.0",
-    "commander": "^13.1.0",
-    "form-data": "^4.0.2"
-  },
-  "devDependencies": {
-    "@types/jest": "^29.5.12",
-    "@types/node": "^20.11.19",
-    "@typescript-eslint/eslint-plugin": "^7.0.1",
-    "@typescript-eslint/parser": "^7.0.1",
-    "eslint": "^8.56.0",
-    "jest": "^29.7.0",
-    "prettier": "^3.2.5",
-    "rimraf": "^5.0.5",
-    "ts-jest": "^29.1.2",
-    "typedoc": "^0.25.8",
-    "typescript": "^5.3.3"
-  },
-  "engines": {
-    "node": ">=14.0.0"
-  }
+    "name": "venice-dev-tools",
+    "version": "1.6.0",
+    "description": "A comprehensive SDK for the Venice AI API",
+    "main": "src/index.ts",
+    "scripts": {
+        "build": "webpack",
+        "start": "webpack serve"
+    },
+    "dependencies": {
+        "typescript": "^5.3.3"
+    },
+    "devDependencies": {
+        "webpack": "^5.89.0",
+        "webpack-cli": "^5.1.4",
+        "ts-loader": "^9.5.1"
+    }
 }
