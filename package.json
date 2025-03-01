@@ -1,14 +1,14 @@
 {
-  "name": "venice-ai-sdk-apl",
-  "version": "1.5.0",
+  "name": "venice-dev-tools",
+  "version": "1.5.1",
   "description": "A comprehensive SDK for the Venice AI API with CLI support, programmatic CLI usage, CLI-style interface, and interactive demo",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/venice-ai/venice-ai-sdk-apl.git"
+    "url": "git+https://github.com/georgeglarson/venice-dev-tools.git"
   },
-  "homepage": "https://venice-ai.github.io/venice-ai-sdk-apl/",
+  "homepage": "https://georgeglarson.github.io/venice-dev-tools/",
   "bugs": {
-    "url": "https://github.com/venice-ai/venice-ai-sdk-apl/issues"
+    "url": "https://github.com/georgeglarson/venice-dev-tools/issues"
   },
   "keywords": [
     "venice",
