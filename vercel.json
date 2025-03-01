@@ -1,10 +1,8 @@
 {
   "version": 2,
-  "builds": [
-    { "src": "docs/**/*", "use": "@vercel/static" }
-  ],
+  "buildCommand": "mkdir -p public && cp -r docs/* public/",
+  "outputDirectory": "public",
   "routes": [
-    { "src": "/(.*)", "dest": "/docs/$1" }
-  ],
-  "outputDirectory": "docs"
+    { "src": "/(.*)", "dest": "/$1" }
+  ]
 }
