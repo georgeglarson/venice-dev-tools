@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Venice AI SDK Documentation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 40px;
+            max-width: 800px;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #3498db;
+            margin-top: 30px;
+        }
+        p {
+            margin-bottom: 20px;
+        }
+        code {
+            background-color: #f8f8f8;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        pre {
+            background-color: #f8f8f8;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Venice AI SDK Documentation</h1>
+    
+    <h2>Introduction</h2>
+    <p>
+        The Venice AI SDK provides a comprehensive set of tools for interacting with the Venice AI API.
+        This document outlines the key features and capabilities of the SDK, with a focus on character
+        interactions and document analysis.
+    </p>
+    
+    <h2>Character Interactions</h2>
+    <p>
+        One of the most powerful features of the Venice AI SDK is the ability to interact with predefined
+        AI characters. These characters have unique personalities, knowledge bases, and conversational styles,
+        making them ideal for specialized use cases.
+    </p>
+    
+    <p>
+        Characters can be used in various contexts, including:
+    </p>
+    <ul>
+        <li>Customer service chatbots</li>
+        <li>Educational assistants</li>
+        <li>Entertainment applications</li>
+        <li>Specialized domain experts</li>
+    </ul>
+    
+    <h2>Document Analysis</h2>
+    <p>
+        The SDK now supports document analysis capabilities, allowing characters to analyze and interpret
+        various file types, including:
+    </p>
+    <ul>
+        <li>PDF documents</li>
+        <li>Images (JPG, PNG, GIF, WebP)</li>
+        <li>Vector graphics (SVG)</li>
+    </ul>
+    
+    <p>
+        This feature enables powerful use cases such as:
+    </p>
+    <ul>
+        <li>Extracting information from business documents</li>
+        <li>Analyzing charts and graphs</li>
+        <li>Interpreting technical diagrams</li>
+        <li>Summarizing research papers</li>
+    </ul>
+    
+    <h2>Code Example</h2>
+    <pre><code>
+// Analyze a PDF with a character
+const fs = require('fs');
+const pdfBuffer = fs.readFileSync('document.pdf');
+const base64Pdf = pdfBuffer.toString('base64');
+
+const response = await venice.chat.completions.create({
+  model: "qwen-2.5-vl",
+  messages: [
+    { 
+      role: "user", 
+      content: [
+        { type: "text", text: "Summarize this document" },
+        { type: "image_url", image_url: { url: `data:application/pdf;base64,${base64Pdf}` } }
+      ] 
+    }
+  ],
+  venice_parameters: {
+    character_slug: "professor"
+  }
+});
+    </code></pre>
+    
+    <h2>Conclusion</h2>
+    <p>
+        The Venice AI SDK continues to evolve with new features and capabilities. The addition of
+        document analysis to character interactions represents a significant enhancement to the platform,
+        enabling more sophisticated AI applications across various domains.
+    </p>
+    
+    <p>
+        For more information, please refer to the official documentation or contact the Venice AI support team.
+    </p>
+</body>
+</html>
