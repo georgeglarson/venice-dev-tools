@@ -2,13 +2,19 @@
 
 A comprehensive, fully-featured SDK for the Venice AI API with CLI support, programmatic CLI usage, CLI-style interface, and an interactive live demo.
 
+## Documentation
+
+For comprehensive documentation, visit our [GitHub Pages documentation site](https://venice-ai.github.io/venice-ai-sdk-apl/).
+
+For the official Venice AI platform, visit [Venice AI](https://venice.ai/).
+
 ## CLI Quick Start
 
 Get started with the Venice AI CLI in seconds:
 
 ```bash
 # Install globally
-npm install -g venice-dev-tools
+npm install -g venice-ai-sdk-apl
 
 # Configure your API key
 venice configure
@@ -21,6 +27,10 @@ venice generate-image "A beautiful sunset" --output sunset.png
 
 # List available models
 venice list-models
+
+# List and interact with characters
+venice list-characters
+venice chat "Tell me about yourself" --model character:sophia-sophie-daniels
 ```
 
 ### Key CLI Commands
@@ -32,6 +42,8 @@ venice list-models
 | `venice generate-image <prompt>` | Generate an image |
 | `venice list-models` | List available models |
 | `venice list-styles` | List available image styles |
+| `venice list-characters` | List available AI characters |
+| `venice chat <prompt> --model character:<slug>` | Chat with a specific character |
 | `venice list-keys` | List your API keys |
 
 ### Advanced CLI Options
@@ -40,12 +52,16 @@ venice list-models
 # Chat with web search enabled
 venice chat "What's happening in the world today?" --web-search
 
+# Chat with a specific character
+venice chat "Tell me about philosophy" --model character:alan-watts
+
 # Generate an image with specific parameters
 venice generate-image "A futuristic city" --model fluently-xl --style "3D Model" --width 1024 --height 768
 
 # Get raw JSON output (useful for scripting)
 venice list-models --raw > models.json
 venice chat "Hello" --raw | jq .choices[0].message.content
+venice list-characters --raw | jq '.data[0].slug'
 ```
 
 ## JavaScript Quick Start
@@ -53,7 +69,7 @@ venice chat "Hello" --raw | jq .choices[0].message.content
 First, [create a Venice AI account](https://venice.ai/sign-up?ref=VB8W1j) to get your API key.
 
 ```javascript
-import { VeniceAI } from 'venice-dev-tools';
+import { VeniceAI } from 'venice-ai-sdk-apl';
 
 // Initialize the client
 const venice = new VeniceAI({
@@ -76,6 +92,30 @@ async function generateChatCompletion() {
   console.log(response.choices[0].message.content);
 }
 
+// Chat with a character
+async function chatWithCharacter() {
+  // Option 1: Using character_slug parameter
+  const response = await venice.chat.completions.create({
+    model: 'default',
+    messages: [
+      { role: 'user', content: 'Tell me about philosophy' }
+    ],
+    venice_parameters: {
+      character_slug: 'alan-watts'
+    }
+  });
+  
+  // Option 2: Using model parameter with character: prefix
+  const response2 = await venice.chat.completions.create({
+    model: 'character:alan-watts',
+    messages: [
+      { role: 'user', content: 'Tell me about philosophy' }
+    ]
+  });
+  
+  console.log(response.choices[0].message.content);
+}
+
 generateChatCompletion();
 ```
 
@@ -86,12 +126,12 @@ generateChatCompletion();
 npm install venice-dev-tools
 
 # Or install globally to use the CLI
-npm install -g venice-dev-tools
+npm install -g venice-ai-sdk-apl
 ```
 
 ## Live Demo
 
-Try out the Venice AI SDK without an API key using our [interactive live demo](https://georgeglarson.github.io/venice-dev-tools/).
+Try out the Venice AI SDK without an API key using our [interactive live demo](https://venice-ai.github.io/venice-ai-sdk-apl/).
 
 ## Features
 
@@ -99,7 +139,9 @@ Try out the Venice AI SDK without an API key using our [interactive live demo](h
 - **Image Generation**: Create images with various models and styles
 - **Image Upscaling**: Enhance image resolution
 - **Models Management**: List models, traits, and compatibility mappings
+- **Character Management**: List and interact with pre-defined AI characters
 - **API Key Management**: Create, list, delete, and check rate limits for API keys
+- **VVV Token Information**: Get circulating supply, network utilization, and staking yield
 - **Web3 Integration**: Generate API keys using Web3 wallets
 - **Command Line Interface**: Interact with the API directly from your terminal
 - **Error Handling**: Comprehensive error handling with specific error classes
@@ -447,7 +489,7 @@ The SDK provides two ways to use CLI commands in your code:
 The most intuitive approach that mirrors the CLI syntax exactly:
 
 ```javascript
-import { VeniceAI } from 'venice-dev-tools';
+import { VeniceAI } from 'venice-ai-sdk-apl';
 
 const venice = new VeniceAI({ apiKey: 'your-api-key' });
 
@@ -485,7 +527,7 @@ main();
 An alternative approach using the command object:
 
 ```javascript
-import { cli } from 'venice-dev-tools';
+import { cli } from 'venice-ai-sdk-apl';
 
 // Use the commands object
 async function main() {
@@ -532,15 +574,21 @@ These approaches allow developers to:
 
 For more examples, check out the [examples](./examples) directory:
 
-- [Basic Chat](./examples/chat/basic-chat.js)
-- [Streaming Chat](./examples/chat/streaming.js)
-- [Web Search Chat](./examples/chat/web-search.js)
-- [Generate Image](./examples/image/generate-image.js)
-- [List Models](./examples/models/list-models.js)
-- [Manage API Keys](./examples/api-keys/manage-keys.js)
-- [Debug Logging](./examples/debug-logging.js)
-- [CLI-Style Interface](./examples/cli-style.js)
-- [Programmatic CLI Usage](./examples/cli-programmatic.js)
+- [Basic Chat](https://github.com/venice-ai/venice-ai-sdk-apl/blob/main/examples/chat/basic-chat.js)
+- [Streaming Chat](https://github.com/venice-ai/venice-ai-sdk-apl/blob/main/examples/chat/streaming.js)
+- [Web Search Chat](https://github.com/venice-ai/venice-ai-sdk-apl/blob/main/examples/chat/web-search.js)
+- [Document Vision Chat](https://github.com/venice-ai/venice-ai-sdk-apl/blob/main/examples/chat/document-vision-chat.js)
+- [Generate Image](https://github.com/venice-ai/venice-ai-sdk-apl/blob/main/examples/image/generate-image.js)
+- [Advanced Image Generation](https://github.com/venice-ai/venice-ai-sdk-apl/blob/main/examples/image/advanced-image-generation.js)
+- [List Models](https://github.com/venice-ai/venice-ai-sdk-apl/blob/main/examples/models/list-models.js)
+- [Model Compatibility](https://github.com/venice-ai/venice-ai-sdk-apl/blob/main/examples/models/model-compatibility.js)
+- [Manage API Keys](https://github.com/venice-ai/venice-ai-sdk-apl/blob/main/examples/api-keys/manage-keys.js)
+- [VVV Token Information](https://github.com/venice-ai/venice-ai-sdk-apl/blob/main/examples/vvv/vvv-info.js)
+- [Character Interaction](https://github.com/venice-ai/venice-ai-sdk-apl/blob/main/examples/characters/character-chat.js)
+- [CLI Character Interaction](https://github.com/venice-ai/venice-ai-sdk-apl/blob/main/examples/cli-character-interaction.js)
+- [Debug Logging](https://github.com/venice-ai/venice-ai-sdk-apl/blob/main/examples/debug-logging.js)
+- [CLI-Style Interface](https://github.com/venice-ai/venice-ai-sdk-apl/blob/main/examples/cli-style.js)
+- [Programmatic CLI Usage](https://github.com/venice-ai/venice-ai-sdk-apl/blob/main/examples/cli-programmatic.js)
 
 ## Implementation Details
 
@@ -590,12 +638,14 @@ All features are now working correctly:
 | Image Styles | ✅ Working | Successfully retrieves and formats style information |
 | API Key Management | ✅ Working | Successfully lists, creates, and deletes API keys |
 | API Key Rate Limits | ✅ Working | Successfully retrieves rate limits for all models and specific models |
+| VVV Token Information | ✅ Working | Successfully retrieves circulating supply, network utilization, and staking yield |
+| Character Management | ✅ Working | Successfully lists and retrieves character information |
 
 ## Contact
 
 For questions or feedback about this SDK, contact:
-- Email: george.g.larson@gmail.com
-- Twitter: [@g3ologic](https://x.com/@g3ologic)
+- Email: support@venice.ai
+- Website: [venice.ai](https://venice.ai/contact)
 
 ## License
 
