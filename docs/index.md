@@ -8,8 +8,8 @@ title: Venice AI SDK Documentation
 Welcome to the Venice AI SDK documentation. This SDK provides a simple, intuitive interface for interacting with the Venice AI API.
 
 <div class="project-links">
-  <a href="https://github.com/venice-ai/venice-ai-sdk-apl" class="project-button">GitHub Repository</a>
-  <a href="https://venice.ai/" class="project-button">Venice AI Platform</a>
+  <a href="https://github.com/georgeglarson/venice-dev-tools" class="project-button">GitHub Repository</a>
+  <a href="https://venice.ai/?ref=VB8W1j" class="project-button">Venice AI Platform</a>
 </div>
 
 ## Command Line Interface
@@ -18,7 +18,7 @@ The Venice AI SDK includes a powerful command-line interface that allows you to 
 
 <div class="cli-highlight">
   <h3>Try our CLI for quick access to Venice AI capabilities</h3>
-  <pre><code>npm install -g venice-ai-sdk-apl
+  <pre><code>npm install -g venice-dev-tools
 venice chat "Tell me about AI"</code></pre>
   <a href="/venice-dev-tools/cli" class="cli-button">View CLI Documentation</a>
 </div>
@@ -28,13 +28,13 @@ venice chat "Tell me about AI"</code></pre>
 Install the Venice AI SDK using npm:
 
 ```bash
-npm install venice-ai-sdk-apl
+npm install venice-dev-tools
 ```
 
 Or install globally to use the CLI:
 
 ```bash
-npm install -g venice-ai-sdk-apl
+npm install -g venice-dev-tools
 ```
 
 ## Getting Started
@@ -42,7 +42,7 @@ npm install -g venice-ai-sdk-apl
 Here's a simple example to get you started:
 
 ```javascript
-import { VeniceAI } from 'venice-ai-sdk-apl';
+import { VeniceAI } from 'venice-dev-tools';
 
 // Initialize the client
 const venice = new VeniceAI({
@@ -71,7 +71,7 @@ generateChatCompletion();
 
 ## Authentication
 
-The Venice AI SDK requires an API key for authentication. You can obtain an API key from the [Venice AI website](https://venice.ai/settings/api).
+The Venice AI SDK requires an API key for authentication. You can obtain an API key from the [Venice AI website](https://venice.ai/settings/api?ref=VB8W1j).
 
 ```javascript
 const venice = new VeniceAI({
@@ -344,11 +344,11 @@ const venice = new VeniceAI({
 
 For more examples, check out the examples directory:
 
-- [Basic Chat](https://github.com/venice-ai/venice-ai-sdk-apl/blob/main/examples/chat/basic-chat.js)
-- [Streaming Chat](https://github.com/venice-ai/venice-ai-sdk-apl/blob/main/examples/chat/streaming.js)
-- [Web Search Chat](https://github.com/venice-ai/venice-ai-sdk-apl/blob/main/examples/chat/web-search.js)
-- [Generate Image](https://github.com/venice-ai/venice-ai-sdk-apl/blob/main/examples/image/generate-image.js)
-- [List Models](https://github.com/venice-ai/venice-ai-sdk-apl/blob/main/examples/models/list-models.js)
-- [Manage API Keys](https://github.com/venice-ai/venice-ai-sdk-apl/blob/main/examples/api-keys/manage-keys.js)
-- [Document Vision Chat](https://github.com/venice-ai/venice-ai-sdk-apl/blob/main/examples/chat/document-vision-chat.js)
-- [Character Chat](https://github.com/venice-ai/venice-ai-sdk-apl/blob/main/examples/characters/character-chat.js)
+- [Basic Chat](https://github.com/georgeglarson/venice-dev-tools/blob/main/examples/chat/basic-chat.js)
+- [Streaming Chat](https://github.com/georgeglarson/venice-dev-tools/blob/main/examples/chat/streaming.js)
+- [Web Search Chat](https://github.com/georgeglarson/venice-dev-tools/blob/main/examples/chat/web-search.js)
+- [Generate Image](https://github.com/georgeglarson/venice-dev-tools/blob/main/examples/image/generate-image.js)
+- [List Models](https://github.com/georgeglarson/venice-dev-tools/blob/main/examples/models/list-models.js)
+- [Manage API Keys](https://github.com/georgeglarson/venice-dev-tools/blob/main/examples/api-keys/manage-keys.js)
+- [Document Vision Chat](https://github.com/georgeglarson/venice-dev-tools/blob/main/examples/chat/document-vision-chat.js)
+- [Character Chat](https://github.com/georgeglarson/venice-dev-tools/blob/main/examples/characters/character-chat.js)
