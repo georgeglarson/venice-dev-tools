@@ -384,23 +384,51 @@ export const commands = {
         return response;
       }
       
-      const result = { url: response.images[0].url };
+      const image = response.images[0];
+      const result: any = {};
       
-      // If outputPath is provided, download the image
-      if (options.outputPath && response.images[0].url) {
-        await new Promise<void>((resolve, reject) => {
-          const file = fs.createWriteStream(options.outputPath!);
-          https.get(response.images[0].url!, function(response) {
-            response.pipe(file);
-            file.on('finish', () => {
-              resolve();
+      // Store image data in result
+      if (image.url) {
+        result.url = image.url;
+      }
+      if (image.b64_json) {
+        result.b64_json = image.b64_json;
+      }
+      if (image.binary) {
+        result.binary = image.binary;
+      }
+      
+      // If outputPath is provided, save the image
+      if (options.outputPath) {
+        if (image.url) {
+          // Download from URL
+          await new Promise<void>((resolve, reject) => {
+            const file = fs.createWriteStream(options.outputPath!);
+            https.get(image.url!, function(response) {
+              response.pipe(file);
+              file.on('finish', () => {
+                resolve();
+              });
+            }).on('error', (err) => {
+              reject(new Error(`Error downloading image: ${err.message}`));
             });
-          }).on('error', (err) => {
-            reject(new Error(`Error downloading image: ${err.message}`));
           });
-        });
+        } else if (image.b64_json) {
+          // Save base64 data
+          const imageData = image.b64_json.replace(/^data:image\/\w+;base64,/, '');
+          fs.writeFileSync(options.outputPath, Buffer.from(imageData, 'base64'));
+        } else if (image.binary) {
+          // Save binary data
+          fs.writeFileSync(options.outputPath, image.binary);
+        } else {
+          throw new Error('No image data returned from the API');
+        }
         
         return { ...result, savedTo: options.outputPath };
+      }
+      
+      if (Object.keys(result).length === 0) {
+        throw new Error('No image data returned from the API');
       }
       
       return result;
@@ -1234,25 +1262,38 @@ program
         // Output raw JSON for scripting
         console.log(JSON.stringify(response, null, 2));
       } else {
-        // Download the image
-        console.log('Downloading image...');
+        // Download or save the image
+        console.log('Saving image...');
         
-        const imageUrl = response.images[0].url;
+        const image = response.images[0];
         
-        if (!imageUrl) {
-          console.error('Error: No image URL returned from the API');
-          return;
-        }
-        
-        const file = fs.createWriteStream(options.output);
-        https.get(imageUrl, function(response) {
-          response.pipe(file);
-          file.on('finish', () => {
-            console.log(`Image saved to ${options.output}`);
+        if (image.url) {
+          // Download from URL
+          console.log('Downloading image from URL...');
+          const file = fs.createWriteStream(options.output);
+          https.get(image.url, function(response) {
+            response.pipe(file);
+            file.on('finish', () => {
+              console.log(`Image saved to ${options.output}`);
+            });
+          }).on('error', (err) => {
+            console.error('Error downloading image:', err.message);
           });
-        }).on('error', (err) => {
-          console.error('Error downloading image:', err.message);
-        });
+        } else if (image.b64_json) {
+          // Save base64 data
+          console.log('Saving base64 image data...');
+          const imageData = image.b64_json.replace(/^data:image\/\w+;base64,/, '');
+          fs.writeFileSync(options.output, Buffer.from(imageData, 'base64'));
+          console.log(`Image saved to ${options.output}`);
+        } else if (image.binary) {
+          // Save binary data
+          console.log('Saving binary image data...');
+          fs.writeFileSync(options.output, image.binary);
+          console.log(`Image saved to ${options.output}`);
+        } else {
+          console.error('Error: No image data returned from the API');
+          console.error('API Response:', JSON.stringify(response, null, 2));
+        }
       }
     } catch (error) {
       console.error('Error:', (error as Error).message);
