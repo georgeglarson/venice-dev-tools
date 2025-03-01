@@ -89,6 +89,11 @@ export interface RequestParams {
    * Request timeout in milliseconds (overrides client timeout)
    */
   timeout?: number;
+
+  /**
+   * Response type (e.g., 'arraybuffer', 'blob', 'document', 'json', 'text', 'stream')
+   */
+  responseType?: 'arraybuffer' | 'blob' | 'document' | 'json' | 'text' | 'stream';
 }
 
 /**
