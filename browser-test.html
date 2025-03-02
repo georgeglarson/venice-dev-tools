@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Venice AI Browser SDK Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    pre {
+      background-color: #f5f5f5;
+      padding: 10px;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+    button {
+      padding: 8px 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    input {
+      padding: 8px;
+      margin-bottom: 10px;
+      width: 300px;
+    }
+    .output {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Venice AI Browser SDK Test</h1>
+  
+  <div>
+    <label for="apiKey">API Key:</label>
+    <input type="text" id="apiKey" placeholder="Enter your Venice AI API key">
+  </div>
+  
+  <div>
+    <button id="listModels">List Models</button>
+    <button id="listImageModels">List Image Models</button>
+    <button id="testBrowserUtils">Test Browser Utils</button>
+  </div>
+  
+  <div class="output">
+    <h3>Output:</h3>
+    <pre id="output">Results will appear here...</pre>
+  </div>
+
+  <!-- Load the browser bundle -->
+  <script src="dist/browser-bundle.js"></script>
+  
+  <script>
+    // Initialize the client when the page loads
+    let veniceClient = null;
+    
+    // Helper function to display output
+    function displayOutput(data) {
+      document.getElementById('output').textContent = 
+        typeof data === 'object' ? JSON.stringify(data, null, 2) : data;
+    }
+    
+    // Helper function to get or create client
+    function getClient() {
+      const apiKey = document.getElementById('apiKey').value;
+      
+      if (!apiKey) {
+        displayOutput('Please enter an API key');
+        return null;
+      }
+      
+      if (!veniceClient) {
+        try {
+          veniceClient = VeniceAI.createClient({
+            apiKey: apiKey
+          });
+          console.log('Client created:', veniceClient);
+        } catch (error) {
+          displayOutput(`Error creating client: ${error.message}`);
+          return null;
+        }
+      }
+      
+      return veniceClient;
+    }
+    
+    // List all models
+    document.getElementById('listModels').addEventListener('click', async () => {
+      const client = getClient();
+      if (!client) return;
+      
+      try {
+        displayOutput('Loading models...');
+        const models = await client.models.list();
+        displayOutput(models);
+      } catch (error) {
+        displayOutput(`Error listing models: ${error.message}`);
+      }
+    });
+    
+    // List image models
+    document.getElementById('listImageModels').addEventListener('click', async () => {
+      const client = getClient();
+      if (!client) return;
+      
+      try {
+        displayOutput('Loading image models...');
+        const models = await client.models.list({ type: 'image' });
+        displayOutput(models);
+      } catch (error) {
+        displayOutput(`Error listing image models: ${error.message}`);
+      }
+    });
+    
+    // Test browser utilities
+    document.getElementById('testBrowserUtils').addEventListener('click', () => {
+      try {
+        const results = {
+          isBrowser: VeniceAI.browser.isBrowser,
+          pathJoin: VeniceAI.browser.path.join('folder', 'subfolder', 'file.txt'),
+          pathBasename: VeniceAI.browser.path.basename('/path/to/file.txt'),
+          eventEmitter: 'Testing EventEmitter...'
+        };
+        
+        // Test EventEmitter
+        const emitter = new VeniceAI.browser.EventEmitter();
+        let eventFired = false;
+        
+        emitter.on('test', (data) => {
+          eventFired = true;
+          results.eventData = data;
+        });
+        
+        emitter.emit('test', { message: 'Event works!' });
+        results.eventFired = eventFired;
+        
+        displayOutput(results);
+      } catch (error) {
+        displayOutput(`Error testing browser utilities: ${error.message}`);
+      }
+    });
+  </script>
+</body>
+</html>
