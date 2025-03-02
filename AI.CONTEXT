@@ -1,0 +1,241 @@
+# VENICE-SDK-AI-CONTEXT
+
+## SDK_STRUCTURE
+{sdk_name:"venice-dev-tools",version:"1.8.0",main_entry:"dist/bundle.js",types:"dist/index.d.ts",cli_entry:"dist/cli.js",primary_class:"VeniceAI",authentication:"apiKey",base_url:"https://api.venice.ai/api/v1"}
+
+## RESOURCES
+[
+  {name:"chat",endpoints:["completions"],methods:["create","createStream"],params:{model:"string",messages:"array",stream:"boolean",functions:"array",function_call:"string|object",venice_parameters:"object"}},
+  {name:"image",endpoints:["generate","styles","upscale"],methods:["generate","styles.list","upscale"],params:{model:"string",prompt:"string",negative_prompt:"string",style_preset:"string",height:"number",width:"number",image:"string|buffer",scale:"number"}},
+  {name:"models",endpoints:["list","traits","compatibility"],methods:["list","traits","compatibility"],params:{filter:"object"}},
+  {name:"apiKeys",endpoints:["list","create","delete","rateLimits"],methods:["list","create","delete","rateLimits","getModelRateLimits"],params:{id:"string",name:"string",model:"string"}},
+  {name:"characters",endpoints:["list"],methods:["list"],params:{limit:"number",offset:"number"}},
+  {name:"vvv",endpoints:["circulatingSupply","utilization","stakingYield"],methods:["circulatingSupply","utilization","stakingYield"],params:{}}
+]
+
+## INITIALIZATION
+```
+const { VeniceAI } = require('venice-dev-tools');
+const venice = new VeniceAI({ apiKey: 'YOUR_API_KEY' });
+```
+
+## CLI_USAGE
+{
+  command:"venice",
+  subcommands:[
+    {name:"configure",description:"Configure API key",usage:"venice configure"},
+    {name:"chat",description:"Generate chat completion",usage:"venice chat <prompt> [options]",options:["-m, --model <model>","-w, --web-search <mode>","-s, --system <system>","-i, --image <path>","--stream","--character <slug>"]},
+    {name:"vision-chat",description:"Chat with image input",usage:"venice vision-chat <prompt> -i <image> [options]"},
+    {name:"function-chat",description:"Chat with function calling",usage:"venice function-chat <prompt> [options]"},
+    {name:"generate-image",description:"Generate image",usage:"venice generate-image <prompt> [options]",options:["-m, --model <model>","-n, --negative <prompt>","-s, --style <style>","-h, --height <height>","-w, --width <width>","-o, --output <filename>"]},
+    {name:"upscale-image",description:"Upscale image",usage:"venice upscale-image <image> [options]",options:["-s, --scale <factor>","-o, --output <filename>"]},
+    {name:"list-styles",description:"List image styles",usage:"venice list-styles"},
+    {name:"list-models",description:"List available models",usage:"venice list-models [options]",options:["-t, --type <type>","-l, --limit <number>"]},
+    {name:"list-characters",description:"List available characters",usage:"venice list-characters [options]",options:["-l, --limit <number>"]},
+    {name:"list-keys",description:"List API keys",usage:"venice list-keys"},
+    {name:"create-key",description:"Create API key",usage:"venice create-key -n <name>"},
+    {name:"delete-key",description:"Delete API key",usage:"venice delete-key -i <id>"},
+    {name:"rate-limits",description:"Get rate limits",usage:"venice rate-limits [options]",options:["-m, --model <model>"]},
+    {name:"vvv-supply",description:"Get VVV circulating supply",usage:"venice vvv-supply"},
+    {name:"vvv-utilization",description:"Get VVV network utilization",usage:"venice vvv-utilization"},
+    {name:"vvv-yield",description:"Get VVV staking yield",usage:"venice vvv-yield"}
+  ],
+  global_options:["-d, --debug","Enable debug output","-r, --raw","Output raw JSON data"]
+}
+
+## ERROR_HANDLING
+{
+  error_types:[
+    {name:"ApiError",description:"General API error",properties:["message","status","data"]},
+    {name:"RateLimitError",description:"Rate limit exceeded",properties:["message","status","data","retryAfter"]},
+    {name:"ValidationError",description:"Invalid request parameters",properties:["message","status","data","validationErrors"]}
+  ],
+  error_handling:```
+try {
+  const response = await venice.chat.completions.create({...});
+} catch (error) {
+  if (error instanceof RateLimitError) {
+    console.error(`Rate limit exceeded. Retry after ${error.retryAfter} seconds`);
+  } else if (error instanceof ValidationError) {
+    console.error(`Validation error: ${error.validationErrors.join(', ')}`);
+  } else {
+    console.error(`API error: ${error.message}`);
+  }
+}
+  ```
+}
+
+## STREAMING
+{
+  streaming_chat:```
+const stream = await venice.chat.completions.createStream({
+  model: "llama-3.3-70b",
+  messages: [{ role: "user", content: "Hello" }],
+  stream: true
+});
+
+for await (const chunk of stream) {
+  process.stdout.write(chunk.choices[0]?.delta?.content || '');
+}
+  ```,
+  streaming_cli:"venice chat 'Hello' --stream"
+}
+
+## VISION_MODELS
+{
+  vision_models:["qwen-2.5-vl"],
+  vision_usage:```
+const response = await venice.chat.completions.create({
+  model: "qwen-2.5-vl",
+  messages: [
+    {
+      role: "user",
+      content: [
+        { type: "text", text: "What's in this image?" },
+        { type: "image_url", image_url: { url: "data:image/jpeg;base64,..." } }
+      ]
+    }
+  ]
+});
+  ```
+}
+
+## WEB_SEARCH
+{
+  web_search_modes:["on","off","auto"],
+  web_search_usage:```
+const response = await venice.chat.completions.create({
+  model: "llama-3.3-70b",
+  messages: [{ role: "user", content: "What's the latest news about AI?" }],
+  venice_parameters: { enable_web_search: "on" }
+});
+  ```
+}
+
+## FUNCTION_CALLING
+{
+  function_calling_usage:```
+const response = await venice.chat.completions.create({
+  model: "mistral-codestral-22b",
+  messages: [{ role: "user", content: "What's the weather in New York?" }],
+  functions: [
+    {
+      name: "get_weather",
+      description: "Get the current weather in a location",
+      parameters: {
+        type: "object",
+        properties: {
+          location: { type: "string", description: "The city and state" },
+          unit: { type: "string", enum: ["celsius", "fahrenheit"] }
+        },
+        required: ["location"]
+      }
+    }
+  ],
+  function_call: "auto"
+});
+  ```
+}
+
+## CHARACTER_INTERACTION
+{
+  character_usage:```
+const response = await venice.chat.completions.create({
+  model: "default",
+  messages: [{ role: "user", content: "Hello" }],
+  venice_parameters: { character_slug: "character-slug" }
+});
+  ```,
+  character_cli:"venice chat 'Hello' --character character-slug"
+}
+
+## IMAGE_GENERATION
+{
+  image_models:["fluently-xl","flux-dev","flux-dev-uncensored","pony-realism","stable-diffusion-3.5","lustify-sdxl"],
+  image_usage:```
+const response = await venice.image.generate({
+  model: "fluently-xl",
+  prompt: "A beautiful sunset over the ocean",
+  negative_prompt: "blurry, distorted",
+  style_preset: "photographic",
+  height: 1024,
+  width: 1024
+});
+  ```
+}
+
+## IMAGE_UPSCALING
+{
+  upscale_usage:```
+const response = await venice.image.upscale({
+  image: imageBase64,
+  scale: 2 // or 4
+});
+  ```
+}
+
+## API_KEY_MANAGEMENT
+{
+  api_key_usage:```
+// List API keys
+const keys = await venice.apiKeys.list();
+
+// Create API key
+const newKey = await venice.apiKeys.create({ name: "My API Key" });
+
+// Delete API key
+const result = await venice.apiKeys.delete({ id: "key_id" });
+
+// Get rate limits
+const limits = await venice.apiKeys.rateLimits();
+  ```
+}
+
+## VVV_TOKEN_INFO
+{
+  vvv_usage:```
+// Get circulating supply
+const supply = await venice.vvv.circulatingSupply();
+
+// Get network utilization
+const utilization = await venice.vvv.utilization();
+
+// Get staking yield
+const yield = await venice.vvv.stakingYield();
+  ```
+}
+
+## ENVIRONMENT_VARIABLES
+{
+  env_vars:[
+    {name:"VENICE_API_KEY",description:"API key for authentication",required:false,alternative:"Constructor option"}
+  ]
+}
+
+## INSTALLATION
+{
+  npm:"npm install venice-dev-tools",
+  yarn:"yarn add venice-dev-tools",
+  global_cli:"npm install -g venice-dev-tools"
+}
+
+## COMPATIBILITY
+{
+  node_versions:">=14.0.0",
+  browsers:["Chrome","Firefox","Safari","Edge"],
+  platforms:["Windows","macOS","Linux"]
+}
+
+## DEPENDENCIES
+[
+  {name:"axios",version:"^1.8.1",purpose:"HTTP client"},
+  {name:"commander",version:"^13.1.0",purpose:"CLI framework"},
+  {name:"form-data",version:"^4.0.2",purpose:"Multipart form data"},
+  {name:"typescript",version:"^5.3.3",purpose:"TypeScript support"}
+]
+
+## REPOSITORY
+{
+  github:"https://github.com/georgeglarson/venice-dev-tools",
+  npm:"https://www.npmjs.com/package/venice-dev-tools"
+}
