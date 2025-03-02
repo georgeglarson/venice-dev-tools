@@ -12,18 +12,11 @@ Welcome to the Venice AI SDK documentation. This SDK provides a simple, intuitiv
   <a href="https://venice.ai/?ref=VB8W1j" class="project-button">Venice AI Platform</a>
 </div>
 
-## Command Line Interface
+## Getting Started
 
-The Venice AI SDK includes a powerful command-line interface that allows you to interact with the Venice AI API directly from your terminal.
+The Venice AI SDK allows you to interact with the Venice AI API, which provides access to powerful AI models for text generation, image creation, and more.
 
-<div class="cli-highlight">
-  <h3>Try our CLI for quick access to Venice AI capabilities</h3>
-  <pre><code>npm install -g venice-dev-tools
-venice chat "Tell me about AI"</code></pre>
-  <a href="/venice-dev-tools/cli" class="cli-button">View CLI Documentation</a>
-</div>
-
-## Installation
+### Installation
 
 Install the Venice AI SDK using npm:
 
@@ -37,7 +30,23 @@ Or install globally to use the CLI:
 npm install -g venice-dev-tools
 ```
 
-## Getting Started
+### Authentication
+
+The Venice AI SDK requires an API key for authentication. You can obtain an API key from the [Venice AI website](https://venice.ai/settings/api?ref=VB8W1j).
+
+```javascript
+const venice = new VeniceAI({
+  apiKey: 'your-api-key',
+});
+```
+
+For CLI usage, configure your API key:
+
+```bash
+venice configure
+```
+
+### Basic Usage
 
 Here's a simple example to get you started:
 
@@ -56,11 +65,7 @@ async function generateChatCompletion() {
     messages: [
       { role: 'system', content: 'You are a helpful assistant' },
       { role: 'user', content: 'Tell me about AI' }
-    ],
-    venice_parameters: {
-      enable_web_search: 'on',
-      include_venice_system_prompt: true
-    }
+    ]
   });
   
   console.log(response.choices[0].message.content);
@@ -69,286 +74,110 @@ async function generateChatCompletion() {
 generateChatCompletion();
 ```
 
-## Authentication
+## Documentation Sections
 
-The Venice AI SDK requires an API key for authentication. You can obtain an API key from the [Venice AI website](https://venice.ai/settings/api?ref=VB8W1j).
-
-```javascript
-const venice = new VeniceAI({
-  apiKey: 'your-api-key',
-});
-```
-
-## API Resources
-
-The Venice AI SDK provides access to the following API resources:
-
-### Chat
-
-The Chat API allows you to generate text responses in a chat-like format.
-
-```javascript
-// Generate a chat completion
-const response = await venice.chat.completions.create({
-  model: 'llama-3.3-70b',
-  messages: [
-    { role: 'system', content: 'You are a helpful assistant' },
-    { role: 'user', content: 'Tell me about AI' }
-  ]
-});
-```
-
-#### Streaming
-
-You can also stream the response:
-
-```javascript
-const stream = await venice.chat.completions.create({
-  model: 'llama-3.3-70b',
-  messages: [
-    { role: 'system', content: 'You are a helpful assistant' },
-    { role: 'user', content: 'Tell me about AI' }
-  ],
-  stream: true
-});
-
-for await (const chunk of stream) {
-  process.stdout.write(chunk.choices[0]?.delta?.content || '');
-}
-```
-
-#### Web Search
-
-Enable web search to get up-to-date information:
-
-```javascript
-const response = await venice.chat.completions.create({
-  model: 'llama-3.3-70b',
-  messages: [
-    { role: 'system', content: 'You are a helpful assistant' },
-    { role: 'user', content: 'What are the latest developments in AI?' }
-  ],
-  venice_parameters: {
-    enable_web_search: 'on'
-  }
-});
-```
-
-### Image
-
-The Image API allows you to generate and manipulate images.
-
-#### Generate Images
-
-```javascript
-const response = await venice.image.generate({
-  model: 'fluently-xl',
-  prompt: 'A beautiful sunset over a mountain range',
-  negative_prompt: 'blurry, distorted, low quality',
-  style_preset: '3D Model',
-  height: 1024,
-  width: 1024
-});
-
-console.log(response.images[0].url);
-```
-
-#### Upscale Images
-
-```javascript
-const response = await venice.image.upscale({
-  model: 'upscale-model',
-  image: base64EncodedImage,
-  scale: 2
-});
-
-console.log(response.url);
-```
-
-#### List Image Styles
-
-```javascript
-const response = await venice.image.styles.list();
-
-console.log(response.styles);
-```
-
-### Models
-
-The Models API allows you to retrieve information about available models.
-
-#### List Models
-
-```javascript
-const response = await venice.models.list();
-
-console.log(response.data);
-```
-
-#### Get Model Traits
-
-```javascript
-const response = await venice.models.traits();
-
-console.log(response.traits);
-```
-
-#### Get Model Compatibility Mappings
-
-```javascript
-const response = await venice.models.compatibility();
-
-console.log(response.mappings);
-```
-
-### API Keys
-
-The API Keys API allows you to manage your API keys.
-
-#### List API Keys
-
-```javascript
-const response = await venice.apiKeys.list();
-
-console.log(response.keys);
-```
-
-#### Create API Key
-
-```javascript
-const response = await venice.apiKeys.create({
-  name: 'My New API Key'
-});
-
-console.log(response.key);
-```
-
-#### Delete API Key
-
-```javascript
-const response = await venice.apiKeys.delete({
-  id: 'api-key-id'
-});
-
-console.log(response.success);
-```
-
-#### Get API Key Rate Limits
-
-```javascript
-const response = await venice.apiKeys.rateLimits();
-
-console.log(response.rate_limits);
-```
-
-#### Generate API Key with Web3 Wallet
-
-```javascript
-// Get message to sign
-const messageResponse = await venice.apiKeys.web3.getMessage({
-  wallet_address: '0x1234567890abcdef1234567890abcdef12345678'
-});
-
-// Sign the message (using a Web3 wallet)
-const signature = await web3.eth.personal.sign(
-  messageResponse.message,
-  '0x1234567890abcdef1234567890abcdef12345678',
-  '' // Password
-);
-
-// Generate API key
-const keyResponse = await venice.apiKeys.web3.generateKey({
-  wallet_address: '0x1234567890abcdef1234567890abcdef12345678',
-  signature: signature,
-  name: 'My Web3 API Key'
-});
-
-console.log(keyResponse.key);
-```
-
-## Error Handling
-
-The Venice AI SDK provides detailed error information:
-
-```javascript
-try {
-  const response = await venice.chat.completions.create({
-    model: 'invalid-model',
-    messages: [
-      { role: 'user', content: 'Hello' }
-    ]
-  });
-} catch (error) {
-  console.error('Error:', error.message);
-  console.error('Error code:', error.code);
-  console.error('Status:', error.status);
+<div class="doc-sections">
+  <div class="doc-section">
+    <h3><a href="/venice-dev-tools/documentation/api-reference/">API Reference</a></h3>
+    <p>Detailed documentation for all API resources and endpoints.</p>
+    <ul>
+      <li><a href="/venice-dev-tools/documentation/api-reference/#chat">Chat API</a></li>
+      <li><a href="/venice-dev-tools/documentation/api-reference/#image">Image API</a></li>
+      <li><a href="/venice-dev-tools/documentation/api-reference/#models">Models API</a></li>
+      <li><a href="/venice-dev-tools/documentation/api-reference/#api-keys">API Keys</a></li>
+      <li><a href="/venice-dev-tools/documentation/api-reference/#characters">Characters</a></li>
+      <li><a href="/venice-dev-tools/documentation/api-reference/#vvv-token">VVV Token</a></li>
+    </ul>
+  </div>
   
-  if (error.rateLimitInfo) {
-    console.error('Rate limit exceeded. Try again after:', 
-      new Date(error.rateLimitInfo.reset * 1000).toLocaleString());
-  }
-}
-```
+  <div class="doc-section">
+    <h3><a href="/venice-dev-tools/cli">CLI Reference</a></h3>
+    <p>Documentation for the command-line interface.</p>
+    <ul>
+      <li>Installation and Configuration</li>
+      <li>Available Commands</li>
+      <li>Advanced Usage</li>
+      <li>Examples</li>
+    </ul>
+  </div>
+  
+  <div class="doc-section">
+    <h3><a href="/venice-dev-tools/documentation/advanced/">Advanced Topics</a></h3>
+    <p>Advanced usage and concepts.</p>
+    <ul>
+      <li><a href="/venice-dev-tools/documentation/advanced/#streaming-implementation">Streaming</a></li>
+      <li><a href="/venice-dev-tools/documentation/advanced/#error-handling">Error Handling</a></li>
+      <li><a href="/venice-dev-tools/documentation/advanced/#rate-limiting">Rate Limiting</a></li>
+      <li><a href="/venice-dev-tools/documentation/advanced/#debug-logging">Debug Logging</a></li>
+      <li><a href="/venice-dev-tools/documentation/advanced/#function-calling">Function Calling</a></li>
+      <li><a href="/venice-dev-tools/documentation/advanced/#vision-models">Vision Models</a></li>
+    </ul>
+  </div>
+  
+  <div class="doc-section">
+    <h3><a href="/venice-dev-tools/documentation/examples/">Examples</a></h3>
+    <p>Code examples for common use cases.</p>
+    <ul>
+      <li><a href="/venice-dev-tools/documentation/examples/#basic-chat">Basic Chat</a></li>
+      <li><a href="/venice-dev-tools/documentation/examples/#streaming-chat">Streaming Chat</a></li>
+      <li><a href="/venice-dev-tools/documentation/examples/#generate-image">Generate Image</a></li>
+      <li><a href="/venice-dev-tools/documentation/examples/#character-interaction">Character Interaction</a></li>
+      <li><a href="/venice-dev-tools/documentation/examples/#function-calling">Function Calling</a></li>
+    </ul>
+  </div>
+</div>
 
-## Rate Limiting
+## Special Features
 
-The Venice AI API has rate limits for different tiers:
+<div class="feature-sections">
+  <div class="feature-section">
+    <h3><a href="/venice-dev-tools/character-interaction">Character Interaction</a></h3>
+    <p>Learn how to interact with AI characters - predefined personalities that can enhance your conversational experiences.</p>
+  </div>
+  
+  <div class="feature-section">
+    <h3><a href="/venice-dev-tools/demo">Live Demo</a></h3>
+    <p>Try out the Venice AI SDK directly in your browser. No API key required!</p>
+  </div>
+  
+  <div class="feature-section">
+    <h3><a href="/venice-dev-tools/documentation/troubleshooting">Troubleshooting</a></h3>
+    <p>Common issues and solutions to help you resolve problems with the SDK.</p>
+  </div>
+</div>
 
-- **Explorer Tier**: Limited requests per minute and day
-- **Paid Tier**: Higher limits for paid users
+## Command Line Interface
 
-The SDK automatically includes rate limit information in the response metadata:
+<div class="cli-highlight">
+  <h3>Try our CLI for quick access to Venice AI capabilities</h3>
+  <pre><code>npm install -g venice-dev-tools
+venice chat "Tell me about AI"</code></pre>
+  <a href="/venice-dev-tools/cli" class="cli-button">View CLI Documentation</a>
+</div>
 
-```javascript
-const response = await venice.chat.completions.create({
-  model: 'llama-3.3-70b',
-  messages: [
-    { role: 'user', content: 'Hello' }
-  ]
-});
+## Features
 
-if (response._metadata?.rateLimit) {
-  console.log('Rate limit:', response._metadata.rateLimit);
-}
-```
+- **Chat Completions**: Generate text responses with streaming support and web search
+- **Image Generation**: Create images with various models and styles
+- **Image Upscaling**: Enhance image resolution
+- **Models Management**: List models, traits, and compatibility mappings
+- **Character Management**: List and interact with pre-defined AI characters
+- **API Key Management**: Create, list, delete, and check rate limits for API keys
+- **VVV Token Information**: Get circulating supply, network utilization, and staking yield
+- **Web3 Integration**: Generate API keys using Web3 wallets
+- **Command Line Interface**: Interact with the API directly from your terminal
+- **Error Handling**: Comprehensive error handling with specific error classes
+- **Rate Limiting**: Automatic rate limit tracking and handling
+- **Debug Logging**: Robust logging system with multiple log levels and runtime configuration
 
-## Advanced Usage
+## Privacy-First Approach
 
-### Model Feature Suffix
+[Venice AI](https://venice.ai/sign-up?ref=VB8W1j) offers unparalleled privacy advantages over other AI providers:
 
-You can use model feature suffixes to enable features:
+- **No Data Storage**: Your prompts, responses, and generated content are never saved on any Venice infrastructure
+- **Local Storage Only**: Your conversation history lives in your local browser - clear your browser data, and those conversations are gone forever
+- **Decentralized Processing**: Your requests are processed on decentralized GPUs without any identifying information
+- **Transient Processing**: Once a prompt is processed, it is purged from the GPU - nothing persists
+- **SSL Encryption**: All communication is secured using SSL encryption throughout the entire journey
 
-```javascript
-const response = await venice.chat.completions.create({
-  model: 'llama-3.3-70b:enable_web_search=on&include_venice_system_prompt=false',
-  messages: [
-    { role: 'user', content: 'What are the latest developments in AI?' }
-  ]
-});
-```
-
-### Custom Configuration
-
-You can customize the client configuration:
-
-```javascript
-const venice = new VeniceAI({
-  apiKey: 'your-api-key',
-  baseUrl: 'https://api.venice.ai/api/v1',
-  timeout: 60000, // 60 seconds
-  maxRetries: 3
-});
-```
-
-## Examples
-
-For more examples, check out the examples directory:
-
-- [Basic Chat](https://github.com/georgeglarson/venice-dev-tools/blob/main/examples/chat/basic-chat.js)
-- [Streaming Chat](https://github.com/georgeglarson/venice-dev-tools/blob/main/examples/chat/streaming.js)
-- [Web Search Chat](https://github.com/georgeglarson/venice-dev-tools/blob/main/examples/chat/web-search.js)
-- [Generate Image](https://github.com/georgeglarson/venice-dev-tools/blob/main/examples/image/generate-image.js)
-- [List Models](https://github.com/georgeglarson/venice-dev-tools/blob/main/examples/models/list-models.js)
-- [Manage API Keys](https://github.com/georgeglarson/venice-dev-tools/blob/main/examples/api-keys/manage-keys.js)
-- [Document Vision Chat](https://github.com/georgeglarson/venice-dev-tools/blob/main/examples/chat/document-vision-chat.js)
-- [Character Chat](https://github.com/georgeglarson/venice-dev-tools/blob/main/examples/characters/character-chat.js)
+As Venice states: **"You don't have to protect what you do not have."**

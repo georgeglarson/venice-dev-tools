@@ -1,53 +1,44 @@
-# GitHub Pages Setup Instructions
+# Venice AI SDK Documentation
 
-To properly configure GitHub Pages for this repository, follow these steps:
+This directory contains the GitHub Pages site for the Venice AI SDK documentation.
 
-1. Go to your GitHub repository
-2. Click on "Settings"
-3. Scroll down to the "GitHub Pages" section
-4. Under "Source", select "Deploy from a branch"
-5. Under "Branch", select "main" and "/docs" folder
-6. Click "Save"
+## Directory Structure
 
-After saving, GitHub will provide you with a URL where your site is published. It may take a few minutes for the changes to take effect.
+- **[_config.yml](_config.yml)**: Jekyll configuration file
+- **[_includes/](_includes/)**: Jekyll includes (navigation, etc.)
+- **[_layouts/](_layouts/)**: Jekyll layouts
+- **[assets/](assets/)**: CSS, JavaScript, and other assets
+- **[documentation/](documentation/)**: The actual documentation content
+  - **[api-reference/](documentation/api-reference/)**: API reference documentation
+  - **[advanced/](documentation/advanced/)**: Advanced topics
+  - **[examples/](documentation/examples/)**: Code examples
+  - **[troubleshooting.md](documentation/troubleshooting.md)**: Troubleshooting guide
+- **[character-interaction.md](character-interaction.md)**: Character interaction guide
+- **[cli.md](cli.md)**: CLI reference
+- **[demo.md](demo.md)**: Live demo
+- **[DEPLOYMENT.md](DEPLOYMENT.md)**: Deployment guide
+- **[index.md](index.md)**: Main documentation page
 
-## Troubleshooting
+## Building the Documentation Locally
 
-If you're experiencing styling issues:
+To build and test the documentation locally:
 
-1. Make sure all the files in the docs directory are properly committed and pushed
-2. Check that the branch and folder settings are correct
-3. Wait a few minutes for GitHub to rebuild the site
-4. Clear your browser cache or try in an incognito/private window
+```bash
+cd docs
+bundle install
+bundle exec jekyll serve
+```
 
-## Local Testing
+This will start a local server at `http://localhost:4000/venice-dev-tools/`.
 
-To test the site locally before pushing to GitHub:
+## Contributing to Documentation
 
-1. Install Jekyll and Bundler:
-   ```
-   gem install jekyll bundler
-   ```
+If you'd like to contribute to the documentation, please follow these guidelines:
 
-2. Navigate to the docs directory:
-   ```
-   cd docs
-   ```
+1. Use Markdown for all documentation files
+2. Follow the existing structure and style
+3. Include code examples where appropriate
+4. Test all code examples to ensure they work
+5. Update the navigation in `_includes/navigation.html` if adding new pages
 
-3. Create a Gemfile:
-   ```
-   echo "source 'https://rubygems.org'" > Gemfile
-   echo "gem 'github-pages', group: :jekyll_plugins" >> Gemfile
-   ```
-
-4. Install dependencies:
-   ```
-   bundle install
-   ```
-
-5. Run the local server:
-   ```
-   bundle exec jekyll serve
-   ```
-
-6. Open your browser to `http://localhost:4000`
+The actual documentation content is in the [documentation/](documentation/) directory. This separation helps keep the GitHub Pages files separate from the actual documentation content.
