@@ -21,7 +21,11 @@ module.exports = {
       {
         test: /\.ts$/,
         use: 'ts-loader',
-        exclude: /node_modules/,
+        exclude: [
+          /node_modules/,
+          /src\/cli\.ts$/, // Exclude CLI-specific code
+          /src\/server\.ts$/, // Exclude server-specific code
+        ],
       },
     ],
   },
@@ -51,6 +55,7 @@ module.exports = {
       "tty": false, // No browser equivalent
       "net": false, // No browser equivalent
       "dns": false, // No browser equivalent
+      "readline": false, // No browser equivalent
     }
   },
   plugins: [
@@ -67,6 +72,11 @@ module.exports = {
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
       'process.env.BROWSER': JSON.stringify(true),
+    }),
+    // Ignore Node.js specific imports
+    new webpack.IgnorePlugin({
+      resourceRegExp: /^(child_process|fs|readline|path)$/,
+      contextRegExp: /./,
     }),
   ],
   // Avoid bundling these modules and use the ones provided by the browser

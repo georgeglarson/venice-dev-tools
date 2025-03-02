@@ -8,7 +8,7 @@
  * @packageDocumentation
  */
 
-import { VeniceAI } from './client';
+import { VeniceAIBrowser } from './browser-client';
 import * as Types from './types';
 import * as Errors from './errors';
 import {
@@ -20,8 +20,8 @@ import {
   process
 } from './browser';
 
-// Export the main client
-export { VeniceAI };
+// Export the browser-compatible client
+export { VeniceAIBrowser };
 
 // Export types and errors for advanced usage
 export { Types, Errors };
@@ -53,8 +53,8 @@ export const browser = {
  * @returns Venice AI client instance
  */
 export function createClient(config: Partial<Types.ClientConfig>) {
-  return new VeniceAI(config);
+  return new VeniceAIBrowser(config);
 }
 
 // Export default client as the main export
-export default VeniceAI;
+export default VeniceAIBrowser;
