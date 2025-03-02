@@ -9,6 +9,8 @@
     },
     "scripts": {
         "build": "webpack && webpack --config webpack.cli.config.js && chmod +x dist/cli.js",
+        "build:browser": "webpack --config webpack.browser.config.js",
+        "build:all": "npm run build && npm run build:browser",
         "start": "webpack serve",
         "test": "./test/run-all-tests.sh"
     },
