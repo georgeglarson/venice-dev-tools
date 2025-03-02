@@ -25,8 +25,16 @@ WHY_VENICE_SDK.md
 # Test files
 tests/
 test-improvements.js
+test/
+test-upscale/
 *.test.ts
 *.spec.ts
 
 # Examples (keep them in the package)
 # examples/
+
+# Vercel API Proxy
+vercel-api-proxy/
+
+# Other large directories
+node_modules/
