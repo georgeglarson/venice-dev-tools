@@ -64,14 +64,35 @@
   <script src="dist/browser-bundle.js"></script>
   
   <script>
+    // Debug what's being exported
+    console.log('VeniceAI global:', window.VeniceAI);
+    console.log('VeniceAI properties:', Object.keys(window.VeniceAI || {}));
+    
     // Initialize the client when the page loads
     let veniceClient = null;
     
     // Helper function to display output
     function displayOutput(data) {
-      document.getElementById('output').textContent = 
+      document.getElementById('output').textContent =
         typeof data === 'object' ? JSON.stringify(data, null, 2) : data;
     }
+    
+    // Display the exported properties
+    document.addEventListener('DOMContentLoaded', () => {
+      try {
+        displayOutput({
+          'VeniceAI exists': !!window.VeniceAI,
+          'VeniceAI type': typeof window.VeniceAI,
+          'VeniceAI properties': Object.keys(window.VeniceAI || {}),
+          'VeniceAI.browser exists': !!(window.VeniceAI && window.VeniceAI.browser),
+          'VeniceAI.browser properties': window.VeniceAI && window.VeniceAI.browser ?
+            Object.keys(window.VeniceAI.browser) : 'N/A',
+          'VeniceAI.createClient exists': !!(window.VeniceAI && typeof window.VeniceAI.createClient === 'function')
+        });
+      } catch (error) {
+        displayOutput(`Error inspecting VeniceAI: ${error.message}`);
+      }
+    });
     
     // Helper function to get or create client
     function getClient() {
@@ -84,9 +105,19 @@
       
       if (!veniceClient) {
         try {
-          veniceClient = VeniceAI.createClient({
-            apiKey: apiKey
-          });
+          // Check if createClient exists
+          if (window.VeniceAI && typeof window.VeniceAI.createClient === 'function') {
+            veniceClient = window.VeniceAI.createClient({
+              apiKey: apiKey
+            });
+          } else if (typeof window.VeniceAI === 'function') {
+            // Try direct constructor
+            veniceClient = new window.VeniceAI({
+              apiKey: apiKey
+            });
+          } else {
+            throw new Error('VeniceAI client constructor not found');
+          }
           console.log('Client created:', veniceClient);
         } catch (error) {
           displayOutput(`Error creating client: ${error.message}`);
@@ -128,26 +159,53 @@
     // Test browser utilities
     document.getElementById('testBrowserUtils').addEventListener('click', () => {
       try {
-        const results = {
-          isBrowser: VeniceAI.browser.isBrowser,
-          pathJoin: VeniceAI.browser.path.join('folder', 'subfolder', 'file.txt'),
-          pathBasename: VeniceAI.browser.path.basename('/path/to/file.txt'),
-          eventEmitter: 'Testing EventEmitter...'
+        // Detailed inspection of the VeniceAI object
+        const veniceAIInfo = {
+          'VeniceAI exists': !!window.VeniceAI,
+          'VeniceAI type': typeof window.VeniceAI,
+          'VeniceAI constructor': window.VeniceAI && window.VeniceAI.name,
+          'VeniceAI properties': Object.keys(window.VeniceAI || {}),
+          'VeniceAI prototype': window.VeniceAI && Object.getOwnPropertyNames(window.VeniceAI.prototype || {})
         };
         
-        // Test EventEmitter
-        const emitter = new VeniceAI.browser.EventEmitter();
-        let eventFired = false;
+        // Check if browser property exists
+        if (window.VeniceAI && window.VeniceAI.browser) {
+          veniceAIInfo.browser = {
+            'type': typeof window.VeniceAI.browser,
+            'properties': Object.keys(window.VeniceAI.browser)
+          };
+          
+          // Try to use browser utilities if they exist
+          try {
+            if (typeof window.VeniceAI.browser.isBrowser !== 'undefined') {
+              veniceAIInfo.browser.isBrowser = window.VeniceAI.browser.isBrowser;
+            }
+            
+            if (window.VeniceAI.browser.path && typeof window.VeniceAI.browser.path.join === 'function') {
+              veniceAIInfo.browser.pathJoin = window.VeniceAI.browser.path.join('folder', 'subfolder', 'file.txt');
+            }
+            
+            if (window.VeniceAI.browser.EventEmitter) {
+              veniceAIInfo.browser.hasEventEmitter = true;
+              
+              // Test EventEmitter if it exists
+              const emitter = new window.VeniceAI.browser.EventEmitter();
+              let eventFired = false;
+              
+              emitter.on('test', (data) => {
+                eventFired = true;
+                veniceAIInfo.browser.eventData = data;
+              });
+              
+              emitter.emit('test', { message: 'Event works!' });
+              veniceAIInfo.browser.eventFired = eventFired;
+            }
+          } catch (browserError) {
+            veniceAIInfo.browserError = browserError.message;
+          }
+        }
         
-        emitter.on('test', (data) => {
-          eventFired = true;
-          results.eventData = data;
-        });
-        
-        emitter.emit('test', { message: 'Event works!' });
-        results.eventFired = eventFired;
-        
-        displayOutput(results);
+        displayOutput(veniceAIInfo);
       } catch (error) {
         displayOutput(`Error testing browser utilities: ${error.message}`);
       }
