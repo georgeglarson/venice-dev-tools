@@ -1,0 +1,9 @@
+{
+  "name": "test-upscale",
+  "version": "1.0.0",
+  "description": "Test for upscale functionality",
+  "main": "test-upscale-supported.js",
+  "dependencies": {
+    "dotenv": "^4.0.0"
+  }
+}

@@ -52,13 +52,6 @@ export class ImageUpscaleResource extends BaseResource {
    */
   public async upscale(params: UpscaleImageParams): Promise<UpscaleImageResponse> {
     // Validate required parameters
-    if (!params.model) {
-      throw new ValidationError({
-        message: 'Model is required',
-        field: 'model',
-      });
-    }
-
     if (!params.image) {
       throw new ValidationError({
         message: 'Image is required',

@@ -144,9 +144,9 @@ export interface GenerateImageResponse {
  */
 export interface UpscaleImageParams {
   /**
-   * ID of the model to use
+   * ID of the model to use (optional)
    */
-  model: string;
+  model?: string;
 
   /**
    * Base64-encoded image data
