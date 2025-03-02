@@ -307,7 +307,11 @@ export const commands = {
   listModels: async (options: { limit?: number; raw?: boolean; type?: string } = {}) => {
     try {
       const venice = getClient();
-      const response = await venice.models.list();
+      
+      // Use the type parameter if provided
+      const response = await venice.models.list(
+        options.type ? { type: options.type as 'all' | 'text' | 'code' | 'image' } : undefined
+      );
       
       if ((global as any).debug) {
         debugLog('List models response', response);
@@ -318,15 +322,19 @@ export const commands = {
         return response;
       }
       
-      // Map and potentially filter the models
-      let models = response.data.map((model: any) => ({
-        id: model.id,
-        name: model.name || model.id,
-        type: model.type || 'Unknown'
-      }));
+      // Map the models with enhanced information
+      let models = response.data.map((model: any) => {
+        return {
+          id: model.id,
+          name: model.name || model.id,
+          type: model.type || 'Unknown',
+          displayType: model.type || 'Unknown',
+          model_spec: model.model_spec
+        };
+      });
       
       // Filter by type if specified
-      if (options.type) {
+      if (options.type && options.type !== 'all') {
         models = models.filter(model =>
           model.type.toLowerCase() === options.type!.toLowerCase()
         );
@@ -890,47 +898,62 @@ program
   .option('-l, --limit <number>', 'Limit the number of models displayed')
   .action(async (options) => {
     try {
-      const venice = getClient();
-      const response = await venice.models.list();
+      // Log the request parameters for debugging
+      console.log(`DEBUG: Requesting models with type=${options.type}`);
       
-      debugLog('List models response', response);
-      
-      // Filter models by type if specified
-      let filteredModels = response.data;
-      if (options.type && options.type !== 'all') {
-        filteredModels = response.data.filter((model: any) =>
-          model.type && model.type.toLowerCase() === options.type.toLowerCase()
-        );
-      }
-      
-      // Apply limit if specified
-      let displayModels = [...filteredModels];
-      if (options.limit && !isNaN(parseInt(options.limit))) {
-        const limit = parseInt(options.limit);
-        displayModels = displayModels.slice(0, limit);
-      }
+      // Use the shared listModels implementation
+      const result = await commands.listModels({
+        type: options.type,
+        limit: options.limit ? parseInt(options.limit) : undefined,
+        raw: options.raw || (global as any).raw
+      });
       
       if ((global as any).raw || options.raw) {
         // Output raw JSON for scripting
-        console.log(JSON.stringify(response, null, 2));
+        console.log(JSON.stringify(result, null, 2));
       } else {
         // Pretty output for human consumption
         console.log('Available Models:');
-        console.log(`Total models: ${response.data.length}`);
         
-        if (filteredModels.length !== response.data.length) {
-          console.log(`Filtered to ${filteredModels.length} ${options.type} models`);
+        // Handle both raw API response and processed result
+        if ('data' in result) {
+          // This is a raw ListModelsResponse
+          console.log(`Total models: ${result.data.length}`);
+          
+          // Display the models with their types and traits
+          console.table(result.data.map((model: any) => {
+            return {
+              id: model.id,
+              name: model.name || model.id,
+              type: model.type || 'Unknown',
+              traits: model.model_spec && model.model_spec.traits ?
+                model.model_spec.traits.join(', ') : 'None'
+            };
+          }));
+        } else {
+          // This is a processed result from listModels
+          console.log(`Total models: ${result.total}`);
+          
+          if (result.filtered !== result.total) {
+            console.log(`Filtered to ${result.filtered} ${options.type} models`);
+          }
+          
+          // Add debug logging to see what's happening
+          if ((global as any).debug && options.type === 'image') {
+            console.log('Image models found:', result.models.map((m: any) => m.id).join(', '));
+          }
+          
+          // Display the models with their types and traits
+          console.table(result.models.map((model: any) => {
+            return {
+              id: model.id,
+              name: model.name || model.id,
+              type: model.displayType || model.type,
+              traits: model.model_spec && model.model_spec.traits ?
+                model.model_spec.traits.join(', ') : 'None'
+            };
+          }));
         }
-        
-        if (displayModels.length !== filteredModels.length) {
-          console.log(`Showing ${displayModels.length} of ${filteredModels.length} models`);
-        }
-        
-        console.table(displayModels.map((model: any) => ({
-          id: model.id,
-          name: model.name || model.id,
-          type: model.type || 'Unknown'
-        })));
       }
     } catch (error) {
       console.error('Error:', (error as Error).message);

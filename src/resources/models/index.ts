@@ -42,16 +42,22 @@ export class ModelsResource {
 
   /**
    * Lists available models
-   * 
+   *
+   * @param options - Options for listing models
+   * @param options.type - Filter models by type (all, text, code, image)
    * @returns Promise that resolves with the list of available models
-   * 
+   *
    * @example
    * ```typescript
-   * const response = await venice.models.list();
+   * // List all models
+   * const allModels = await venice.models.list();
+   *
+   * // List only image models
+   * const imageModels = await venice.models.list({ type: 'image' });
    * ```
    */
-  public list(): Promise<ListModelsResponse> {
-    return this.listResource.list();
+  public list(options?: { type?: 'all' | 'text' | 'code' | 'image' }): Promise<ListModelsResponse> {
+    return this.listResource.list(options);
   }
 
   /**
