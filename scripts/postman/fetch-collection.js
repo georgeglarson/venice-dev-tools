@@ -21,7 +21,14 @@ require('dotenv').config(); // Load environment variables from .env file
 const POSTMAN_API_URL = 'https://api.getpostman.com';
 // Load API key from environment variable to avoid secret scanning
 const POSTMAN_ENV_VAR = 'POSTMAN_API_KEY';
-const POSTMAN_AUTH_KEY = process.env[POSTMAN_ENV_VAR] || 'PMAK-67bbb048795e6c0001961807-8bff4d11df50e8674efec77ce3520fc074';
+const POSTMAN_AUTH_KEY = process.env[POSTMAN_ENV_VAR];
+
+// Check if API key is missing
+if (!POSTMAN_AUTH_KEY) {
+  console.warn(`Warning: ${POSTMAN_ENV_VAR} environment variable is not set. Some functionality may be limited.`);
+  console.warn('To use the Postman API, set the environment variable:');
+  console.warn('  export POSTMAN_API_KEY=your_api_key');
+}
 const VENICE_COLLECTION_ID = '38652128-d4701b00-292f-48a3-bfad-e26b7b6daaf9';
 
 // Output directories
@@ -37,11 +44,106 @@ if (!fs.existsSync(ENDPOINTS_DIR)) {
 }
 
 /**
+ * Creates a placeholder collection when the API key is missing
+ * @returns {Object} Placeholder collection object
+ */
+function createPlaceholderCollection() {
+  const placeholderCollection = {
+    info: {
+      name: "Venice AI API (Placeholder)",
+      description: "This is a placeholder for the actual Venice AI API collection. To get the real collection, visit https://www.postman.com/veniceai/venice-ai-workspace/",
+      schema: "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    item: [
+      {
+        name: "Image",
+        item: [
+          {
+            name: "Upscale Image",
+            request: {
+              method: "POST",
+              url: {
+                raw: "https://api.venice.ai/api/v1/image/upscale",
+                protocol: "https",
+                host: ["api", "venice", "ai"],
+                path: ["api", "v1", "image", "upscale"]
+              },
+              header: [
+                {
+                  key: "Authorization",
+                  value: "Bearer {{api_key}}",
+                  type: "text"
+                },
+                {
+                  key: "Content-Type",
+                  value: "multipart/form-data",
+                  type: "text"
+                }
+              ],
+              body: {
+                mode: "formdata",
+                formdata: [
+                  {
+                    key: "model",
+                    value: "upscale-model",
+                    type: "text"
+                  },
+                  {
+                    key: "scale",
+                    value: "2",
+                    description: "Scale factor (2 or 4)",
+                    type: "text"
+                  },
+                  {
+                    key: "image",
+                    type: "file",
+                    src: "/path/to/image.jpg"
+                  }
+                ]
+              },
+              description: "Upscales an image by a specified scale factor (2 or 4)"
+            },
+            response: []
+          }
+        ]
+      }
+    ]
+  };
+  
+  // Save the placeholder collection
+  const outputPath = path.join(COLLECTIONS_DIR, 'venice-placeholder.json');
+  fs.writeFileSync(outputPath, JSON.stringify(placeholderCollection, null, 2));
+  console.log(`Placeholder collection saved to: ${outputPath}`);
+  
+  return placeholderCollection;
+}
+
+/**
  * Fetches the Venice AI Postman collection
  */
 async function fetchCollection() {
   try {
     console.log('Fetching Venice AI Postman collection...');
+    
+    // Check if API key is available
+    if (!POSTMAN_AUTH_KEY) {
+      console.log('No Postman API key found. Checking for local collection file...');
+      
+      // Check if we already have a local copy
+      const localPath = path.join(COLLECTIONS_DIR, 'venice.json');
+      if (fs.existsSync(localPath)) {
+        console.log('Using existing local collection file.');
+        try {
+          const fileContent = fs.readFileSync(localPath, 'utf8');
+          return JSON.parse(fileContent);
+        } catch (readError) {
+          console.error(`Error reading local collection: ${readError.message}`);
+        }
+      }
+      
+      console.log('No local collection found. Using placeholder collection as fallback.');
+      return createPlaceholderCollection();
+    }
     
     // Use the Postman API to get the specific collection
     const headers = {
@@ -50,6 +152,7 @@ async function fetchCollection() {
     
     try {
       // Directly fetch the Venice collection using the collection ID
+      console.log(`Fetching collection ${VENICE_COLLECTION_ID} from Postman API...`);
       const collectionResponse = await axios.get(`${POSTMAN_API_URL}/collections/${VENICE_COLLECTION_ID}`, { headers });
       
       if (collectionResponse.data && collectionResponse.data.collection) {
@@ -85,77 +188,7 @@ async function fetchCollection() {
       }
       
       console.log('Using placeholder collection as fallback.');
-      
-      // Create a placeholder collection file as fallback
-      const placeholderCollection = {
-        info: {
-          name: "Venice AI API (Placeholder)",
-          description: "This is a placeholder for the actual Venice AI API collection. To get the real collection, visit https://www.postman.com/veniceai/venice-ai-workspace/",
-          schema: "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-        },
-        item: [
-          {
-            name: "Image",
-            item: [
-              {
-                name: "Upscale Image",
-                request: {
-                  method: "POST",
-                  url: {
-                    raw: "https://api.venice.ai/api/v1/image/upscale",
-                    protocol: "https",
-                    host: ["api", "venice", "ai"],
-                    path: ["api", "v1", "image", "upscale"]
-                  },
-                  header: [
-                    {
-                      key: "Authorization",
-                      value: "Bearer {{api_key}}",
-                      type: "text"
-                    },
-                    {
-                      key: "Content-Type",
-                      value: "multipart/form-data",
-                      type: "text"
-                    }
-                  ],
-                  body: {
-                    mode: "formdata",
-                    formdata: [
-                      {
-                        key: "model",
-                        value: "upscale-model",
-                        type: "text"
-                      },
-                      {
-                        key: "scale",
-                        value: "2",
-                        description: "Scale factor (2 or 4)",
-                        type: "text"
-                      },
-                      {
-                        key: "image",
-                        type: "file",
-                        src: "/path/to/image.jpg"
-                      }
-                    ]
-                  },
-                  description: "Upscales an image by a specified scale factor (2 or 4)"
-                },
-                response: []
-              }
-            ]
-          }
-        ]
-      };
-      
-      // Save the placeholder collection
-      const outputPath = path.join(COLLECTIONS_DIR, 'venice-ai-api-placeholder.json');
-      fs.writeFileSync(outputPath, JSON.stringify(placeholderCollection, null, 2));
-      console.log(`Placeholder collection saved to: ${outputPath}`);
-      
-      // Return the placeholder collection
-      return placeholderCollection;
+      return createPlaceholderCollection();
     }
   } catch (error) {
     console.error('Error fetching collection:', error.message);
