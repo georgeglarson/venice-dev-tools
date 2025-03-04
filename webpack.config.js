@@ -1,6 +1,6 @@
 const path = require('path');
 const webpack = require('webpack');
-const NodePolyfillPlugin = require('node-polyfill-webpack-plugin')
+const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 
 module.exports = {
     mode: 'development',
@@ -35,7 +35,22 @@ module.exports = {
             "fs": false,
             "path": false,
             "process": false,
-            "events": false
+            "events": false,
+            "https": require.resolve("https-browserify"),
+            "readline": false
+        },
+        alias: {
+            // Handle node: protocol imports
+            "node:child_process": false,
+            "node:fs": false,
+            "node:path": false,
+            "node:process": false,
+            "node:events": false,
+            "node:https": require.resolve("https-browserify"),
+            "node:readline": false
         }
-    }
+    },
+    plugins: [
+        new NodePolyfillPlugin()
+    ]
 };
