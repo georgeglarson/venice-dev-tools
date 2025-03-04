@@ -1,6 +1,6 @@
 {
      "name": "venice-dev-tools",
-     "version": "1.8.3",
+     "version": "1.8.4",
      "description": "A comprehensive SDK for the Venice AI API",
      "main": "dist/bundle.js",
      "types": "dist/index.d.ts",
