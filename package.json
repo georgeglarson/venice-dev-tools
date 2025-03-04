@@ -1,36 +1,38 @@
- {
-    "name": "venice-dev-tools",
-    "version": "1.8.1",
-    "description": "A comprehensive SDK for the Venice AI API",
-    "main": "dist/bundle.js",
-    "types": "dist/index.d.ts",
-    "bin": {
-        "venice": "./dist/cli.js"
-    },
-    "scripts": {
-        "build": "webpack && webpack --config webpack.cli.config.js && chmod +x dist/cli.js",
-        "start": "webpack serve",
-        "test": "./test/run-all-tests.sh"
-    },
-    "dependencies": {
-        "axios": "^1.8.1",
-        "commander": "^13.1.0",
-        "form-data": "^4.0.2",
-        "typescript": "^5.3.3"
-    },
-    "devDependencies": {
-        "buffer": "^6.0.3",
-        "debug": "^4.4.0",
-        "dotenv": "^16.4.7",
-        "https-browserify": "^1.0.0",
-        "node-polyfill-webpack-plugin": "^4.1.0",
-        "path-browserify": "^1.0.1",
-        "process": "^0.11.10",
-        "stream-http": "^3.2.0",
-        "ts-loader": "^9.5.1",
-        "url": "^0.11.4",
-        "util": "^0.12.5",
-        "webpack": "^5.89.0",
-        "webpack-cli": "^5.1.4"
-    }
+{
+     "name": "venice-dev-tools",
+     "version": "1.8.3",
+     "description": "A comprehensive SDK for the Venice AI API",
+     "main": "dist/bundle.js",
+     "types": "dist/index.d.ts",
+     "bin": {
+          "venice": "./dist/cli.js"
+     },
+     "scripts": {
+          "build": "webpack && webpack --config webpack.cli.config.js && chmod +x dist/cli.js",
+          "build:browser": "webpack --config webpack.browser.config.js",
+          "build:all": "npm run build && npm run build:browser",
+          "start": "webpack serve",
+          "test": "./test/run-all-tests.sh"
+     },
+     "dependencies": {
+          "axios": "^1.8.1",
+          "commander": "^13.1.0",
+          "form-data": "^4.0.2",
+          "typescript": "^5.3.3"
+     },
+     "devDependencies": {
+          "buffer": "^6.0.3",
+          "debug": "^4.4.0",
+          "dotenv": "^16.4.7",
+          "https-browserify": "^1.0.0",
+          "node-polyfill-webpack-plugin": "^4.1.0",
+          "path-browserify": "^1.0.1",
+          "process": "^0.11.10",
+          "stream-http": "^3.2.0",
+          "ts-loader": "^9.5.1",
+          "url": "^0.11.4",
+          "util": "^0.12.5",
+          "webpack": "^5.89.0",
+          "webpack-cli": "^5.1.4"
+     }
 }

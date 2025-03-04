@@ -1,10 +1,11 @@
 const path = require('path');
 const webpack = require('webpack');
+const NodePolyfillPlugin = require('node-polyfill-webpack-plugin')
 
 module.exports = {
     mode: 'development',
     entry: './src/index.ts',
-    target: 'node',
+    target: 'web',
     output: {
         filename: 'bundle.js',
         path: path.resolve(__dirname, 'dist'),
@@ -27,4 +28,14 @@ module.exports = {
     resolve: {
         extensions: ['.ts', '.js'],
     },
+    resolve: {
+        extensions: ['.ts', '.js'],
+        fallback: {
+            "child_process": false,
+            "fs": false,
+            "path": false,
+            "process": false,
+            "events": false
+        }
+    }
 };

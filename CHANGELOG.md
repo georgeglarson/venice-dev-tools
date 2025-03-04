@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.2] - 2025-03-02
+
+### Added
+- Browser compatibility support with dedicated webpack configuration
+- Browser-specific client implementation that works in web environments
+- Browser utilities for file system, path, and event operations
+- Test page for browser bundle verification
+
+### Fixed
+- Node.js module compatibility issues in browser environments
+- Proper export of browser utilities in the browser bundle
+
+## [1.8.1] - 2025-03-01
+
+### Fixed
+- Image models filtering in CLI by properly passing query parameters
+- Refactored CLI implementation to reduce code duplication
+- Enhanced display of model traits in CLI output
+
 ## [1.8.0] - 2025-03-01
 
 ### Added
