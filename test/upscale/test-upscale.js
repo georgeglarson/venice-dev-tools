@@ -37,68 +37,61 @@ async function testUpscale(scale) {
     
     console.log(`Original image size: ${imageBuffer.length} bytes`);
     
-    // Try upscaling with curl directly
+    // Create a FormData object
+    const FormData = require('form-data');
+    const axios = require('axios');
+    const formData = new FormData();
+    
+    // Add the image to the form data
+    formData.append('image', imageBuffer, 'image.jpg');
+    
+    // Add other parameters
+    formData.append('model', 'upscale-model');
+    formData.append('scale', scale.toString());
+    
+    // Get the API key from environment variables
+    const apiKey = process.env.VENICE_API_KEY;
+    if (!apiKey) {
+      console.error('VENICE_API_KEY environment variable is not set');
+      return false;
+    }
+    
     try {
-      console.log('Attempting upscale with curl...');
+      // Make the request directly with axios
+      const response = await axios({
+        method: 'post',
+        url: 'https://api.venice.ai/api/v1/image/upscale',
+        data: formData,
+        headers: {
+          ...formData.getHeaders(),
+          'Authorization': `Bearer ${apiKey}`,
+          'User-Agent': 'Venice-AI-SDK-APL/0.1.0'
+        },
+        responseType: 'arraybuffer'
+      });
       
-      // Create a temporary file to store the output
+      // Save the response to a file
       const outputPath = path.join(__dirname, `upscaled-${scale}x.jpg`);
+      fs.writeFileSync(outputPath, response.data);
       
-      // Build the curl command
-      const apiKey = process.env.VENICE_API_KEY;
-      const curlCommand = `curl -s -X POST https://api.venice.ai/api/v1/image/upscale \
-        -H "Authorization: Bearer ${apiKey}" \
-        -F "image=@${testImagePath}" \
-        -F "scale=${scale}" \
-        -F "model=upscale-model" \
-        -o ${outputPath}`;
-      
-      // Execute the curl command
-      const { error, stdout, stderr } = require('child_process').execSync(curlCommand, { encoding: 'utf8' });
-      
-      if (error) {
-        throw new Error(`Curl command failed: ${error.message}`);
-      }
-      
-      // Check if the output file exists and has content
-      if (fs.existsSync(outputPath) && fs.statSync(outputPath).size > 0) {
-        console.log(`Upscale with scale=${scale} succeeded! Saved to ${outputPath}`);
-        return true;
-      } else {
-        console.error(`Output file is empty or doesn't exist: ${outputPath}`);
-        return false;
-      }
+      console.log(`Upscale with scale=${scale} succeeded! Saved to ${outputPath}`);
+      return true;
     } catch (error) {
-      console.error(`Error upscaling with curl: ${error.message}`);
-      
-      // If curl fails, try using the SDK as a fallback
-      console.log('Falling back to SDK implementation...');
-      
-      try {
-        // Use the SDK's upscale method
-        const response = await venice.image.upscale({
-          model: 'upscale-model',
-          image: imageBuffer,
-          scale: scale
-        });
-        
-        return handleUpscaleResponse(response, scale);
-      } catch (sdkError) {
-        console.error(`SDK upscale failed: ${sdkError.message}`);
-        
-        // Check if the error indicates that the API doesn't support upscaling
-        if (sdkError.message && (
-            sdkError.message.includes('not found') ||
-            sdkError.message.includes('not supported') ||
-            sdkError.message.includes('multipart/form-data')
-        )) {
-          console.warn('Upscale API may not be supported by the API:', sdkError.message);
-          // Return true to indicate the test passed (since the feature is not supported)
-          return true;
+      console.error(`Error upscaling with scale=${scale}:`, error.message);
+      if (error.response) {
+        console.error('Status:', error.response.status);
+        if (error.response.data) {
+          try {
+            // Try to parse the error data as JSON
+            const errorData = JSON.parse(error.response.data.toString());
+            console.error('Error data:', errorData);
+          } catch (e) {
+            // If it's not JSON, just log it as a string
+            console.error('Error data:', error.response.data.toString());
+          }
         }
-        
-        return false;
       }
+      return false;
     }
   } catch (error) {
     console.error(`Error upscaling with scale=${scale}:`, error.message);
@@ -136,8 +129,8 @@ function handleUpscaleResponse(response, scale) {
  * Main test function
  */
 async function main() {
-  // Test scale values 1, 2, 3, and 4
-  const scaleValues = [1, 2, 3, 4];
+  // Test scale values 2 and 4 (only supported values)
+  const scaleValues = [2, 4];
   const results = {};
   
   for (const scale of scaleValues) {

@@ -54,6 +54,21 @@ export class ImageUpscaleResource extends BaseResource {
    * });
    * ```
    */
+  /**
+   * Upscales an image to a higher resolution
+   *
+   * @param params - Parameters for upscaling an image
+   * @returns Promise that resolves with the upscaled image
+   *
+   * @example
+   * ```typescript
+   * const response = await venice.image.upscale({
+   *   model: 'upscale-model',
+   *   image: base64EncodedImage,
+   *   scale: 2
+   * });
+   * ```
+   */
   public async upscale(params: UpscaleImageParams): Promise<UpscaleImageResponse> {
     // Validate required parameters
     if (!params.image) {
@@ -63,12 +78,12 @@ export class ImageUpscaleResource extends BaseResource {
       });
     }
 
-    // Validate scale if provided
-    if (params.scale && (params.scale < 1 || params.scale > 4)) {
+    // Validate scale if provided - only 2 and 4 are supported
+    if (params.scale && params.scale !== 2 && params.scale !== 4) {
       throw new ValidationError({
-        message: 'Scale must be between 1 and 4',
+        message: 'Scale must be either 2 or 4',
         field: 'scale',
-        expected: 'Between 1 and 4',
+        expected: '2 or 4',
         actual: params.scale.toString(),
       });
     }
@@ -108,35 +123,45 @@ export class ImageUpscaleResource extends BaseResource {
       const baseUrl = this.http.getBaseURL();
       const apiKey = this.http.getApiKey();
       
-      // Make the request directly with axios
-      const response = await axios({
-        method: 'post',
-        url: `${baseUrl}/image/upscale`,
-        data: formData,
-        headers: {
-          ...formData.getHeaders(),
-          'Authorization': `Bearer ${apiKey}`,
-          'User-Agent': 'Venice-AI-SDK-APL/0.1.0'
-        },
-        responseType: returnBinary ? 'arraybuffer' : 'json'
-      });
-      
-      // Return the response data
-      return response.data;
+      try {
+        // Make the request directly with axios
+        const response = await axios({
+          method: 'post',
+          url: `${baseUrl}/image/upscale`,
+          data: formData,
+          headers: {
+            ...formData.getHeaders(),
+            'Authorization': `Bearer ${apiKey}`,
+            'User-Agent': 'Venice-AI-SDK-APL/0.1.0'
+          },
+          responseType: returnBinary ? 'arraybuffer' : 'json'
+        });
+        
+        // If we got a binary response, wrap it in an object
+        if (returnBinary && response.data instanceof Buffer) {
+          return {
+            binary: response.data
+          } as UpscaleImageResponse;
+        }
+        
+        // Return the response data
+        return response.data;
+      } catch (axiosError) {
+        if (axios.isAxiosError(axiosError) && axiosError.response) {
+          throw new ApiError({
+            message: axiosError.response.data?.error || 'API request failed',
+            status: axiosError.response.status,
+            code: 'API_ERROR',
+            data: axiosError.response.data
+          });
+        }
+        throw axiosError;
+      }
     } catch (error: unknown) {
       if (error instanceof Error) {
         console.error('Error in upscale:', error.message);
       } else {
         console.error('Unknown error in upscale');
-      }
-      
-      if (axios.isAxiosError(error) && error.response) {
-        throw new ApiError({
-          message: error.response.data?.error || 'API request failed',
-          status: error.response.status,
-          code: 'API_ERROR',
-          data: error.response.data
-        });
       }
       
       if (error instanceof Error) {
