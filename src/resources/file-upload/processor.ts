@@ -1,46 +1,22 @@
 /**
- * Unified File Upload Example
- *
- * This example demonstrates a unified approach to handling file uploads of any type:
- * - Text files: Included directly in the prompt
- * - Images: Converted to base64
- * - HTML: Processed as document content
- *
- * All files must be under the 4.5MB API limit.
- *
- * This provides a seamless experience similar to the paperclip upload in the UI.
- *
- * Usage:
- *   VENICE_API_KEY=your-api-key node -e "require('./examples/chat/unified-file-upload.js').processFile('./sample.html')"
+ * Core file processing logic for the universal file upload functionality
  */
 
-const fs = require('fs');
-const path = require('path');
-const { VeniceAI } = require('../../dist');
-const { execSync } = require('child_process');
-const os = require('os');
-
-// Initialize the Venice AI client with the API key from environment variable
-function getClient() {
-  if (!process.env.VENICE_API_KEY) {
-    console.error('Error: VENICE_API_KEY environment variable is required');
-    process.exit(1);
-  }
-  
-  return new VeniceAI({
-    apiKey: process.env.VENICE_API_KEY,
-    logLevel: 'debug', // Enable debug logging
-  });
-}
+import * as fs from 'fs';
+import * as path from 'path';
+import { execSync } from 'child_process';
+import * as os from 'os';
+import { VeniceAI } from '../../index';
+import { FileProcessingOptions, ProcessedFileInfo } from './types';
 
 /**
  * Resize an image if it's too large
  * 
- * @param {string} imagePath - Path to the image file
- * @param {number} maxSizeMB - Maximum size in MB
- * @returns {Promise<string>} - Path to the resized image or original if small enough
+ * @param imagePath - Path to the image file
+ * @param maxSizeMB - Maximum size in MB
+ * @returns Path to the resized image or original if small enough
  */
-async function resizeImageIfNeeded(imagePath, maxSizeMB = 4) {
+export async function resizeImageIfNeeded(imagePath: string, maxSizeMB: number = 4): Promise<string> {
   // Get file size
   const stats = fs.statSync(imagePath);
   const fileSizeMB = stats.size / (1024 * 1024);
@@ -97,7 +73,7 @@ async function resizeImageIfNeeded(imagePath, maxSizeMB = 4) {
     
     return outputPath;
   } catch (error) {
-    console.error('Error resizing image:', error.message);
+    console.error('Error resizing image:', (error as Error).message);
     console.error('Make sure ImageMagick is installed (sudo apt-get install imagemagick on Ubuntu/Debian)');
     console.log('Continuing with original image...');
     return imagePath;
@@ -105,19 +81,13 @@ async function resizeImageIfNeeded(imagePath, maxSizeMB = 4) {
 }
 
 /**
- * Process a file based on its type and send to the API
- *
- * @param {string} filePath - Path to the file
- * @param {Object} client - Venice AI client instance
- * @param {Object} options - Additional options
- * @param {string} options.customPrompt - Custom prompt to use instead of the default
- * @param {string} options.model - Model to use (defaults to qwen-2.5-vl)
- * @returns {Promise<string>} - API response content
+ * Process a file and prepare it for sending to the API
+ * 
+ * @param filePath - Path to the file
+ * @param options - Processing options
+ * @returns Information about the processed file
  */
-async function processFile(filePath, client = null, options = {}) {
-  // Use provided client or create a new one
-  const venice = client || getClient();
-  
+export async function prepareFileForUpload(filePath: string, options: FileProcessingOptions = {}): Promise<ProcessedFileInfo> {
   // Check if the file exists
   if (!fs.existsSync(filePath)) {
     throw new Error(`File not found at ${filePath}`);
@@ -132,12 +102,13 @@ async function processFile(filePath, client = null, options = {}) {
   console.log(`File type: ${fileExt}, Size: ${fileSizeMB.toFixed(2)}MB`);
   
   // Check if file is too large for the API
-  if (fileSizeMB > 4.5) {
-    throw new Error(`File is too large (${fileSizeMB.toFixed(2)}MB). The Venice AI API has a strict 4.5MB limit.`);
+  const maxSizeMB = options.maxSizeMB || 4.5;
+  if (fileSizeMB > maxSizeMB) {
+    throw new Error(`File is too large (${fileSizeMB.toFixed(2)}MB). The Venice AI API has a strict ${maxSizeMB}MB limit.`);
   }
   
   // Determine file type and process accordingly
-  let messages = [];
+  let content: any[] = [];
   
   // Handle different file types
   if (['.jpg', '.jpeg', '.png', '.gif', '.webp'].includes(fileExt)) {
@@ -145,7 +116,7 @@ async function processFile(filePath, client = null, options = {}) {
     console.log('Detected image file');
     
     // Check if image needs resizing
-    const processedImagePath = await resizeImageIfNeeded(filePath);
+    const processedImagePath = await resizeImageIfNeeded(filePath, maxSizeMB);
     
     // Read the processed image file and convert to base64
     const imageBuffer = fs.readFileSync(processedImagePath);
@@ -161,25 +132,20 @@ async function processFile(filePath, client = null, options = {}) {
     const promptText = options.customPrompt ||
       'I\'ve uploaded an image. Please analyze this image and describe what you see in detail.';
     
-    messages = [
+    content = [
       {
-        role: 'user',
-        content: [
-          {
-            type: 'text',
-            text: promptText
-          },
-          {
-            type: 'file',
-            file: {
-              data: base64Image,
-              mime_type: fileExt === '.png' ? 'image/png' :
-                         fileExt === '.gif' ? 'image/gif' :
-                         fileExt === '.webp' ? 'image/webp' : 'image/jpeg',
-              name: path.basename(filePath)
-            }
-          }
-        ]
+        type: 'text',
+        text: promptText
+      },
+      {
+        type: 'file',
+        file: {
+          data: base64Image,
+          mime_type: fileExt === '.png' ? 'image/png' :
+                     fileExt === '.gif' ? 'image/gif' :
+                     fileExt === '.webp' ? 'image/webp' : 'image/jpeg',
+          name: path.basename(filePath)
+        }
       }
     ];
   } else if (fileExt === '.html') {
@@ -192,21 +158,16 @@ async function processFile(filePath, client = null, options = {}) {
     const promptText = options.customPrompt ||
       'I\'ve uploaded an HTML document. Please analyze this content and provide insights.';
     
-    messages = [
+    content = [
       {
-        role: 'user',
-        content: [
-          {
-            type: 'text',
-            text: promptText
-          },
-          {
-            type: 'image_url',
-            image_url: {
-              url: `data:text/html;base64,${base64Html}`
-            }
-          }
-        ]
+        type: 'text',
+        text: promptText
+      },
+      {
+        type: 'image_url',
+        image_url: {
+          url: `data:text/html;base64,${base64Html}`
+        }
       }
     ];
   } else if (['.txt', '.md', '.csv', '.json', '.xml', '.js', '.py', '.java', '.c', '.cpp', '.h', '.cs', '.php', '.rb', '.go', '.rs', '.ts', '.jsx', '.tsx'].includes(fileExt)) {
@@ -218,15 +179,10 @@ async function processFile(filePath, client = null, options = {}) {
     const promptText = options.customPrompt ||
       `I've uploaded a ${fileExt.substring(1).toUpperCase()} file. Please analyze this content:`;
     
-    messages = [
+    content = [
       {
-        role: 'user',
-        content: [
-          {
-            type: 'text',
-            text: `${promptText}\n\n${textContent}`
-          }
-        ]
+        type: 'text',
+        text: `${promptText}\n\n${textContent}`
       }
     ];
   } else {
@@ -244,15 +200,10 @@ async function processFile(filePath, client = null, options = {}) {
       const promptText = options.customPrompt ||
         `I've uploaded a file with extension ${fileExt}. Please analyze this content:`;
       
-      messages = [
+      content = [
         {
-          role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: `${promptText}\n\n${textContent}`
-            }
-          ]
+          type: 'text',
+          text: `${promptText}\n\n${textContent}`
         }
       ];
     } catch (error) {
@@ -267,107 +218,109 @@ async function processFile(filePath, client = null, options = {}) {
       const promptText = options.customPrompt ||
         `I've uploaded a binary file with extension ${fileExt}. Please analyze this if possible.`;
       
-      messages = [
+      content = [
         {
-          role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: promptText
-            },
-            {
-              type: 'file',
-              file: {
-                data: base64Data,
-                mime_type: 'application/octet-stream',
-                name: path.basename(filePath)
-              }
-            }
-          ]
+          type: 'text',
+          text: promptText
+        },
+        {
+          type: 'file',
+          file: {
+            data: base64Data,
+            mime_type: 'application/octet-stream',
+            name: path.basename(filePath)
+          }
         }
       ];
     }
   }
   
-  // Send to API
-  console.log('Sending to API...');
-  const model = options.model || 'qwen-2.5-vl'; // Use provided model or default to qwen-2.5-vl
-  const response = await venice.chat.completions.create({
-    model: model,
-    messages: messages
-  });
-  
-  return response.choices[0].message.content;
+  return {
+    content,
+    fileType: fileExt,
+    fileSizeMB
+  };
 }
 
 /**
- * Process a file with the unified approach
- *
- * @param {string} filePath - Path to the file to process
- * @param {Object} options - Additional options
- * @param {string} options.customPrompt - Custom prompt to use instead of the default
- * @param {string} options.model - Model to use (defaults to qwen-2.5-vl)
- * @returns {Promise<boolean>} - Success status
+ * Process a file and send it to the API
+ * 
+ * @param filePath - Path to the file
+ * @param client - Venice AI client instance
+ * @param options - Processing options
+ * @returns API response content
  */
-async function processFileAndPrint(filePath, options = {}) {
-  try {
-    const venice = getClient();
-    
-    console.log(`Processing file: ${filePath}`);
-    
-    // Process the file with options
-    const result = await processFile(filePath, venice, options);
-    
-    // Display the result
-    console.log('\nAPI Response:');
-    console.log('=============');
-    console.log(result);
-    
-    return true;
-  } catch (error) {
-    console.error('Error:', error.message);
-    return false;
+export async function processFile(
+  filePath: string, 
+  client: VeniceAI, 
+  options: FileProcessingOptions = {}
+): Promise<string> {
+  // Check if the file exists
+  if (!fs.existsSync(filePath)) {
+    throw new Error(`File not found at ${filePath}`);
   }
+  
+  // Prepare the file for upload
+  const fileInfo = await prepareFileForUpload(filePath, options);
+  
+  // Send to API
+  console.log('Sending to API...');
+  const model = options.model || 'qwen-2.5-vl'; // Use provided model or default to qwen-2.5-vl
+  const response = await client.chat.completions.create({
+    model: model,
+    messages: [
+      {
+        role: 'user',
+        content: fileInfo.content
+      }
+    ]
+  });
+  
+  const content = response.choices[0].message.content;
+  
+  // Handle different content types
+  if (typeof content === 'string') {
+    return content;
+  } else if (Array.isArray(content)) {
+    // If content is an array, try to extract text parts
+    return content
+      .filter(item => item.type === 'text')
+      .map(item => item.text)
+      .join('\n') || '';
+  }
+  
+  return '';
 }
 
-// Export the functions for use in other scripts
-module.exports = {
-  processFile,
-  processFileAndPrint,
-  resizeImageIfNeeded
-};
-
-// If this script is run directly, provide usage instructions
-if (require.main === module) {
-  console.log(`
-Unified File Upload Example
-
-This script provides functions for handling file uploads of any type.
-All files must be under the 4.5MB API limit.
-
-Example usage:
-  VENICE_API_KEY=your-api-key node -e "require('./examples/chat/unified-file-upload.js').processFileAndPrint('./sample.html')"
+/**
+ * Attach a file to a message
+ * 
+ * @param options - File attachment options
+ * @returns Content array for the message
+ */
+export async function attachFileToMessage(options: {
+  filePath: string;
+  prompt: string;
+  options?: FileProcessingOptions;
+}): Promise<any[]> {
+  const { filePath, prompt, options: processingOptions = {} } = options;
   
-  # With custom prompt:
-  VENICE_API_KEY=your-api-key node -e "require('./examples/chat/unified-file-upload.js').processFileAndPrint('./sample.html', {customPrompt: 'Analyze this HTML and tell me about its structure.'})"
+  // Prepare the file for upload
+  const fileInfo = await prepareFileForUpload(filePath, processingOptions);
   
-  # With custom model:
-  VENICE_API_KEY=your-api-key node -e "require('./examples/chat/unified-file-upload.js').processFileAndPrint('./sample.jpg', {model: 'claude-3-opus-20240229'})"
+  // Create a new content array with the prompt as the first item
+  const content = [...fileInfo.content];
   
-Or import in your own script:
-  const { processFile } = require('./examples/chat/unified-file-upload.js');
-  
-  async function myFunction() {
-    // Basic usage
-    const result = await processFile('./my-file.html');
-    
-    // With options
-    const resultWithOptions = await processFile('./my-file.html', null, {
-      customPrompt: 'Please analyze this HTML document and extract all links.',
-      model: 'qwen-2.5-vl'
+  // Replace the first text item with the user's prompt
+  if (content.length > 0 && content[0].type === 'text') {
+    content[0].text = prompt;
+  } else {
+    // If there's no text item, add one at the beginning
+    content.unshift({
+      type: 'text',
+      text: prompt
     });
-    
-    console.log(result);
   }
-`);
+  
+  return content;
 }

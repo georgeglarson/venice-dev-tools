@@ -68,7 +68,9 @@ class CLIWrapper {
             {
               model: params.model,
               webSearch: params.venice_parameters?.enable_web_search === 'on',
-              stream: params.stream
+              stream: params.stream,
+              image: params.image,
+              attach: params.attach // Add support for the attach option
             }
           );
           
@@ -201,6 +203,16 @@ class CLIWrapper {
       stakingYield: async () => {
         console.log('Using real SDK vvv.stakingYield() via CLI commands');
         const result = await commands.vvvStakingYield();
+        return result;
+      }
+    };
+    
+    // Add the processFile command to the CLI wrapper
+    this.commands = {
+      ...commands,
+      processFile: async (filePath, options = {}) => {
+        console.log('Using real SDK processFile() via CLI commands');
+        const result = await commands.processFile(filePath, options);
         return result;
       }
     };

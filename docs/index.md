@@ -102,6 +102,17 @@ generateChatCompletion();
   </div>
   
   <div class="doc-section">
+    <h3><a href="/venice-dev-tools/file-handling">File Handling</a></h3>
+    <p>Learn how to work with files in the Venice AI SDK.</p>
+    <ul>
+      <li>File Size Limitations</li>
+      <li>Using Files with the CLI</li>
+      <li>Using Files with the SDK</li>
+      <li>Best Practices</li>
+    </ul>
+  </div>
+  
+  <div class="doc-section">
     <h3><a href="/venice-dev-tools/documentation/advanced/">Advanced Topics</a></h3>
     <p>Advanced usage and concepts.</p>
     <ul>

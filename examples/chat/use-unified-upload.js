@@ -2,7 +2,7 @@
  * Example of using the unified file upload module
  * 
  * This script demonstrates how to use the unified file upload module
- * to process different types of files.
+ * to process different types of files. All files must be under the 4.5MB API limit.
  * 
  * Usage:
  *   VENICE_API_KEY=your-api-key node examples/chat/use-unified-upload.js
@@ -14,10 +14,10 @@ const { processFile } = require('./unified-file-upload.js');
 // Define the main function
 async function main() {
   try {
-    // Process a PDF file
-    console.log('\n=== Processing PDF file ===\n');
-    const pdfResult = await processFile('../../sample.pdf');
-    console.log('PDF Result:', pdfResult);
+    // Process an HTML file
+    console.log('\n=== Processing HTML file ===\n');
+    const htmlResult = await processFile('../../sample-document.html');
+    console.log('HTML Result:', htmlResult);
     
     // Process a text file
     console.log('\n=== Processing text file ===\n');

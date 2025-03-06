@@ -88,37 +88,16 @@ async function testGetCharacter() {
       if (typeof response === 'object') {
         console.log('Character details response keys:', Object.keys(response).join(', '));
         
-        // Check if the response is a single character object or has a data array
-        if (response.slug && response.name) {
-          // Direct character object
-          validateResponse(response, {
-            slug: 'string',
-            name: 'string'
-          });
-          
-          console.log('Character details:', response.name, `(${response.slug})`);
-        } else if (response.data && Array.isArray(response.data)) {
-          // Response with data array
-          validateResponse(response, {
-            object: 'string',
-            data: 'array'
-          });
-          
-          // If we have character data, validate the first character
-          if (response.data.length > 0) {
-            const character = response.data[0];
-            validateResponse(character, {
-              slug: 'string',
-              name: 'string'
-            });
-            
-            console.log('Character details:', character.name, `(${character.slug})`);
-          } else {
-            console.log('Character details received but no character data found');
-          }
-        } else {
-          console.log('Unexpected character response format, but test passes as we got a response');
-        }
+        // The actual API response structure has these fields
+        validateResponse(response, {
+          name: 'string',
+          description: 'string',
+          slug: 'string',
+          shareUrl: 'string'
+        });
+        
+        console.log('Character details:', response.name, `(${response.slug})`);
+        console.log('Description:', response.description.substring(0, 100) + (response.description.length > 100 ? '...' : ''));
       } else {
         console.log('Response is not an object, but test passes as we got a response');
       }

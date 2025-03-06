@@ -5,6 +5,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as https from 'https';
 import * as readline from 'readline'; // Standard import without node: prefix
+import { processFile as processFileCore, attachFileToMessage, resizeImageIfNeeded } from './resources/file-upload';
 
 // Get package version
 const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, '../package.json'), 'utf8'));
@@ -56,6 +57,7 @@ export const commands = {
     system?: string;
     raw?: boolean;
     image?: string;
+    attach?: string;
     stream?: boolean;
     noSystemPrompt?: boolean;
     character?: string;
@@ -73,33 +75,48 @@ export const commands = {
         messages.push({ role: 'system', content: options.system });
       }
       
-      // Handle complex message content (for vision models)
-      if (options.image) {
-        const content = [];
+      // Handle complex message content (for vision models or file attachments)
+      if (options.image || options.attach) {
+        let content = [];
         content.push({ type: 'text', text: prompt });
         
         // Handle image input (base64, URL, or file path)
-        if (options.image.startsWith('data:') || options.image.match(/^[A-Za-z0-9+/=]+$/)) {
-          content.push({
-            type: 'image_url',
-            image_url: { url: options.image }
+        if (options.image) {
+          if (options.image.startsWith('data:') || options.image.match(/^[A-Za-z0-9+/=]+$/)) {
+            content.push({
+              type: 'image_url',
+              image_url: { url: options.image }
+            });
+          } else if (options.image.startsWith('http')) {
+            content.push({
+              type: 'image_url',
+              image_url: { url: options.image }
+            });
+          } else {
+            const imageBuffer = fs.readFileSync(options.image);
+            const base64Image = imageBuffer.toString('base64');
+            const mimeType = options.image.endsWith('.png') ? 'image/png' :
+                            options.image.endsWith('.jpg') || options.image.endsWith('.jpeg') ? 'image/jpeg' :
+                            'application/octet-stream';
+            
+            content.push({
+              type: 'image_url',
+              image_url: { url: `data:${mimeType};base64,${base64Image}` }
+            });
+          }
+        }
+        
+        // Handle file attachment using the file-upload module
+        if (options.attach) {
+          // Use the attachFileToMessage function to handle the file
+          const attachedContent = await attachFileToMessage({
+            filePath: options.attach,
+            prompt: prompt,
+            options: {}
           });
-        } else if (options.image.startsWith('http')) {
-          content.push({
-            type: 'image_url',
-            image_url: { url: options.image }
-          });
-        } else {
-          const imageBuffer = fs.readFileSync(options.image);
-          const base64Image = imageBuffer.toString('base64');
-          const mimeType = options.image.endsWith('.png') ? 'image/png' :
-                          options.image.endsWith('.jpg') || options.image.endsWith('.jpeg') ? 'image/jpeg' :
-                          'application/octet-stream';
           
-          content.push({
-            type: 'image_url',
-            image_url: { url: `data:${mimeType};base64,${base64Image}` }
-          });
+          // Replace the content array with the attached content
+          content = attachedContent;
         }
         
         messages.push({ role: 'user', content });
@@ -717,6 +734,44 @@ export const commands = {
     } catch (error) {
       throw new Error(`VVV staking yield error: ${(error as Error).message}`);
     }
+  },
+  
+  // Process file command implementation
+  processFile: async (filePath: string, options: {
+    model?: string;
+    prompt?: string;
+    raw?: boolean;
+  } = {}) => {
+    try {
+      const venice = getClient();
+      
+      if ((global as any).debug) {
+        debugLog('Processing file', { filePath, options });
+      }
+      
+      // Process the file with options
+      const processOptions: any = {};
+      
+      if (options.prompt) {
+        processOptions.customPrompt = options.prompt;
+      }
+      
+      if (options.model) {
+        processOptions.model = options.model;
+      }
+      
+      // Use the imported processFileCore function from our new module
+      const result = await processFileCore(filePath, venice, processOptions);
+      
+      // Return raw response if requested
+      if (options.raw) {
+        return result;
+      }
+      
+      return result;
+    } catch (error) {
+      throw new Error(`Process file error: ${(error as Error).message}`);
+    }
   }
 };
 
@@ -1020,6 +1075,7 @@ program
   .option('-w, --web-search <mode>', 'Web search mode (on, off, auto)', 'off')
   .option('-s, --system <system>', 'System message')
   .option('-i, --image <path>', 'Path to image file, URL, or base64 data (for vision models)')
+  .option('-a, --attach <path>', 'Path to any file to attach to the conversation')
   .option('-f, --functions <json>', 'JSON string of function definitions')
   .option('-F, --functions-file <path>', 'Path to JSON file with function definitions')
   .option('--force-function-call', 'Force the model to call a function')
@@ -1093,6 +1149,7 @@ program
           webSearch: options.webSearch,
           system: options.system,
           image: options.image,
+          attach: options.attach,
           functions: options.functions,
           functionsFile: options.functionsFile,
           forceFunctionCall: options.forceFunctionCall,
@@ -1610,6 +1667,39 @@ program
       } else {
         console.error('Error:', (error as Error).message);
       }
+    }
+  });
+
+// Process file command
+program
+  .command('process-file')
+  .description('Process a file using the universal file upload functionality')
+  .argument('<file>', 'Path to the file to process')
+  .option('-m, --model <model>', 'Model to use', 'qwen-2.5-vl')
+  .option('-p, --prompt <prompt>', 'Custom prompt to use with the file')
+  .option('-r, --raw', 'Output raw JSON response')
+  .action(async (filePath, options) => {
+    try {
+      console.log(`Processing file: ${filePath}`);
+      
+      // Use the shared processFile implementation
+      const result = await commands.processFile(filePath, {
+        model: options.model,
+        prompt: options.prompt,
+        raw: options.raw || (global as any).raw
+      });
+      
+      if ((global as any).raw || options.raw) {
+        // Output raw JSON for scripting
+        console.log(JSON.stringify(result, null, 2));
+      } else {
+        // Pretty output for human consumption
+        console.log('\nAPI Response:');
+        console.log('=============');
+        console.log(result);
+      }
+    } catch (error) {
+      console.error('Error:', (error as Error).message);
     }
   });
 

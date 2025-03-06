@@ -2,7 +2,7 @@
  * Document Analysis Example
  * 
  * This example demonstrates how to use file attachments with chat completions
- * to analyze a PDF document.
+ * to analyze an HTML document.
  */
 
 const fs = require('fs');
@@ -14,18 +14,18 @@ const venice = new VeniceAI({
   apiKey: process.env.VENICE_API_KEY || 'your-api-key',
 });
 
-async function analyzePdfDocument() {
+async function analyzeHtmlDocument() {
   try {
-    // Path to the PDF file
-    const pdfPath = path.join(__dirname, '../../sample.pdf');
+    // Path to the HTML file
+    const htmlPath = path.join(__dirname, '../../sample-document.html');
     
-    // Read the PDF file
-    const pdfBuffer = fs.readFileSync(pdfPath);
-    const base64Pdf = pdfBuffer.toString('base64');
+    // Read the HTML file
+    const htmlBuffer = fs.readFileSync(htmlPath);
+    const base64Html = htmlBuffer.toString('base64');
     
-    console.log(`Analyzing PDF document: ${pdfPath}`);
+    console.log(`Analyzing HTML document: ${htmlPath}`);
     
-    // Create a chat completion with the PDF file attachment
+    // Create a chat completion with the HTML file attachment
     const response = await venice.chat.completions.create({
       model: 'qwen-2.5-vl', // Use a vision model that can process documents
       messages: [
@@ -34,14 +34,12 @@ async function analyzePdfDocument() {
           content: [
             {
               type: 'text',
-              text: 'Please analyze this PDF document and provide a summary of its contents.'
+              text: 'Please analyze this HTML document and provide a summary of its contents.'
             },
             {
-              type: 'file',
-              file: {
-                data: base64Pdf,
-                mime_type: 'application/pdf',
-                name: 'document.pdf'
+              type: 'image_url',
+              image_url: {
+                url: `data:text/html;base64,${base64Html}`
               }
             }
           ]
@@ -53,7 +51,7 @@ async function analyzePdfDocument() {
     console.log(response.choices[0].message.content);
     
   } catch (error) {
-    console.error('Error analyzing PDF document:', error);
+    console.error('Error analyzing HTML document:', error);
     if (error.response) {
       console.error('API Error:', error.response.data);
     }
@@ -61,14 +59,14 @@ async function analyzePdfDocument() {
 }
 
 // Alternative method using a file path instead of base64 encoding
-async function analyzePdfDocumentWithPath() {
+async function analyzeHtmlDocumentWithPath() {
   try {
-    // Path to the PDF file
-    const pdfPath = path.join(__dirname, '../../sample.pdf');
+    // Path to the HTML file
+    const htmlPath = path.join(__dirname, '../../sample-document.html');
     
-    console.log(`Analyzing PDF document using file path: ${pdfPath}`);
+    console.log(`Analyzing HTML document using file path: ${htmlPath}`);
     
-    // Create a chat completion with the PDF file attachment
+    // Create a chat completion with the HTML file attachment
     const response = await venice.chat.completions.create({
       model: 'qwen-2.5-vl', // Use a vision model that can process documents
       messages: [
@@ -77,13 +75,13 @@ async function analyzePdfDocumentWithPath() {
           content: [
             {
               type: 'text',
-              text: 'Please analyze this PDF document and provide a summary of its contents.'
+              text: 'Please analyze this HTML document and provide a summary of its contents.'
             },
             {
               type: 'file',
               file: {
-                path: pdfPath,
-                name: 'document.pdf'
+                path: htmlPath,
+                name: 'document.html'
               }
             }
           ]
@@ -95,7 +93,7 @@ async function analyzePdfDocumentWithPath() {
     console.log(response.choices[0].message.content);
     
   } catch (error) {
-    console.error('Error analyzing PDF document:', error);
+    console.error('Error analyzing HTML document:', error);
     if (error.response) {
       console.error('API Error:', error.response.data);
     }
@@ -103,9 +101,9 @@ async function analyzePdfDocumentWithPath() {
 }
 
 // Run the example
-analyzePdfDocument()
+analyzeHtmlDocument()
   .then(() => {
     console.log('\n--- Using file path method ---\n');
-    return analyzePdfDocumentWithPath();
+    return analyzeHtmlDocumentWithPath();
   })
   .catch(console.error);
