@@ -22,8 +22,9 @@ export interface ChatMessage {
 
   /**
    * Content of the message
+   * Can be a string, null, or an array of content parts
    */
-  content: string | null;
+  content: string | null | ChatMessageContent[];
 
   /**
    * Name of the author (optional)
@@ -49,6 +50,84 @@ export interface ChatMessage {
       arguments: string;
     };
   }>;
+}
+
+/**
+ * Content part of a chat message
+ */
+export type ChatMessageContent =
+  | ChatMessageTextContent
+  | ChatMessageImageContent
+  | ChatMessageFileContent;
+
+/**
+ * Text content part of a chat message
+ */
+export interface ChatMessageTextContent {
+  /**
+   * Type of content
+   */
+  type: 'text';
+
+  /**
+   * Text content
+   */
+  text: string;
+}
+
+/**
+ * Image content part of a chat message
+ */
+export interface ChatMessageImageContent {
+  /**
+   * Type of content
+   */
+  type: 'image_url';
+
+  /**
+   * Image URL information
+   */
+  image_url: {
+    /**
+     * URL of the image (can be a data URL or a remote URL)
+     */
+    url: string;
+  };
+}
+
+/**
+ * File content part of a chat message
+ */
+export interface ChatMessageFileContent {
+  /**
+   * Type of content
+   */
+  type: 'file';
+
+  /**
+   * File information
+   */
+  file: {
+    /**
+     * File data (base64 encoded)
+     */
+    data?: string;
+
+    /**
+     * File path (for local files)
+     */
+    path?: string;
+
+    /**
+     * File MIME type
+     */
+    mime_type?: string;
+
+    /**
+     * File name
+     */
+    name?: string;
+  };
 }
 
 /**

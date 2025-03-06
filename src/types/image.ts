@@ -149,9 +149,9 @@ export interface UpscaleImageParams {
   model?: string;
 
   /**
-   * Base64-encoded image data
+   * Image data - can be a base64-encoded string or a Buffer
    */
-  image: string;
+  image: string | Buffer;
 
   /**
    * Scale factor for upscaling

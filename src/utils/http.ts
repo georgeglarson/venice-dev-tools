@@ -101,17 +101,33 @@ export class HttpClient {
 
     // Handle form data
     if (params.formData) {
-      const formData = new FormData();
+      // If formData is already a FormData instance, use it directly
+      const formData = params.formData instanceof FormData
+        ? params.formData
+        : Object.entries(params.formData).reduce((form, [key, value]) => {
+            form.append(key, value);
+            return form;
+          }, new FormData());
       
-      Object.entries(params.formData).forEach(([key, value]) => {
-        formData.append(key, value);
-      });
-      
+      // Set the form data as the request body
       config.data = formData;
+      
+      // Get headers from the form data
+      const formHeaders = formData.getHeaders();
+      
+      // Override the Content-Type header with the one from form data
       config.headers = {
         ...config.headers,
-        ...formData.getHeaders(),
+        ...formHeaders,
       };
+      
+      // Remove the default Content-Type header if it exists
+      if (config.headers && config.headers['Content-Type'] === 'application/json') {
+        delete config.headers['Content-Type'];
+      }
+      
+      // Log the headers for debugging
+      Logger.debug('Form data headers:', formHeaders);
     }
 
     // Handle streaming and responseType
@@ -152,11 +168,17 @@ export class HttpClient {
       data: this.sanitizeData(response.data),
     });
 
-    // Extract rate limit information from headers
+    // Extract rate limit and balance information from headers for logging/debugging
+    // but don't modify the response data
     const rateLimitInfo = this.extractRateLimitInfo(response);
-    
-    // Extract balance information from headers
     const balanceInfo = this.extractBalanceInfo(response);
+    
+    if (rateLimitInfo || balanceInfo) {
+      Logger.debug('API Response Metadata:', {
+        rateLimit: rateLimitInfo,
+        balance: balanceInfo
+      });
+    }
 
     // Check if the response is binary data (Buffer or ArrayBuffer)
     const isBinaryResponse =
@@ -166,26 +188,13 @@ export class HttpClient {
 
     if (isBinaryResponse) {
       // For binary responses, wrap the data in an object with the binary property
-      // and add metadata without modifying the original binary data
+      // but don't add metadata
       const binaryData = Buffer.isBuffer(response.data)
         ? response.data
         : Buffer.from(response.data);
       
       response.data = {
-        binary: binaryData,
-        _metadata: {
-          rateLimit: rateLimitInfo,
-          balance: balanceInfo,
-        },
-      };
-    } else {
-      // For JSON responses, add metadata to the existing object
-      response.data = {
-        ...response.data,
-        _metadata: {
-          rateLimit: rateLimitInfo,
-          balance: balanceInfo,
-        },
+        binary: binaryData
       };
     }
 
@@ -336,13 +345,16 @@ export class HttpClient {
     
     // For simple types, check if it's a string that might be image data
     if (typeof data === 'string') {
-      // Check if it's likely base64 encoded image data
+      // Check if it's likely base64 encoded image data or PDF
       if (data.length > 1000 &&
           (data.startsWith('data:image') ||
            data.startsWith('/9j/') || // JPEG
            data.startsWith('iVBOR') || // PNG
+           data.startsWith('JVBERi0') || // PDF (%PDF- in base64)
+           data.startsWith('aiA8PAovVHlwZS') || // PDF header pattern
+           data.startsWith('%PDF-') || // PDF header in plain text
            /^[A-Za-z0-9+/=]{1000,}$/.test(data))) {
-        return '[IMAGE DATA EXCLUDED]';
+        return '[FILE DATA EXCLUDED]';
       }
       return data;
     }
@@ -379,12 +391,12 @@ export class HttpClient {
       // Sanitize image data
       for (const key in sanitized) {
         if (Object.prototype.hasOwnProperty.call(sanitized, key)) {
-          // Check for common image field names
+          // Check for common image/file field names
           if (['image', 'data', 'content', 'file', 'buffer', 'base64'].includes(key.toLowerCase())) {
             const value = sanitized[key];
-            // Check if value is likely image data (string longer than 1000 chars)
+            // Check if value is likely image data or PDF (string longer than 1000 chars)
             if (typeof value === 'string' && value.length > 1000) {
-              sanitized[key] = '[IMAGE DATA EXCLUDED]';
+              sanitized[key] = '[FILE DATA EXCLUDED]';
             }
           } else if (typeof sanitized[key] === 'object' && sanitized[key] !== null) {
             // Recursively sanitize nested objects

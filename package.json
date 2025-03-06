@@ -4,13 +4,11 @@
      "description": "A comprehensive SDK for the Venice AI API",
      "main": "dist/bundle.js",
      "types": "dist/index.d.ts",
-     "bin": {
-          "venice": "./dist/cli.js"
-     },
      "scripts": {
           "build": "webpack && webpack --config webpack.cli.config.js && chmod +x dist/cli.js",
           "build:browser": "webpack --config webpack.browser.config.js",
-          "build:all": "npm run build && npm run build:browser",
+          "build:test": "webpack --config webpack.test.config.js",
+          "build:all": "npm run build && npm run build:browser && npm run build:test",
           "start": "webpack serve",
           "test": "./test/run-all-tests.sh"
      },
@@ -18,16 +16,20 @@
           "axios": "^1.8.1",
           "commander": "^13.1.0",
           "form-data": "^4.0.2",
+          "pdfjs-dist": "^4.10.38",
           "typescript": "^5.3.3"
      },
      "devDependencies": {
           "buffer": "^6.0.3",
           "debug": "^4.4.0",
           "dotenv": "^16.4.7",
+          "enhanced-resolve": "^5.18.1",
           "https-browserify": "^1.0.0",
           "node-polyfill-webpack-plugin": "^4.1.0",
           "path-browserify": "^1.0.1",
+          "pdf-parse": "^1.1.1",
           "process": "^0.11.10",
+          "readline-browserify": "^0.0.4",
           "stream-http": "^3.2.0",
           "ts-loader": "^9.5.1",
           "url": "^0.11.4",

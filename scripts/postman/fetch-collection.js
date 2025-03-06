@@ -159,12 +159,19 @@ async function fetchCollection() {
         const collection = collectionResponse.data.collection;
         console.log(`Successfully fetched collection: ${collection.info.name}`);
         
-        // Save the collection
+        // Save the collection temporarily for extraction
         const outputPath = path.join(COLLECTIONS_DIR, 'venice.json');
         fs.writeFileSync(outputPath, JSON.stringify(collection, null, 2));
-        console.log(`Collection saved to: ${outputPath}`);
+        console.log(`Collection temporarily saved to: ${outputPath}`);
         
-        return collection;
+        // If we're extracting endpoints, we'll delete this file later
+        // to save space, as it's very large
+        const shouldDeleteLater = process.argv.includes('--extract');
+        if (shouldDeleteLater) {
+          console.log('Will delete large venice.json file after extraction');
+        }
+        
+        return { collection, tempFilePath: outputPath, shouldDeleteLater };
       } else {
         throw new Error('Invalid collection data received');
       }
@@ -249,20 +256,46 @@ function createCompactEndpoint(endpoint) {
 function truncateBase64Images(str) {
   if (typeof str !== 'string') return str;
   
+  // If the string is very large, be extremely aggressive
+  if (str.length > 10000) {
+    // For extremely large strings, just return a brief summary
+    return `[Large content truncated - ${str.length} bytes]`;
+  }
+  
+  // For moderately large strings, be more aggressive
+  if (str.length > 1000) {
+    // Check if it looks like JSON
+    if ((str.startsWith('{') && str.endsWith('}')) ||
+        (str.startsWith('[') && str.endsWith(']'))) {
+      try {
+        // Try to parse as JSON and stringify with limited depth
+        const parsed = JSON.parse(str);
+        return JSON.stringify(parsed, (key, value) => {
+          if (typeof value === 'string' && value.length > 100) {
+            return `[String truncated - ${value.length} bytes]`;
+          }
+          return value;
+        }, 2);
+      } catch (e) {
+        // Not valid JSON, continue with normal truncation
+      }
+    }
+  }
+  
   // Common patterns for base64 image data
   const patterns = [
     // Standard data URI format for images
     /data:image\/[^;]+;base64,[a-zA-Z0-9+/=]+/g,
     // Base64 prefix followed by long base64 string
-    /base64,[a-zA-Z0-9+/=]{100,}/g,
+    /base64,[a-zA-Z0-9+/=]{50,}/g, // More aggressive (50+ chars)
     // Long base64 strings (likely to be images or binary data)
-    /[a-zA-Z0-9+/=]{500,}/g,
+    /[a-zA-Z0-9+/=]{200,}/g, // More aggressive (200+ chars)
     // Common image formats in base64 (JPEG, PNG, GIF, WebP, SVG)
-    /iVBOR[a-zA-Z0-9+/=]{100,}/g,  // PNG
-    /R0lGOD[a-zA-Z0-9+/=]{100,}/g, // GIF
-    /\/9j\/[a-zA-Z0-9+/=]{100,}/g, // JPEG
-    /UklGR[a-zA-Z0-9+/=]{100,}/g,  // WebP
-    /PHN2Z[a-zA-Z0-9+/=]{100,}/g   // SVG
+    /iVBOR[a-zA-Z0-9+/=]{50,}/g,  // PNG
+    /R0lGOD[a-zA-Z0-9+/=]{50,}/g, // GIF
+    /\/9j\/[a-zA-Z0-9+/=]{50,}/g, // JPEG
+    /UklGR[a-zA-Z0-9+/=]{50,}/g,  // WebP
+    /PHN2Z[a-zA-Z0-9+/=]{50,}/g   // SVG
   ];
   
   let result = str;
@@ -271,11 +304,16 @@ function truncateBase64Images(str) {
       // For data URI format, preserve the prefix
       if (match.includes('base64,')) {
         const prefix = match.substring(0, match.indexOf('base64,') + 7);
-        return `${prefix}[Base64 image data truncated - ${match.length - prefix.length} bytes]`;
+        return `${prefix}[...]`;
       }
-      // For other patterns, just truncate with a note
-      return `[Base64 data truncated - ${match.length} bytes]`;
+      // For other patterns, just use ellipsis
+      return `[...]`;
     });
+  }
+  
+  // Also truncate any long text that might not be base64
+  if (result.length > 500) {
+    return result.substring(0, 100) + '...';
   }
   
   return result;
@@ -317,7 +355,7 @@ function truncateImagesInObject(obj) {
  */
 function isLargeEndpoint(endpoint) {
   const size = JSON.stringify(endpoint).length;
-  return size > 2000; // Consider endpoints larger than 2KB as "large" (more aggressive)
+  return size > 1000; // Even more aggressive - consider endpoints larger than 1KB as "large"
 }
 
 /**
@@ -353,9 +391,8 @@ function extractEndpoints(collection) {
   console.log('Truncating base64 image data in collection...');
   const processedCollection = truncateImagesInObject(collection);
   
+  // Create a flat structure of endpoints
   const endpoints = [];
-  const endpointsByCategory = {};
-  const endpointsByResource = {};
   
   // Function to recursively process collection items
   function processItems(items, parentName = '') {
@@ -364,53 +401,35 @@ function extractEndpoints(collection) {
       
       if (item.request) {
         // This is an endpoint
+        // Create a minimal endpoint object with only essential information
         const endpoint = {
+          id: endpoints.length, // Add a unique ID for reference
           name: item.name,
           path: itemName,
           method: item.request.method,
           url: item.request.url.raw,
           description: item.request.description || '',
-          headers: item.request.header || [],
-          body: item.request.body || null,
-          parameters: []
         };
         
-        // Extract URL parameters
+        // Extract URL parameters (minimal info)
         if (item.request.url.query) {
           endpoint.parameters = item.request.url.query.map(param => ({
             name: param.key,
-            description: param.description || '',
             required: param.disabled ? false : true,
-            type: 'query'
           }));
+        } else {
+          endpoint.parameters = [];
         }
         
-        // Extract body parameters for form data
-        if (item.request.body && item.request.body.mode === 'formdata' && item.request.body.formdata) {
-          item.request.body.formdata.forEach(param => {
-            endpoint.parameters.push({
-              name: param.key,
-              description: param.description || '',
-              required: param.disabled ? false : true,
-              type: 'formdata',
-              valueType: param.type
-            });
-          });
-        }
-        
-        endpoints.push(endpoint);
-        
-        // Extract API path components for more granular categorization
+        // Extract API path for categorization
         let urlPath = '';
         if (item.request.url.path && Array.isArray(item.request.url.path)) {
           urlPath = item.request.url.path.join('/');
         } else if (typeof item.request.url.raw === 'string') {
-          // Extract path from raw URL
           try {
             const url = new URL(item.request.url.raw.replace(/{{[^}]+}}/g, 'placeholder'));
             urlPath = url.pathname.replace(/^\//, '');
           } catch (e) {
-            // If URL parsing fails, use a fallback
             const match = item.request.url.raw.match(/\/([^?]+)/);
             if (match) {
               urlPath = match[1];
@@ -418,29 +437,53 @@ function extractEndpoints(collection) {
           }
         }
         
-        // Add to category (top-level folder)
-        const category = itemName.split('/')[0] || 'Uncategorized';
-        if (!endpointsByCategory[category]) {
-          endpointsByCategory[category] = [];
-        }
-        endpointsByCategory[category].push(endpoint);
-        
-        // Add to resource (based on API path)
+        // Extract resource type (first path component)
         if (urlPath) {
-          // Get the first two path components for resource grouping
           const pathParts = urlPath.split('/');
-          let resource = pathParts[0] || 'Uncategorized';
+          endpoint.resource = pathParts[0] || 'uncategorized';
           
           // Add second path component if it exists and isn't a parameter
           if (pathParts[1] && !pathParts[1].includes('{')) {
-            resource += `/${pathParts[1]}`;
+            endpoint.resource += `/${pathParts[1]}`;
           }
-          
-          if (!endpointsByResource[resource]) {
-            endpointsByResource[resource] = [];
-          }
-          endpointsByResource[resource].push(endpoint);
+        } else {
+          endpoint.resource = 'uncategorized';
         }
+        
+        // Extract category from folder structure
+        endpoint.category = itemName.split('/')[0] || 'Uncategorized';
+        
+        // Add request details with truncated content
+        endpoint.details = {
+          headers: item.request.header || [],
+        };
+        
+        // Handle body content with aggressive truncation
+        if (item.request.body) {
+          if (item.request.body.mode === 'raw' && item.request.body.raw) {
+            // Truncate raw body content
+            const rawContent = item.request.body.raw;
+            endpoint.details.body = {
+              mode: 'raw',
+              type: item.request.body.options?.raw?.language || 'text',
+              content: rawContent.length > 100 ?
+                rawContent.substring(0, 100) + '...' :
+                rawContent
+            };
+          } else if (item.request.body.mode === 'formdata' && item.request.body.formdata) {
+            // Simplify formdata to just show field names and types
+            endpoint.details.body = {
+              mode: 'formdata',
+              fields: item.request.body.formdata.map(field => ({
+                key: field.key,
+                type: field.type,
+                required: !field.disabled
+              }))
+            };
+          }
+        }
+        
+        endpoints.push(endpoint);
       }
       
       // Process nested items
@@ -455,227 +498,98 @@ function extractEndpoints(collection) {
     processItems(processedCollection.item);
   }
   
-  // Create directories
-  const categoriesDir = path.join(ENDPOINTS_DIR, 'by-category');
-  const resourcesDir = path.join(ENDPOINTS_DIR, 'by-resource');
+  // Create a simple, flat output structure
   
-  if (!fs.existsSync(categoriesDir)) {
-    fs.mkdirSync(categoriesDir, { recursive: true });
+  // 1. Create a single endpoints directory
+  const endpointsDir = ENDPOINTS_DIR;
+  if (!fs.existsSync(endpointsDir)) {
+    fs.mkdirSync(endpointsDir, { recursive: true });
   }
   
-  if (!fs.existsSync(resourcesDir)) {
-    fs.mkdirSync(resourcesDir, { recursive: true });
-  }
-  
-  // Create an index file with minimal information
-  const index = {
-    totalEndpoints: endpoints.length,
-    categories: {},
-    resources: {}
+  // Create a function to generate consistent filenames
+  const getEndpointFilename = (endpoint) => {
+    let filename = `${endpoint.method.toLowerCase()}-${endpoint.name.toLowerCase()}`
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '')
+      .substring(0, 80);
+    
+    return filename;
   };
   
-  // Process categories - chunk large categories
-  for (const [category, categoryEndpoints] of Object.entries(endpointsByCategory)) {
-    const categoryFileName = category.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-    
-    // Check if we need to chunk this category (more than 3 endpoints or any large endpoint)
-    const needsChunking = categoryEndpoints.length > 3 ||
-                          categoryEndpoints.some(e => isLargeEndpoint(e));
-    
-    if (needsChunking) {
-      // Create a directory for this category
-      const categoryDir = path.join(categoriesDir, categoryFileName);
-      if (!fs.existsSync(categoryDir)) {
-        fs.mkdirSync(categoryDir, { recursive: true });
-      }
-      
-      // Create a compact summary file with minimal information
-      const summaryPath = path.join(categoryDir, 'summary.json');
-      fs.writeFileSync(summaryPath, JSON.stringify(
-        categoryEndpoints.map(createCompactEndpoint), null, 2
-      ));
-      
-      // Save endpoints in chunks of 3
-      const chunkSize = 3;
-      for (let i = 0; i < categoryEndpoints.length; i += chunkSize) {
-        // Create a deep copy of the chunk
-        const chunk = JSON.parse(JSON.stringify(categoryEndpoints.slice(i, i + chunkSize)));
-        
-        // Process each endpoint in the chunk to aggressively truncate any base64 image data
-        const processedChunk = chunk.map(endpoint => {
-          // Deep process the endpoint to truncate all base64 data
-          let processedEndpoint = truncateImagesInObject(endpoint);
-          
-          // Extra check for any remaining large strings that might be base64 data
-          if (JSON.stringify(processedEndpoint).length > 10000) {
-            // More aggressive truncation for very large endpoints
-            processedEndpoint = JSON.parse(JSON.stringify(processedEndpoint, (key, value) => {
-              if (typeof value === 'string' && value.length > 500 && containsBase64Data(value)) {
-                return `[Large data truncated - ${value.length} bytes]`;
-              }
-              return value;
-            }));
-          }
-          
-          return processedEndpoint;
-        });
-        
-        const chunkPath = path.join(categoryDir, `chunk-${Math.floor(i/chunkSize)}.json`);
-        fs.writeFileSync(chunkPath, JSON.stringify(processedChunk, null, 2));
-      }
-      
-      // Add to index
-      index.categories[category] = {
-        count: categoryEndpoints.length,
-        directory: `by-category/${categoryFileName}`,
-        summaryFile: `by-category/${categoryFileName}/summary.json`,
-        endpoints: categoryEndpoints.map(createMinimalEndpoint)
-      };
-      
-      console.log(`Saved ${categoryEndpoints.length} endpoints to directory: ${categoryDir}`);
+  // Track filename usage for handling duplicates
+  const filenameUsage = {};
+  const getUniqueFilename = (baseFilename) => {
+    if (filenameUsage[baseFilename]) {
+      filenameUsage[baseFilename]++;
+      return `${baseFilename}-${filenameUsage[baseFilename]}`;
     } else {
-      // Save small categories to a single file
-      const categoryPath = path.join(categoriesDir, `${categoryFileName}.json`);
-      fs.writeFileSync(categoryPath, JSON.stringify(categoryEndpoints, null, 2));
-      
-      // Add to index
-      index.categories[category] = {
-        count: categoryEndpoints.length,
-        file: `by-category/${categoryFileName}.json`,
-        endpoints: categoryEndpoints.map(createMinimalEndpoint)
-      };
-      
-      console.log(`Saved ${categoryEndpoints.length} endpoints to: ${categoryPath}`);
+      filenameUsage[baseFilename] = 1;
+      return baseFilename;
     }
-  }
+  };
   
-  // Process resources - always chunk resources with more than 2 endpoints
-  for (const [resource, resourceEndpoints] of Object.entries(endpointsByResource)) {
-    const resourceFileName = resource.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-    
-    // More aggressive chunking - chunk if more than 2 endpoints or any large endpoint
-    const needsChunking = resourceEndpoints.length > 2 ||
-                          resourceEndpoints.some(e => isLargeEndpoint(e));
-    
-    if (needsChunking) {
-      // Create a directory for this resource
-      const resourceDir = path.join(resourcesDir, resourceFileName);
-      if (!fs.existsSync(resourceDir)) {
-        fs.mkdirSync(resourceDir, { recursive: true });
-      }
-      
-      // Create a minimal summary file
-      const summaryEndpoints = resourceEndpoints.map(createCompactEndpoint);
-      
-      const summaryPath = path.join(resourceDir, 'summary.json');
-      fs.writeFileSync(summaryPath, JSON.stringify(summaryEndpoints, null, 2));
-      
-      // Save each endpoint to its own file, but strip large fields for very large endpoints
-      for (let i = 0; i < resourceEndpoints.length; i++) {
-        // Create a copy to avoid modifying the original
-        let endpoint = JSON.parse(JSON.stringify(resourceEndpoints[i]));
-        
-        const endpointFileName = endpoint.name.toLowerCase()
-          .replace(/\s+/g, '-')
-          .replace(/[^a-z0-9-]/g, '')
-          .substring(0, 40); // Shorter filename length
-        
-        // First pass: truncate all base64 image data
-        endpoint = truncateImagesInObject(endpoint);
-        
-        // For very large endpoints, be more aggressive with truncation
-        if (isLargeEndpoint(endpoint)) {
-          // Second pass: more aggressive truncation for any remaining large content
-          if (endpoint.body) {
-            // Keep the body structure but remove large content
-            if (endpoint.body.mode === 'raw' && endpoint.body.raw) {
-              if (endpoint.body.raw.length > 500) {
-                endpoint.body = {
-                  ...endpoint.body,
-                  raw: `[Content truncated - ${endpoint.body.raw.length} characters]`
-                };
-              } else if (containsBase64Data(endpoint.body.raw)) {
-                endpoint.body = {
-                  ...endpoint.body,
-                  raw: `[Base64 content truncated - ${endpoint.body.raw.length} characters]`
-                };
-              }
-            } else if (endpoint.body.mode === 'formdata' && endpoint.body.formdata) {
-              // Keep formdata structure but truncate file content and any base64 data
-              endpoint.body = {
-                ...endpoint.body,
-                formdata: endpoint.body.formdata.map(item => {
-                  if (item.type === 'file' && item.src && typeof item.src === 'string') {
-                    return {...item, src: `[File path truncated - ${item.src.length} characters]`};
-                  }
-                  if (item.value && typeof item.value === 'string' &&
-                     (item.value.length > 500 || containsBase64Data(item.value))) {
-                    return {...item, value: `[Large value truncated - ${item.value.length} characters]`};
-                  }
-                  return item;
-                })
-              };
-            }
-          }
-          
-          // Third pass: check for any remaining large strings in the entire object
-          endpoint = JSON.parse(JSON.stringify(endpoint, (key, value) => {
-            if (typeof value === 'string' &&
-               (value.length > 1000 || (value.length > 500 && containsBase64Data(value)))) {
-              return `[Large data truncated - ${value.length} bytes]`;
-            }
-            return value;
-          }));
-        }
-        
-        const endpointPath = path.join(resourceDir, `${endpointFileName}-${i}.json`);
-        fs.writeFileSync(endpointPath, JSON.stringify(endpoint, null, 2));
-      }
-      
-      // Add to index with minimal information
-      index.resources[resource] = {
-        count: resourceEndpoints.length,
-        directory: `by-resource/${resourceFileName}`,
-        summaryFile: `by-resource/${resourceFileName}/summary.json`,
-        endpoints: resourceEndpoints.map(createMinimalEndpoint)
-      };
-      
-      console.log(`Saved ${resourceEndpoints.length} endpoints to directory: ${resourceDir}`);
-    } else {
-      // Save small resources to a single file
-      const resourcePath = path.join(resourcesDir, `${resourceFileName}.json`);
-      fs.writeFileSync(resourcePath, JSON.stringify(resourceEndpoints, null, 2));
-      
-      // Add to index
-      index.resources[resource] = {
-        count: resourceEndpoints.length,
-        file: `by-resource/${resourceFileName}.json`,
-        endpoints: resourceEndpoints.map(createMinimalEndpoint)
-      };
-      
-      console.log(`Saved ${resourceEndpoints.length} endpoints to: ${resourcePath}`);
-    }
-  }
+  // Assign unique filenames to each endpoint
+  endpoints.forEach(endpoint => {
+    const baseFilename = getEndpointFilename(endpoint);
+    endpoint.filename = getUniqueFilename(baseFilename);
+  });
   
-  // Save index file
-  const indexPath = path.join(ENDPOINTS_DIR, 'index.json');
-  fs.writeFileSync(indexPath, JSON.stringify(index, null, 2));
-  console.log(`Created endpoint index at: ${indexPath}`);
-  
-  // Save a very compact version of all endpoints (minimal information)
-  const compactPath = path.join(ENDPOINTS_DIR, 'endpoints-compact.json');
-  fs.writeFileSync(compactPath, JSON.stringify(
-    endpoints.map(e => ({
+  // 2. Create a main index file that lists all endpoints with minimal info
+  const indexData = {
+    count: endpoints.length,
+    endpoints: endpoints.map(e => ({
+      filename: e.filename,
       name: e.name,
       method: e.method,
-      path: e.path,
+      resource: e.resource,
+      category: e.category,
       url: e.url
-    })), null, 2
-  ));
-  console.log(`Saved compact endpoints to: ${compactPath}`);
+    }))
+  };
   
-  // Don't save the full endpoints.json or all-endpoints.json files anymore
-  console.log(`Skipped creating large endpoints.json file to save space`);
+  const indexPath = path.join(endpointsDir, 'endpoints.json');
+  fs.writeFileSync(indexPath, JSON.stringify(indexData, null, 2));
+  console.log(`Created main endpoint index at: ${indexPath}`);
+  
+  // 3. Create a resources.json file that organizes endpoints by resource
+  const resourcesMap = {};
+  endpoints.forEach(endpoint => {
+    if (!resourcesMap[endpoint.resource]) {
+      resourcesMap[endpoint.resource] = [];
+    }
+    resourcesMap[endpoint.resource].push(endpoint.filename);
+  });
+  
+  const resourcesPath = path.join(endpointsDir, 'resources.json');
+  fs.writeFileSync(resourcesPath, JSON.stringify(resourcesMap, null, 2));
+  console.log(`Created resources index at: ${resourcesPath}`);
+  
+  // 4. Create a categories.json file that organizes endpoints by category
+  const categoriesMap = {};
+  endpoints.forEach(endpoint => {
+    if (!categoriesMap[endpoint.category]) {
+      categoriesMap[endpoint.category] = [];
+    }
+    categoriesMap[endpoint.category].push(endpoint.filename);
+  });
+  
+  const categoriesPath = path.join(endpointsDir, 'categories.json');
+  fs.writeFileSync(categoriesPath, JSON.stringify(categoriesMap, null, 2));
+  console.log(`Created categories index at: ${categoriesPath}`);
+  
+  // 5. Save individual endpoint details with meaningful filenames
+  const detailsDir = path.join(endpointsDir, 'endpoints');
+  if (!fs.existsSync(detailsDir)) {
+    fs.mkdirSync(detailsDir, { recursive: true });
+  }
+  
+  // Save each endpoint with its assigned filename
+  endpoints.forEach(endpoint => {
+    const detailPath = path.join(detailsDir, `${endpoint.filename}.json`);
+    fs.writeFileSync(detailPath, JSON.stringify(endpoint, null, 2));
+  });
+  
+  console.log(`Saved ${endpoints.length} individual endpoint details with meaningful filenames to: ${detailsDir}`);
   
   return endpoints;
 }
@@ -716,49 +630,34 @@ function cleanDirectory(dirPath) {
 function cleanEndpointsDirectory() {
   console.log('Cleaning endpoints directory...');
   
-  // Remove all JSON files in the endpoints directory and its subdirectories
+  // Remove all files in the endpoints directory and its subdirectories
   if (fs.existsSync(ENDPOINTS_DIR)) {
     console.log('Removing all files from endpoints directory...');
     
-    // First clean top-level JSON files
+    // Clean top-level JSON files
     const files = fs.readdirSync(ENDPOINTS_DIR);
     for (const file of files) {
       const filePath = path.join(ENDPOINTS_DIR, file);
       if (file.endsWith('.json')) {
         console.log(`Removing old file: ${filePath}`);
         fs.unlinkSync(filePath);
-      } else if (fs.statSync(filePath).isDirectory() && file !== 'collections') {
-        // Recursively clean all subdirectories except collections
+      } else if (fs.statSync(filePath).isDirectory()) {
+        // Recursively clean all subdirectories
         console.log(`Cleaning subdirectory: ${file}`);
         cleanDirectory(filePath);
       }
     }
-    
-    // Explicitly clean the main subdirectories to be sure
-    const categoriesDir = path.join(ENDPOINTS_DIR, 'by-category');
-    const resourcesDir = path.join(ENDPOINTS_DIR, 'by-resource');
-    
-    if (fs.existsSync(categoriesDir)) {
-      console.log('Deep cleaning by-category directory...');
-      cleanDirectory(categoriesDir);
-    }
-    
-    if (fs.existsSync(resourcesDir)) {
-      console.log('Deep cleaning by-resource directory...');
-      cleanDirectory(resourcesDir);
-    }
   }
   
-  // Ensure directories exist
-  const categoriesDir = path.join(ENDPOINTS_DIR, 'by-category');
-  const resourcesDir = path.join(ENDPOINTS_DIR, 'by-resource');
-  
-  if (!fs.existsSync(categoriesDir)) {
-    fs.mkdirSync(categoriesDir, { recursive: true });
+  // Ensure main directory exists
+  if (!fs.existsSync(ENDPOINTS_DIR)) {
+    fs.mkdirSync(ENDPOINTS_DIR, { recursive: true });
   }
   
-  if (!fs.existsSync(resourcesDir)) {
-    fs.mkdirSync(resourcesDir, { recursive: true });
+  // Ensure endpoints directory exists
+  const endpointsDir = path.join(ENDPOINTS_DIR, 'endpoints');
+  if (!fs.existsSync(endpointsDir)) {
+    fs.mkdirSync(endpointsDir, { recursive: true });
   }
   
   console.log('Endpoints directory cleaned successfully.');
@@ -774,7 +673,10 @@ async function main() {
     const forceFlag = process.argv.includes('--force');
     
     // Fetch the collection
-    const collection = await fetchCollection();
+    const result = await fetchCollection();
+    const collection = result.collection || result; // Handle both new and old return formats
+    let tempFilePath = result.tempFilePath;
+    let shouldDeleteLater = result.shouldDeleteLater;
     
     // Extract endpoints if requested
     if (extractEndpointsFlag) {
@@ -783,6 +685,17 @@ async function main() {
       
       // Extract endpoints
       extractEndpoints(collection);
+      
+      // Delete the large venice.json file if it was created
+      if (shouldDeleteLater && tempFilePath && fs.existsSync(tempFilePath)) {
+        console.log(`Deleting large temporary file: ${tempFilePath}`);
+        fs.unlinkSync(tempFilePath);
+        console.log('Large venice.json file deleted successfully');
+      }
+      
+      // Process all JSON files to replace excessive data with ellipses
+      console.log('Processing extracted files to reduce size...');
+      processExtractedFiles();
     }
     
     console.log('\nNext steps:');
@@ -793,6 +706,124 @@ async function main() {
   } catch (error) {
     console.error('Error:', error.message);
     process.exit(1);
+  }
+}
+
+/**
+ * Process all extracted JSON files to replace excessive data with ellipses
+ */
+function processExtractedFiles() {
+  // Process files in the endpoints directory
+  processDirectory(ENDPOINTS_DIR);
+  console.log('All extracted files processed successfully');
+}
+
+/**
+ * Recursively process all JSON files in a directory
+ * @param {string} dirPath - Directory path to process
+ */
+function processDirectory(dirPath) {
+  if (!fs.existsSync(dirPath)) return;
+  
+  const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+  
+  for (const entry of entries) {
+    const fullPath = path.join(dirPath, entry.name);
+    
+    if (entry.isDirectory()) {
+      // Recursively process subdirectories
+      processDirectory(fullPath);
+    } else if (entry.isFile() && entry.name.endsWith('.json')) {
+      // Process JSON files
+      processJsonFile(fullPath);
+    }
+  }
+}
+
+/**
+ * Process a JSON file to replace excessive data with ellipses
+ * @param {string} filePath - Path to the JSON file
+ */
+function processJsonFile(filePath) {
+  try {
+    // Read the file
+    const content = fs.readFileSync(filePath, 'utf8');
+    
+    // Skip very small files
+    if (content.length < 1000) return;
+    
+    console.log(`Processing file: ${filePath}`);
+    
+    let processed = content;
+    
+    // For extremely large files, be even more aggressive
+    if (content.length > 10000) {
+      console.log(`  Aggressive truncation for very large file (${content.length} bytes)`);
+      
+      try {
+        // Try to parse as JSON and aggressively truncate
+        const parsed = JSON.parse(content);
+        
+        // Recursively process the object to truncate all large strings
+        const truncateRecursive = (obj) => {
+          if (obj === null || obj === undefined) return obj;
+          
+          if (typeof obj === 'string') {
+            if (obj.length > 100) {
+              return obj.substring(0, 50) + '...';
+            }
+            return obj;
+          }
+          
+          if (Array.isArray(obj)) {
+            return obj.map(item => truncateRecursive(item));
+          }
+          
+          if (typeof obj === 'object') {
+            const result = {};
+            for (const [key, value] of Object.entries(obj)) {
+              result[key] = truncateRecursive(value);
+            }
+            return result;
+          }
+          
+          return obj;
+        };
+        
+        const truncated = truncateRecursive(parsed);
+        processed = JSON.stringify(truncated, null, 2);
+        
+        // Write the processed content back to the file
+        fs.writeFileSync(filePath, processed);
+        return;
+      } catch (e) {
+        // Not valid JSON, continue with regex replacements
+        console.log(`  Could not parse as JSON, using regex replacements`);
+      }
+    }
+    
+    // Use sed-like replacement for large base64 data and other content
+    processed = processed
+      // Base64 image data
+      .replace(/(data:image\/[^;]+;base64,)[a-zA-Z0-9+/=]{50,}/g, '$1[...]')
+      .replace(/("url": "data:image\/[^;]+;base64,)[a-zA-Z0-9+/=]{50,}/g, '$1[...]')
+      // Any long base64-like strings
+      .replace(/[a-zA-Z0-9+/=]{200,}/g, '[...]')
+      // Long raw content
+      .replace(/"raw": "(.{50}).{100,}"/g, '"raw": "$1..."')
+      // Long text content
+      .replace(/"text": "(.{50}).{100,}"/g, '"text": "$1..."')
+      // Long description content
+      .replace(/"description": "(.{50}).{100,}"/g, '"description": "$1..."')
+      // Long value content
+      .replace(/"value": "(.{50}).{100,}"/g, '"value": "$1..."')
+      // Any other long string values
+      .replace(/"[^"]+": "(.{100}).{200,}"/g, '"$1": "$1..."');
+    
+    // Write the processed content back to the file
+    fs.writeFileSync(filePath, processed);
+  } catch (error) {
+    console.error(`Error processing file ${filePath}: ${error.message}`);
   }
 }
 

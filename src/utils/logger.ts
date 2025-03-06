@@ -147,21 +147,24 @@ export class Logger {
       if (Object.prototype.hasOwnProperty.call(sanitized, key)) {
         const value = sanitized[key];
         
-        // Check for common image field names
+        // Check for common image/file field names
         if (['image', 'data', 'content', 'file', 'buffer', 'base64'].includes(key.toLowerCase())) {
-          // Check if value is likely image data (string longer than 1000 chars or Buffer)
+          // Check if value is likely image data or PDF (string longer than 1000 chars or Buffer)
           if ((typeof value === 'string' && value.length > 1000) ||
               (value && typeof value === 'object' && 'buffer' in value) ||
               (value instanceof Buffer)) {
-            sanitized[key] = '[IMAGE DATA EXCLUDED]';
+            sanitized[key] = '[FILE DATA EXCLUDED]';
           }
         } else if (typeof value === 'string' && value.length > 1000 &&
                   (value.startsWith('data:image') ||
                    value.startsWith('/9j/') || // JPEG
                    value.startsWith('iVBOR') || // PNG
+                   value.startsWith('JVBERi0') || // PDF (%PDF- in base64)
+                   value.startsWith('aiA8PAovVHlwZS') || // PDF header pattern
+                   value.startsWith('%PDF-') || // PDF header in plain text
                    /^[A-Za-z0-9+/=]{1000,}$/.test(value))) {
-          // Also check for base64 encoded images in other fields
-          sanitized[key] = '[IMAGE DATA EXCLUDED]';
+          // Also check for base64 encoded images or PDFs in other fields
+          sanitized[key] = '[FILE DATA EXCLUDED]';
         } else if (typeof value === 'object' && value !== null) {
           // Recursively sanitize nested objects
           sanitized[key] = Logger.sanitizeImageData(value);
@@ -199,13 +202,16 @@ export class Logger {
           logMessage += `\n[Object could not be stringified]`;
         }
       } else {
-        // For non-object data, check if it's a string that might be base64 encoded image
+        // For non-object data, check if it's a string that might be base64 encoded image or PDF
         if (typeof data === 'string' && data.length > 1000 &&
             (data.startsWith('data:image') ||
              data.startsWith('/9j/') || // JPEG
              data.startsWith('iVBOR') || // PNG
+             data.startsWith('JVBERi0') || // PDF (%PDF- in base64)
+             data.startsWith('aiA8PAovVHlwZS') || // PDF header pattern
+             data.startsWith('%PDF-') || // PDF header in plain text
              /^[A-Za-z0-9+/=]{1000,}$/.test(data))) {
-          logMessage += ' [IMAGE DATA EXCLUDED]';
+          logMessage += ' [FILE DATA EXCLUDED]';
         } else {
           logMessage += ` ${data}`;
         }

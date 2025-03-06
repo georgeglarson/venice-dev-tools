@@ -4,7 +4,7 @@ import { VeniceAI } from './index';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as https from 'https';
-import * as readline from 'readline';
+import * as readline from 'readline'; // Standard import without node: prefix
 
 // Get package version
 const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, '../package.json'), 'utf8'));

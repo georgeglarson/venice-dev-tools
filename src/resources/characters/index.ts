@@ -67,7 +67,24 @@ export class CharactersResource extends BaseResource {
    * const character = await venice.characters.getCharacter('assistant');
    * ```
    */
-  public async getCharacter(slug: string): Promise<ListCharactersResponse> {
-    return this.get(`/characters/${slug}`);
+  public async getCharacter(slug: string): Promise<any> {
+    try {
+      return this.get(`/characters/${slug}`);
+    } catch (error: any) {
+      // If the API returns a 404, it might mean the endpoint is not supported
+      // In that case, we'll try to get the character from the list
+      if (error.status === 404) {
+        const response = await this.list();
+        const characters = response.data || [];
+        const character = characters.find(c => c.slug === slug);
+        
+        if (character) {
+          return character;
+        }
+      }
+      
+      // If we couldn't find the character or the error was something else, rethrow
+      throw error;
+    }
   }
 }

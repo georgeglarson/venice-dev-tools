@@ -76,7 +76,80 @@ async function generateChatCompletion() {
   console.log(response.choices[0].message.content);
 }
 
+// Analyze a PDF document
+async function analyzePdfDocument() {
+  const fs = require('fs');
+  const path = require('path');
+  
+  // Read the PDF file
+  const pdfPath = path.join(__dirname, 'document.pdf');
+  const pdfBuffer = fs.readFileSync(pdfPath);
+  const base64Pdf = pdfBuffer.toString('base64');
+  
+  const response = await venice.chat.completions.create({
+    model: 'qwen-2.5-vl', // Use a vision model that can process documents
+    messages: [
+      {
+        role: 'user',
+        content: [
+          {
+            type: 'text',
+            text: 'Please analyze this PDF document and provide a summary.'
+          },
+          {
+            type: 'file',
+            file: {
+              data: base64Pdf,
+              mime_type: 'application/pdf',
+              name: 'document.pdf'
+            }
+          }
+        ]
+      }
+    ]
+  });
+  
+  console.log(response.choices[0].message.content);
+}
+
 generateChatCompletion();
+// analyzePdfDocument();
+
+// Handle a large PDF file (>4.5MB)
+async function handleLargePDF() {
+  const fs = require('fs');
+  const path = require('path');
+  const pdfjsLib = require('pdfjs-dist/legacy/build/pdf.js');
+  
+  // Path to the large PDF file
+  const pdfPath = path.join(__dirname, 'large-document.pdf');
+  
+  // Extract text locally
+  const data = new Uint8Array(fs.readFileSync(pdfPath));
+  const loadingTask = pdfjsLib.getDocument({ data });
+  const pdfDocument = await loadingTask.promise;
+  
+  let extractedText = '';
+  for (let i = 1; i <= pdfDocument.numPages; i++) {
+    const page = await pdfDocument.getPage(i);
+    const textContent = await page.getTextContent();
+    const pageText = textContent.items.map(item => item.str).join(' ');
+    extractedText += `\n--- Page ${i} ---\n${pageText}\n`;
+  }
+  
+  // Send extracted text to API
+  const response = await venice.chat.completions.create({
+    model: 'qwen-2.5-vl',
+    messages: [
+      {
+        role: 'user',
+        content: `Please analyze this document content and provide a summary:\n\n${extractedText}`
+      }
+    ]
+  });
+  
+  console.log(response.choices[0].message.content);
+}
 ```
 
 For more JavaScript examples, see the [Examples](https://georgeglarson.github.io/venice-dev-tools/documentation/examples/) section in the documentation.
@@ -97,7 +170,8 @@ Try out the Venice AI SDK without an API key using our [interactive live demo](h
 
 ## Features
 
-- **Chat Completions**: Generate text responses with streaming support and web search
+- **Chat Completions**: Generate text responses with streaming support, web search, and file attachment support
+- **Document Analysis**: Analyze PDF documents and other file types using AI, with support for handling large files (>4.5MB)
 - **Image Generation**: Create images with various models and styles
 - **Image Upscaling**: Enhance image resolution
 - **Models Management**: List models, traits, and compatibility mappings
@@ -129,6 +203,23 @@ As Venice states: **"You don't have to protect what you do not have."**
 ## Examples
 
 For code examples covering all SDK features, see the [Examples](https://georgeglarson.github.io/venice-dev-tools/documentation/examples/) section in the documentation or check out the [examples](./examples) directory in this repository.
+
+### Handling Large Files
+
+The Venice AI API has a 4.5MB post limit for file uploads. For files larger than this limit, we provide several approaches:
+
+1. **Local Extraction**: Extract content locally before sending to the API
+2. **File Resizing**: Resize or compress files locally
+3. **Comprehensive PDF Handling**: Extract text from PDFs of any size
+4. **URL-Based Approach**: Upload files to cloud storage and provide URLs
+
+Check out these examples:
+- [Unified File Upload](./examples/chat/unified-file-upload.js) - Handles any file type automatically
+- [Large PDF Extraction](./examples/chat/large-pdf-extraction.js) - Extracts text from PDFs locally
+- [Large Image Processing](./examples/chat/large-image-processing.js) - Resizes images to fit within limits
+- [Comprehensive PDF Handling](./examples/chat/comprehensive-pdf-handling.js) - Advanced PDF processing
+
+For detailed documentation, see [Handling Large Files](./docs/examples/large-file-handling.md).
 
 ## Contact
 

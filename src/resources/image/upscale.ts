@@ -30,6 +30,10 @@
 import { BaseResource } from '../base-resource';
 import { UpscaleImageParams, UpscaleImageResponse } from '../../types/image';
 import { ValidationError } from '../../errors/validation-error';
+import { RequestParams } from '../../types/common';
+import FormData from 'form-data';
+import axios from 'axios';
+import { ApiError } from '../../errors/api-error';
 
 /**
  * Image Upscale Resource
@@ -71,15 +75,75 @@ export class ImageUpscaleResource extends BaseResource {
 
     // Determine if we should return binary data
     const returnBinary = params.return_binary === true;
-
-    if (returnBinary) {
-      // Request binary data directly
-      return this.post<UpscaleImageResponse>('/image/upscale', params, {
-        responseType: 'arraybuffer'
+    
+    try {
+      // Create a FormData object for multipart/form-data
+      const formData = new FormData();
+      
+      // Add the image to the form data
+      if (typeof params.image === 'object' && Buffer.isBuffer(params.image)) {
+        // If it's a Buffer, add it directly to the form data
+        formData.append('image', params.image, 'image.jpg');
+      } else if (typeof params.image === 'string') {
+        // If it's a base64 string, convert it to a Buffer first
+        const imageBuffer = Buffer.from(params.image, 'base64');
+        formData.append('image', imageBuffer, 'image.jpg');
+      } else {
+        throw new ValidationError({
+          message: 'Image must be a Buffer or base64 string',
+          field: 'image',
+        });
+      }
+      
+      // Add other parameters to the form data
+      if (params.model) {
+        formData.append('model', params.model);
+      }
+      
+      if (params.scale) {
+        formData.append('scale', params.scale.toString());
+      }
+      
+      // Get the base URL and API key from the HTTP client
+      const baseUrl = this.http.getBaseURL();
+      const apiKey = this.http.getApiKey();
+      
+      // Make the request directly with axios
+      const response = await axios({
+        method: 'post',
+        url: `${baseUrl}/image/upscale`,
+        data: formData,
+        headers: {
+          ...formData.getHeaders(),
+          'Authorization': `Bearer ${apiKey}`,
+          'User-Agent': 'Venice-AI-SDK-APL/0.1.0'
+        },
+        responseType: returnBinary ? 'arraybuffer' : 'json'
       });
-    } else {
-      // Standard JSON response
-      return this.post<UpscaleImageResponse>('/image/upscale', params);
+      
+      // Return the response data
+      return response.data;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error('Error in upscale:', error.message);
+      } else {
+        console.error('Unknown error in upscale');
+      }
+      
+      if (axios.isAxiosError(error) && error.response) {
+        throw new ApiError({
+          message: error.response.data?.error || 'API request failed',
+          status: error.response.status,
+          code: 'API_ERROR',
+          data: error.response.data
+        });
+      }
+      
+      if (error instanceof Error) {
+        throw error;
+      } else {
+        throw new Error('Unknown error in upscale');
+      }
     }
   }
 }

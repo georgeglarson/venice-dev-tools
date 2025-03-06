@@ -6,23 +6,15 @@
  * 
  * To run this script:
  * 1. Set your API key in the VENICE_API_KEY environment variable
- * 2. Run: node test-improvements.js
+ * 2. Run: node test/api-features/test-improvements.js
  */
 
-const { VeniceAI } = require('./dist');
+const { createClient, runTest } = require('../utils/test-utils');
 
-// LogLevel values:
-// NONE = 0, ERROR = 1, WARN = 2, INFO = 3, DEBUG = 4, TRACE = 5
-
-// Initialize the client with your API key and debug logging enabled
-const venice = new VeniceAI({
-  apiKey: process.env.VENICE_API_KEY || 'your-api-key',
-  logLevel: 4, // DEBUG level
-});
+// Initialize the client with the utility function
+const venice = createClient();
 
 async function testImageStyles() {
-  console.log('\n=== Testing Image Styles ===\n');
-  
   try {
     console.log('Listing image styles...');
     const styles = await venice.image.styles.list();
@@ -45,12 +37,11 @@ async function testImageStyles() {
     console.log('\nImage Styles test completed successfully!');
   } catch (error) {
     console.error('Error testing Image Styles:', error.message);
+    throw error; // Re-throw to be caught by runTest
   }
 }
 
 async function testApiKeysList() {
-  console.log('\n=== Testing API Keys List ===\n');
-  
   try {
     console.log('Listing API keys...');
     const keys = await venice.apiKeys.list();
@@ -73,12 +64,11 @@ async function testApiKeysList() {
     console.log('\nAPI Keys List test completed successfully!');
   } catch (error) {
     console.error('Error testing API Keys List:', error.message);
+    throw error; // Re-throw to be caught by runTest
   }
 }
 
 async function testApiKeysRateLimits() {
-  console.log('\n=== Testing API Keys Rate Limits ===\n');
-  
   try {
     console.log('Getting API key rate limits...');
     const rateLimits = await venice.apiKeys.rateLimits();
@@ -102,22 +92,38 @@ async function testApiKeysRateLimits() {
     console.log('\nAPI Keys Rate Limits test completed successfully!');
   } catch (error) {
     console.error('Error testing API Keys Rate Limits:', error.message);
+    throw error; // Re-throw to be caught by runTest
   }
 }
 
 async function main() {
   console.log('Testing improved implementations...\n');
   
-  // Test Image Styles
-  await testImageStyles();
+  // Run each test using the runTest utility
+  const results = {
+    imageStyles: await runTest('Image Styles', testImageStyles),
+    apiKeysList: await runTest('API Keys List', testApiKeysList),
+    apiKeysRateLimits: await runTest('API Keys Rate Limits', testApiKeysRateLimits)
+  };
   
-  // Test API Keys List
-  await testApiKeysList();
+  // Summary
+  console.log('\n=== Test Summary ===');
+  for (const [test, success] of Object.entries(results)) {
+    console.log(`${test}: ${success ? '✅ Passed' : '❌ Failed'}`);
+  }
   
-  // Test API Keys Rate Limits
-  await testApiKeysRateLimits();
+  // Overall result
+  const allPassed = Object.values(results).every(result => result);
+  console.log(`\nOverall Result: ${allPassed ? '✅ All tests passed' : '❌ Some tests failed'}`);
   
-  console.log('\nAll tests completed!');
+  // Exit with appropriate code
+  process.exit(allPassed ? 0 : 1);
 }
 
-main();
+// Run the tests
+if (require.main === module) {
+  main().catch(error => {
+    console.error('Unexpected error:', error);
+    process.exit(1);
+  });
+}
