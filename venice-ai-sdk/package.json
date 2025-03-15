@@ -1,8 +1,8 @@
 {
-  "name": "venice-ai-sdk",
+  "name": "venice-dev-tools",
   "version": "2.1.0",
   "private": true,
-  "description": "Official SDK for the Venice AI API",
+  "description": "unOfficial SDK for the Venice AI API",
   "workspaces": [
     "packages/*"
   ],

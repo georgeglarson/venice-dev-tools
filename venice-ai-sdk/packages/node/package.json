@@ -1,7 +1,7 @@
 {
-  "name": "@venice-ai/node",
+  "name": "@venice-dev-tools/node",
   "version": "2.1.0",
-  "description": "Node.js implementation of the Venice AI SDK",
+  "description": "Node.js implementation of the Venice AI unOfficial SDK",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -28,7 +28,7 @@
   "author": "Venice AI",
   "license": "MIT",
   "dependencies": {
-    "@venice-ai/core": "workspace:*",
+    "@venice-dev-tools/core": "workspace:*",
     "chalk": "^4.1.2",
     "commander": "^11.1.0",
     "inquirer": "^8.2.6",

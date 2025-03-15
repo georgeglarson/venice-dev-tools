@@ -1,6 +1,6 @@
-# Venice AI SDK
+# Venice Dev Tools
 
-The official SDK for the [Venice AI](https://venice.ai) platform. This SDK provides a simple and elegant way to integrate with Venice AI's API for chat completions, image generation, and more.
+The unOfficial SDK for the [Venice AI](https://venice.ai) platform. This SDK provides a simple and elegant way to integrate with Venice AI's API for chat completions, image generation, and more.
 
 ## Features
 
@@ -15,21 +15,21 @@ The official SDK for the [Venice AI](https://venice.ai) platform. This SDK provi
 ### Node.js
 
 ```bash
-npm install @venice-ai/node
+npm install @venice-dev-tools/node
 # or
-yarn add @venice-ai/node
+yarn add @venice-dev-tools/node
 # or
-pnpm add @venice-ai/node
+pnpm add @venice-dev-tools/node
 ```
 
 ### Browser
 
 ```bash
-npm install @venice-ai/web
+npm install @venice-dev-tools/web
 # or
-yarn add @venice-ai/web
+yarn add @venice-dev-tools/web
 # or
-pnpm add @venice-ai/web
+pnpm add @venice-dev-tools/web
 ```
 
 ## Quick Start
@@ -37,7 +37,7 @@ pnpm add @venice-ai/web
 ### Node.js
 
 ```javascript
-import { VeniceNode } from '@venice-ai/node';
+import { VeniceNode } from '@venice-dev-tools/node';
 
 // Create a new client
 const venice = new VeniceNode({
@@ -73,7 +73,7 @@ async function imageExample() {
 ### Browser
 
 ```javascript
-import { VeniceWeb } from '@venice-ai/web';
+import { VeniceWeb } from '@venice-dev-tools/web';
 
 // Create a new client
 const venice = new VeniceWeb({

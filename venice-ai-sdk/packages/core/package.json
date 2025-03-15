@@ -1,7 +1,7 @@
 {
-  "name": "@venice-ai/core",
+  "name": "@venice-dev-tools/core",
   "version": "2.1.0",
-  "description": "Core package for the Venice AI SDK",
+  "description": "Core package for the Venice AI unOfficial SDK",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
