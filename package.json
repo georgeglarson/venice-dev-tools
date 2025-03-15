@@ -8,7 +8,11 @@
     "clean": "pnpm recursive run clean",
     "dev": "pnpm recursive run dev",
     "lint": "pnpm recursive run lint",
-    "test": "pnpm recursive run test"
+    "test": "pnpm recursive run test",
+    "test:api": "node tests/test-api-key.js",
+    "test:sdk": "node tests/test-venice-sdk.js",
+    "test:sdk:2": "node tests/test-venice-sdk-2.js",
+    "test:sdk:3": "node tests/test-venice-sdk-3.js"
   },
   "devDependencies": {
     "@types/axios": "^0.9.36",
