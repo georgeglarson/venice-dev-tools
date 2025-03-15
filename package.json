@@ -12,7 +12,8 @@
     "test:api": "node tests/test-api-key.js",
     "test:sdk": "node tests/test-venice-sdk.js",
     "test:sdk:2": "node tests/test-venice-sdk-2.js",
-    "test:sdk:3": "node tests/test-venice-sdk-3.js"
+    "test:sdk:3": "node tests/test-venice-sdk-3.js",
+    "test:help": "echo \"\\nTo run tests, you need to set the VENICE_API_KEY environment variable:\\n\\n  # On Linux/macOS:\\n  export VENICE_API_KEY=your-api-key\\n\\n  # On Windows Command Prompt:\\n  set VENICE_API_KEY=your-api-key\\n\\n  # On Windows PowerShell:\\n  $env:VENICE_API_KEY=\\\"your-api-key\\\"\\n\\nThen run one of the test scripts:\\n  pnpm run test:api\\n  pnpm run test:sdk\\n  pnpm run test:sdk:2\\n  pnpm run test:sdk:3\\n\""
   },
   "devDependencies": {
     "@types/axios": "^0.9.36",
