@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://georgeglarson.github.io/venice-dev-tools/sitemap.xml
