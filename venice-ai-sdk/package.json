@@ -26,7 +26,6 @@
     "@types/node": "^20.10.6",
     "pdfkit": "^0.16.0",
     "prettier": "^3.1.1",
-    "turbo": "^1.11.2",
     "typescript": "^5.3.3"
   },
   "packageManager": "pnpm"

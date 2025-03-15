@@ -1,79 +1,52 @@
 # Models API
 
-The Models API provides functionality for handling model-related operations.
+The Models API provides functionality for retrieving information about available models.
 
 ## Methods
 
-### validateModel
+### list
 
 ```typescript
-validateModel(model: any): boolean
+list(options?: ModelListOptions): Promise<ModelListResponse>
 ```
 
-Validates a model object.
+Lists the available models.
 
 #### Parameters
 
-- `model`: The model object to validate
+- `options` (optional): Options for filtering the models
+  - `type`: Filter models by type (e.g., 'text', 'image')
+  - `status`: Filter models by status (e.g., 'active', 'deprecated')
 
 #### Returns
 
-A boolean indicating whether the model is valid.
+A promise that resolves to the model list response.
 
-### Example
-
-```typescript
-import { validateModel } from '@venice-ai/core/utils/validators/models';
-
-const model = {
-  name: 'GPT-4',
-  type: 'language',
-  version: '1.0'
-};
-
-const isValid = validateModel(model);
-console.log(isValid); // true or false
-```
-
-### createModel
+#### Example
 
 ```typescript
-createModel(model: any): Promise<any>
+import { VeniceNode } from '@venice-dev-tools/node';
+
+const venice = new VeniceNode({
+  apiKey: 'your-api-key'
+});
+
+// List all models
+const models = await venice.models.list();
+console.log(models.data);
+
+// List only text models
+const textModels = await venice.models.list({ type: 'text' });
+console.log(textModels.data);
 ```
 
-Creates a new model in the Venice AI API.
-
-#### Parameters
-
-- `model`: The model object to create
-
-#### Returns
-
-A promise that resolves to the response from the API.
-
-### Example
+### retrieve
 
 ```typescript
-import { createModel } from '@venice-ai/core/api/endpoints/models';
-
-const model = {
-  name: 'GPT-4',
-  type: 'language',
-  version: '1.0'
-};
-
-createModel(model)
-  .then(response => console.log(response))
-  .catch(error => console.error(error));
+retrieve(modelId: string): Promise<ModelResponse>
 ```
 
-### getModel
-
-```typescript
-getModel(modelId: string): Promise<any>
-```
-
-Retrieves a model from the Venice AI API by its ID.
+Retrieves information about a specific model.
 
 #### Parameters
 
@@ -81,77 +54,199 @@ Retrieves a model from the Venice AI API by its ID.
 
 #### Returns
 
-A promise that resolves to the model data.
+A promise that resolves to the model response.
 
-### Example
-
-```typescript
-import { getModel } from '@venice-ai/core/api/endpoints/models';
-
-const modelId = '12345';
-
-getModel(modelId)
-  .then(model => console.log(model))
-  .catch(error => console.error(error));
-```
-
-### updateModel
+#### Example
 
 ```typescript
-updateModel(modelId: string, model: any): Promise<any>
+import { VeniceNode } from '@venice-dev-tools/node';
+
+const venice = new VeniceNode({
+  apiKey: 'your-api-key'
+});
+
+const model = await venice.models.retrieve('llama-3.3-70b');
+console.log(model);
 ```
 
-Updates a model in the Venice AI API by its ID.
+### getTraits
 
-#### Parameters
+```typescript
+getTraits(): Promise<ModelTraitsResponse>
+```
 
-- `modelId`: The ID of the model to update
-- `model`: The updated model object
+Gets the available model traits.
 
 #### Returns
 
-A promise that resolves to the response from the API.
+A promise that resolves to the model traits response.
 
-### Example
-
-```typescript
-import { updateModel } from '@venice-ai/core/api/endpoints/models';
-
-const modelId = '12345';
-const updatedModel = {
-  name: 'GPT-4',
-  type: 'language',
-  version: '1.1'
-};
-
-updateModel(modelId, updatedModel)
-  .then(response => console.log(response))
-  .catch(error => console.error(error));
-```
-
-### deleteModel
+#### Example
 
 ```typescript
-deleteModel(modelId: string): Promise<any>
+import { VeniceNode } from '@venice-dev-tools/node';
+
+const venice = new VeniceNode({
+  apiKey: 'your-api-key'
+});
+
+const traits = await venice.models.getTraits();
+console.log(traits.data);
 ```
 
-Deletes a model from the Venice AI API by its ID.
+### getCompatibility
 
-#### Parameters
+```typescript
+getCompatibility(): Promise<ModelCompatibilityResponse>
+```
 
-- `modelId`: The ID of the model to delete
+Gets the compatibility mapping between models and features.
 
 #### Returns
 
-A promise that resolves to the response from the API.
+A promise that resolves to the model compatibility response.
 
-### Example
+#### Example
 
 ```typescript
-import { deleteModel } from '@venice-ai/core/api/endpoints/models';
+import { VeniceNode } from '@venice-dev-tools/node';
 
-const modelId = '12345';
+const venice = new VeniceNode({
+  apiKey: 'your-api-key'
+});
 
-deleteModel(modelId)
-  .then(response => console.log(response))
-  .catch(error => console.error(error));
+const compatibility = await venice.models.getCompatibility();
+console.log(compatibility.data);
+```
+
+## Types
+
+### ModelListOptions
+
+```typescript
+interface ModelListOptions {
+  type?: string;
+  status?: string;
+}
+```
+
+### ModelListResponse
+
+```typescript
+interface ModelListResponse {
+  object: string;
+  data: Model[];
+}
+```
+
+### Model
+
+```typescript
+interface Model {
+  id: string;
+  object: string;
+  created: number;
+  owned_by: string;
+  type: string;
+  status: string;
+  traits: string[];
+  description?: string;
+  capabilities?: {
+    [key: string]: boolean;
+  };
+  pricing?: {
+    input: number;
+    output: number;
+    unit: string;
+  };
+}
+```
+
+### ModelResponse
+
+```typescript
+interface ModelResponse extends Model {
+  // Same as Model
+}
+```
+
+### ModelTraitsResponse
+
+```typescript
+interface ModelTraitsResponse {
+  object: string;
+  data: {
+    id: string;
+    name: string;
+    description: string;
+  }[];
+}
+```
+
+### ModelCompatibilityResponse
+
+```typescript
+interface ModelCompatibilityResponse {
+  object: string;
+  data: {
+    [feature: string]: {
+      [modelId: string]: boolean;
+    };
+  };
+}
+```
+
+## Finding the Right Model
+
+Venice Dev Tools provides several ways to find the right model for your needs:
+
+### By Type
+
+```typescript
+// Get all text models
+const textModels = await venice.models.list({ type: 'text' });
+
+// Get all image models
+const imageModels = await venice.models.list({ type: 'image' });
+```
+
+### By Trait
+
+```typescript
+// Get all models
+const models = await venice.models.list();
+
+// Filter models with specific traits
+const visionModels = models.data.filter(model => 
+  model.traits.includes('vision')
+);
+
+const fastModels = models.data.filter(model => 
+  model.traits.includes('fast-response')
+);
+```
+
+### By Compatibility
+
+```typescript
+// Get compatibility mapping
+const compatibility = await venice.models.getCompatibility();
+
+// Find models compatible with a specific feature
+const modelsWithFunctionCalling = Object.entries(compatibility.data.function_calling)
+  .filter(([_, isCompatible]) => isCompatible)
+  .map(([modelId, _]) => modelId);
+
+console.log('Models with function calling:', modelsWithFunctionCalling);
+```
+
+## Model Selection Guide
+
+When selecting a model, consider the following factors:
+
+1. **Task Type**: Different models excel at different tasks (text generation, image creation, etc.)
+2. **Performance**: Larger models generally produce better results but are slower and more expensive
+3. **Capabilities**: Some models support special features like vision, function calling, or JSON mode
+4. **Cost**: Models have different pricing tiers based on their capabilities
+
+For most general-purpose text tasks, we recommend starting with `llama-3.3-70b` which offers a good balance of quality and performance. For vision tasks, `qwen-2.5-vl` provides excellent multimodal capabilities.

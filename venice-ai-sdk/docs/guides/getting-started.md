@@ -1,27 +1,27 @@
-# Getting Started with Venice AI SDK
+# Getting Started with Venice Dev Tools
 
-This guide will help you get started with the Venice AI SDK, a powerful client library for interacting with the Venice AI API.
+This guide will help you get started with the Venice Dev Tools, a powerful client library for interacting with the Venice AI API.
 
 ## Installation
 
 ### Node.js
 
 ```bash
-npm install @venice-ai/node
+npm install @venice-dev-tools/node
 # or
-yarn add @venice-ai/node
+yarn add @venice-dev-tools/node
 # or
-pnpm add @venice-ai/node
+pnpm add @venice-dev-tools/node
 ```
 
 ### Browser
 
 ```bash
-npm install @venice-ai/web
+npm install @venice-dev-tools/web
 # or
-yarn add @venice-ai/web
+yarn add @venice-dev-tools/web
 # or
-pnpm add @venice-ai/web
+pnpm add @venice-dev-tools/web
 ```
 
 ## Basic Usage
@@ -29,7 +29,7 @@ pnpm add @venice-ai/web
 ### Node.js
 
 ```typescript
-import { VeniceNode } from '@venice-ai/node';
+import { VeniceNode } from '@venice-dev-tools/node';
 
 // Create a new client
 const venice = new VeniceNode({
@@ -54,7 +54,7 @@ chatExample();
 ### Browser
 
 ```typescript
-import { VeniceWeb } from '@venice-ai/web';
+import { VeniceWeb } from '@venice-dev-tools/web';
 
 // Create a new client
 const venice = new VeniceWeb({
@@ -132,7 +132,7 @@ console.log(response.choices[0].message.content);
 ### Streaming Chat Completion
 
 ```typescript
-const streamGenerator = venice.chatStream.streamCompletion({
+const streamGenerator = venice.chat.streamCompletion({
   model: 'llama-3.3-70b',
   messages: [
     { role: 'user', content: 'Tell me a story about a robot.' }
@@ -167,6 +167,44 @@ const response = await venice.chat.createCompletion({
             url: 'https://example.com/image.jpg'
           }
         }
+      ]
+    }
+  ]
+});
+
+console.log(response.choices[0].message.content);
+```
+
+## PDF Processing
+
+Venice Dev Tools v2.1 introduces powerful PDF processing capabilities:
+
+```typescript
+// Process a PDF file
+const pdfPath = './document.pdf';
+
+// Default mode (image)
+const imageContent = await venice.utils.processFile(pdfPath);
+
+// Text mode
+const textContent = await venice.utils.processFile(pdfPath, { pdfMode: 'text' });
+
+// Both mode
+const bothContent = await venice.utils.processFile(pdfPath, { pdfMode: 'both' });
+
+// Use the processed content in a chat completion
+const response = await venice.chat.createCompletion({
+  model: 'llama-3.3-70b',
+  messages: [
+    {
+      role: 'user',
+      content: [
+        {
+          type: 'text',
+          text: 'Please analyze this PDF document.'
+        },
+        // Use one of the processed contents
+        ...(Array.isArray(bothContent) ? bothContent : [bothContent])
       ]
     }
   ]
@@ -233,7 +271,7 @@ const venice = new VeniceNode({
 ### Logging
 
 ```typescript
-import { LogLevel } from '@venice-ai/core';
+import { LogLevel } from '@venice-dev-tools/core';
 
 // Set log level during initialization
 const venice = new VeniceNode({
@@ -269,7 +307,7 @@ import {
   VeniceRateLimitError,
   VeniceValidationError,
   VeniceNetworkError
-} from '@venice-ai/core';
+} from '@venice-dev-tools/core';
 
 try {
   const response = await venice.chat.createCompletion({
@@ -326,6 +364,38 @@ console.log(newKey.api_key);
 
 // Delete an API key
 await venice.keys.delete({ id: 'key-id' });
+```
+
+## Web3 Key Management
+
+Venice Dev Tools v2.1 introduces Web3 authentication for API key management:
+
+```typescript
+// Generate a token
+const tokenResponse = await venice.keys.generateWeb3Token();
+const token = tokenResponse.token;
+
+// Sign the token with a Web3 wallet (example using ethers.js)
+const provider = new ethers.providers.Web3Provider(window.ethereum);
+await provider.send('eth_requestAccounts', []);
+const signer = provider.getSigner();
+const address = await signer.getAddress();
+const signature = await signer.signMessage(token);
+
+// Create an API key with Web3 authentication
+const newKey = await venice.keys.createWithWeb3({
+  address: address,
+  signature: signature,
+  token: token,
+  description: 'My Web3 API Key',
+  apiKeyType: 'INFERENCE',
+  consumptionLimit: {
+    vcu: 100,
+    usd: 50
+  }
+});
+
+console.log('New API Key:', newKey.api_key);
 ```
 
 ## Characters

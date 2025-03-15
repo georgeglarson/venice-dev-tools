@@ -4,118 +4,253 @@ The Chat API provides functionality for handling chat-related operations.
 
 ## Methods
 
-### validateChatMessage
+### createCompletion
 
 ```typescript
-validateChatMessage(message: any): boolean
+createCompletion(options: ChatCompletionOptions): Promise<ChatCompletionResponse>
 ```
 
-Validates a chat message object.
+Creates a chat completion with the specified options.
 
 #### Parameters
 
-- `message`: The chat message object to validate
+- `options`: The chat completion options
+  - `model`: The model to use for the completion
+  - `messages`: An array of chat messages
+  - `temperature`: Controls randomness (0-2, default: 1)
+  - `max_tokens`: Maximum number of tokens to generate
+  - `top_p`: Controls diversity via nucleus sampling (0-1, default: 1)
+  - `frequency_penalty`: Reduces repetition of token sequences (0-2, default: 0)
+  - `presence_penalty`: Reduces repetition of topics (0-2, default: 0)
+  - `stop`: Up to 4 sequences where the API will stop generating
+  - `stream`: Whether to stream the response (default: false)
+  - `venice_parameters`: Additional Venice-specific parameters
+    - `character_slug`: Slug of the character to use
+    - `web_search`: Enable web search (default: false)
 
 #### Returns
 
-A boolean indicating whether the chat message is valid.
+A promise that resolves to the chat completion response.
 
-### Example
-
-```typescript
-import { validateChatMessage } from '@venice-ai/core/utils/validators/chat';
-
-const message = {
-  content: 'Hello, Venice AI!',
-  sender: 'user'
-};
-
-const isValid = validateChatMessage(message);
-console.log(isValid); // true or false
-```
-
-### sendMessage
+#### Example
 
 ```typescript
-sendMessage(message: any): Promise<any>
+import { VeniceNode } from '@venice-dev-tools/node';
+
+const venice = new VeniceNode({
+  apiKey: 'your-api-key'
+});
+
+const response = await venice.chat.createCompletion({
+  model: 'llama-3.3-70b',
+  messages: [
+    { role: 'system', content: 'You are a helpful assistant.' },
+    { role: 'user', content: 'What is the capital of France?' }
+  ]
+});
+
+console.log(response.choices[0].message.content);
 ```
 
-Sends a chat message to the Venice AI API.
+### streamCompletion
+
+```typescript
+streamCompletion(options: ChatCompletionOptions): AsyncGenerator<ChatCompletionChunk>
+```
+
+Creates a streaming chat completion with the specified options.
 
 #### Parameters
 
-- `message`: The chat message object to send
+- `options`: The chat completion options (same as createCompletion)
+  - `stream` must be set to `true`
 
 #### Returns
 
-A promise that resolves to the response from the API.
+An async generator that yields chat completion chunks.
 
-### Example
+#### Example
 
 ```typescript
-import { sendMessage } from '@venice-ai/core/api/endpoints/chat';
+import { VeniceNode } from '@venice-dev-tools/node';
 
-const message = {
-  content: 'Hello, Venice AI!',
-  sender: 'user'
-};
+const venice = new VeniceNode({
+  apiKey: 'your-api-key'
+});
 
-sendMessage(message)
-  .then(response => console.log(response))
-  .catch(error => console.error(error));
+const streamGenerator = venice.chat.streamCompletion({
+  model: 'llama-3.3-70b',
+  messages: [
+    { role: 'user', content: 'Tell me a story about a robot.' }
+  ],
+  stream: true
+});
+
+for await (const chunk of streamGenerator) {
+  const content = chunk.choices[0]?.delta?.content;
+  if (content) {
+    process.stdout.write(content);
+  }
+}
 ```
 
-### getChatHistory
+### Multimodal Chat (Vision)
+
+You can send both text and images to vision-capable models:
 
 ```typescript
-getChatHistory(chatId: string): Promise<any>
+import { VeniceNode } from '@venice-dev-tools/node';
+
+const venice = new VeniceNode({
+  apiKey: 'your-api-key'
+});
+
+const response = await venice.chat.createCompletion({
+  model: 'qwen-2.5-vl',
+  messages: [
+    {
+      role: 'user',
+      content: [
+        {
+          type: 'text',
+          text: 'What's in this image?'
+        },
+        {
+          type: 'image_url',
+          image_url: {
+            url: 'https://example.com/image.jpg'
+          }
+        }
+      ]
+    }
+  ]
+});
+
+console.log(response.choices[0].message.content);
 ```
 
-Retrieves chat history from the Venice AI API by its ID.
+### PDF Processing
 
-#### Parameters
-
-- `chatId`: The ID of the chat to retrieve
-
-#### Returns
-
-A promise that resolves to the chat history data.
-
-### Example
+You can process PDF documents using the file processor utility:
 
 ```typescript
-import { getChatHistory } from '@venice-ai/core/api/endpoints/chat';
+import { VeniceNode } from '@venice-dev-tools/node';
 
-const chatId = '12345';
+const venice = new VeniceNode({
+  apiKey: 'your-api-key'
+});
 
-getChatHistory(chatId)
-  .then(history => console.log(history))
-  .catch(error => console.error(error));
+// Process a PDF file
+const pdfPath = './document.pdf';
+
+// Default mode (image)
+const imageContent = await venice.utils.processFile(pdfPath);
+
+// Text mode
+const textContent = await venice.utils.processFile(pdfPath, { pdfMode: 'text' });
+
+// Both mode
+const bothContent = await venice.utils.processFile(pdfPath, { pdfMode: 'both' });
+
+// Use the processed content in a chat completion
+const response = await venice.chat.createCompletion({
+  model: 'llama-3.3-70b',
+  messages: [
+    {
+      role: 'user',
+      content: [
+        {
+          type: 'text',
+          text: 'Please analyze this PDF document.'
+        },
+        // Use one of the processed contents
+        ...(Array.isArray(bothContent) ? bothContent : [bothContent])
+      ]
+    }
+  ]
+});
+
+console.log(response.choices[0].message.content);
 ```
 
-### deleteChat
+## Types
+
+### ChatMessage
 
 ```typescript
-deleteChat(chatId: string): Promise<any>
+interface ChatMessage {
+  role: 'system' | 'user' | 'assistant' | 'function';
+  content: string | ContentItem[];
+  name?: string;
+  function_call?: {
+    name: string;
+    arguments: string;
+  };
+}
 ```
 
-Deletes a chat from the Venice AI API by its ID.
-
-#### Parameters
-
-- `chatId`: The ID of the chat to delete
-
-#### Returns
-
-A promise that resolves to the response from the API.
-
-### Example
+### ContentItem
 
 ```typescript
-import { deleteChat } from '@venice-ai/core/api/endpoints/chat';
+interface TextContentItem {
+  type: 'text';
+  text: string;
+}
 
-const chatId = '12345';
+interface ImageUrlContentItem {
+  type: 'image_url';
+  image_url: {
+    url: string;
+    detail?: 'low' | 'high' | 'auto';
+  };
+}
 
-deleteChat(chatId)
-  .then(response => console.log(response))
-  .catch(error => console.error(error));
+type ContentItem = TextContentItem | ImageUrlContentItem;
+```
+
+### ChatCompletionOptions
+
+```typescript
+interface ChatCompletionOptions {
+  model: string;
+  messages: ChatMessage[];
+  temperature?: number;
+  max_tokens?: number;
+  top_p?: number;
+  frequency_penalty?: number;
+  presence_penalty?: number;
+  stop?: string | string[];
+  stream?: boolean;
+  venice_parameters?: {
+    character_slug?: string;
+    web_search?: boolean;
+  };
+}
+```
+
+### ChatCompletionResponse
+
+```typescript
+interface ChatCompletionResponse {
+  id: string;
+  object: string;
+  created: number;
+  model: string;
+  choices: {
+    index: number;
+    message: {
+      role: string;
+      content: string;
+      function_call?: {
+        name: string;
+        arguments: string;
+      };
+    };
+    finish_reason: string;
+  }[];
+  usage: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+  };
+}

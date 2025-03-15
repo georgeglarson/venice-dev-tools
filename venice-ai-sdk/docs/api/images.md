@@ -1,123 +1,258 @@
 # Images API
 
-The Images API provides functionality for handling image-related operations.
+The Images API provides functionality for generating and manipulating images.
 
 ## Methods
 
-### validateImage
+### generate
 
 ```typescript
-validateImage(image: any): boolean
+generate(options: ImageGenerationOptions): Promise<ImageGenerationResponse>
 ```
 
-Validates an image object.
+Generates images based on the provided options.
 
 #### Parameters
 
-- `image`: The image object to validate
+- `options`: The image generation options
+  - `model`: The model to use for image generation (e.g., 'stable-diffusion-3')
+  - `prompt`: The text prompt to generate images from
+  - `n`: Number of images to generate (default: 1)
+  - `size`: Size of the generated images (e.g., 1024, 512)
+  - `response_format`: Format of the response (default: 'url')
+  - `style`: Style of the generated images (optional)
+  - `quality`: Quality of the generated images (optional)
 
 #### Returns
 
-A boolean indicating whether the image is valid.
+A promise that resolves to the image generation response.
 
-### Example
+#### Example
 
 ```typescript
-import { validateImage } from '@venice-ai/core/utils/validators/images';
+import { VeniceNode } from '@venice-dev-tools/node';
 
-const image = {
-  url: 'https://example.com/image.jpg',
-  format: 'jpg',
+const venice = new VeniceNode({
+  apiKey: 'your-api-key'
+});
+
+const response = await venice.images.generate({
+  model: 'stable-diffusion-3',
+  prompt: 'A futuristic city with flying cars',
+  n: 1,
   size: 1024
-};
+});
 
-const isValid = validateImage(image);
-console.log(isValid); // true or false
+console.log(response.data[0].url);
 ```
 
-### uploadImage
+### upscale
 
 ```typescript
-uploadImage(image: any): Promise<any>
+upscale(options: ImageUpscaleOptions): Promise<Blob>
 ```
 
-Uploads an image to the Venice AI API.
+Upscales an image to a higher resolution.
 
 #### Parameters
 
-- `image`: The image object to upload
+- `options`: The image upscale options
+  - `image`: The image to upscale (as a Blob, Buffer, or URL)
+  - `scale`: The scale factor (e.g., 2, 4)
+  - `model`: The model to use for upscaling (optional)
 
 #### Returns
 
-A promise that resolves to the response from the API.
+A promise that resolves to the upscaled image as a Blob.
 
-### Example
-
-```typescript
-import { uploadImage } from '@venice-ai/core/api/endpoints/images';
-
-const image = {
-  url: 'https://example.com/image.jpg',
-  format: 'jpg',
-  size: 1024
-};
-
-uploadImage(image)
-  .then(response => console.log(response))
-  .catch(error => console.error(error));
-```
-
-### getImage
+#### Example
 
 ```typescript
-getImage(imageId: string): Promise<any>
+import { VeniceNode } from '@venice-dev-tools/node';
+import fs from 'fs';
+
+const venice = new VeniceNode({
+  apiKey: 'your-api-key'
+});
+
+// Upscale an image from a file
+const imageBuffer = fs.readFileSync('image.jpg');
+const upscaledImage = await venice.images.upscale({
+  image: imageBuffer,
+  scale: 4
+});
+
+// Save the upscaled image
+fs.writeFileSync('upscaled-image.jpg', Buffer.from(await upscaledImage.arrayBuffer()));
 ```
 
-Retrieves an image from the Venice AI API by its ID.
+### edit
+
+```typescript
+edit(options: ImageEditOptions): Promise<ImageEditResponse>
+```
+
+Edits an image based on the provided options.
 
 #### Parameters
 
-- `imageId`: The ID of the image to retrieve
+- `options`: The image edit options
+  - `image`: The image to edit (as a Blob, Buffer, or URL)
+  - `prompt`: The text prompt describing the desired edits
+  - `mask`: Optional mask image defining the areas to edit
+  - `model`: The model to use for editing (optional)
+  - `n`: Number of edited images to generate (default: 1)
+  - `size`: Size of the edited images (optional)
 
 #### Returns
 
-A promise that resolves to the image data.
+A promise that resolves to the image edit response.
 
-### Example
-
-```typescript
-import { getImage } from '@venice-ai/core/api/endpoints/images';
-
-const imageId = '12345';
-
-getImage(imageId)
-  .then(image => console.log(image))
-  .catch(error => console.error(error));
-```
-
-### deleteImage
+#### Example
 
 ```typescript
-deleteImage(imageId: string): Promise<any>
+import { VeniceNode } from '@venice-dev-tools/node';
+import fs from 'fs';
+
+const venice = new VeniceNode({
+  apiKey: 'your-api-key'
+});
+
+// Edit an image from a file
+const imageBuffer = fs.readFileSync('image.jpg');
+const response = await venice.images.edit({
+  image: imageBuffer,
+  prompt: 'Add a blue sky with clouds in the background',
+  n: 1
+});
+
+console.log(response.data[0].url);
 ```
 
-Deletes an image from the Venice AI API by its ID.
+### variation
+
+```typescript
+variation(options: ImageVariationOptions): Promise<ImageVariationResponse>
+```
+
+Creates variations of an image.
 
 #### Parameters
 
-- `imageId`: The ID of the image to delete
+- `options`: The image variation options
+  - `image`: The image to create variations of (as a Blob, Buffer, or URL)
+  - `n`: Number of variations to generate (default: 1)
+  - `model`: The model to use for variations (optional)
+  - `size`: Size of the variation images (optional)
 
 #### Returns
 
-A promise that resolves to the response from the API.
+A promise that resolves to the image variation response.
 
-### Example
+#### Example
 
 ```typescript
-import { deleteImage } from '@venice-ai/core/api/endpoints/images';
+import { VeniceNode } from '@venice-dev-tools/node';
+import fs from 'fs';
 
-const imageId = '12345';
+const venice = new VeniceNode({
+  apiKey: 'your-api-key'
+});
 
-deleteImage(imageId)
-  .then(response => console.log(response))
-  .catch(error => console.error(error));
+// Create variations of an image from a file
+const imageBuffer = fs.readFileSync('image.jpg');
+const response = await venice.images.variation({
+  image: imageBuffer,
+  n: 3
+});
+
+console.log(response.data.map(img => img.url));
+```
+
+## Types
+
+### ImageGenerationOptions
+
+```typescript
+interface ImageGenerationOptions {
+  model: string;
+  prompt: string;
+  n?: number;
+  size?: number | string;
+  response_format?: 'url' | 'b64_json';
+  style?: string;
+  quality?: string;
+  venice_parameters?: {
+    [key: string]: any;
+  };
+}
+```
+
+### ImageGenerationResponse
+
+```typescript
+interface ImageGenerationResponse {
+  created: number;
+  data: {
+    url?: string;
+    b64_json?: string;
+  }[];
+}
+```
+
+### ImageUpscaleOptions
+
+```typescript
+interface ImageUpscaleOptions {
+  image: Blob | Buffer | string;
+  scale: number;
+  model?: string;
+}
+```
+
+### ImageEditOptions
+
+```typescript
+interface ImageEditOptions {
+  image: Blob | Buffer | string;
+  prompt: string;
+  mask?: Blob | Buffer | string;
+  model?: string;
+  n?: number;
+  size?: number | string;
+}
+```
+
+### ImageEditResponse
+
+```typescript
+interface ImageEditResponse {
+  created: number;
+  data: {
+    url?: string;
+    b64_json?: string;
+  }[];
+}
+```
+
+### ImageVariationOptions
+
+```typescript
+interface ImageVariationOptions {
+  image: Blob | Buffer | string;
+  n?: number;
+  model?: string;
+  size?: number | string;
+}
+```
+
+### ImageVariationResponse
+
+```typescript
+interface ImageVariationResponse {
+  created: number;
+  data: {
+    url?: string;
+    b64_json?: string;
+  }[];
+}

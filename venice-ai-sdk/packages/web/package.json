@@ -3,15 +3,14 @@
   "version": "2.1.0",
   "description": "Web implementation of the Venice AI unOfficial SDK",
   "main": "dist/index.js",
-  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
   "sideEffects": false,
   "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --dts --clean",
-    "dev": "tsup src/index.ts --format cjs,esm --dts --clean --watch",
+    "build": "tsup src/index.ts --format cjs --dts --clean",
+    "dev": "tsup src/index.ts --format cjs --dts --clean --watch",
     "lint": "eslint \"src/**/*.ts\"",
     "clean": "rimraf dist"
   },

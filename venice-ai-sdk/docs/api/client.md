@@ -1,35 +1,78 @@
-# VeniceAI Client
+# Venice Client
 
 The main client for interacting with the Venice AI API.
 
-## Constructor
+## VeniceNode Client
+
+For Node.js environments.
+
+### Constructor
 
 ```typescript
 constructor(config: VeniceClientConfig = {})
 ```
 
-Creates a new Venice AI client instance.
+Creates a new Venice Node client instance.
 
-### Parameters
+#### Parameters
 
 - `config` (optional): Configuration options for the client
   - `apiKey`: Your Venice API key
   - `baseUrl`: API base URL (default: 'https://api.venice.ai/api/v1')
   - `timeout`: Request timeout in milliseconds (default: 30000)
   - `headers`: Additional headers to include in requests
+  - `maxConcurrent`: Maximum concurrent requests (default: 10)
+  - `requestsPerMinute`: Maximum requests per minute (default: 60)
+  - `logLevel`: Log level for the client (default: LogLevel.INFO)
 
-### Example
+#### Example
 
 ```typescript
-import { VeniceAI } from '@venice-ai/core';
+import { VeniceNode } from '@venice-dev-tools/node';
 
-const venice = new VeniceAI({
+const venice = new VeniceNode({
   apiKey: 'your-api-key',
   timeout: 60000
 });
 ```
 
-## Methods
+## VeniceWeb Client
+
+For browser environments.
+
+### Constructor
+
+```typescript
+constructor(config: VeniceClientConfig = {})
+```
+
+Creates a new Venice Web client instance.
+
+#### Parameters
+
+- `config` (optional): Configuration options for the client
+  - `apiKey`: Your Venice API key
+  - `baseUrl`: API base URL (default: 'https://api.venice.ai/api/v1')
+  - `timeout`: Request timeout in milliseconds (default: 30000)
+  - `headers`: Additional headers to include in requests
+  - `maxConcurrent`: Maximum concurrent requests (default: 10)
+  - `requestsPerMinute`: Maximum requests per minute (default: 60)
+  - `logLevel`: Log level for the client (default: LogLevel.INFO)
+
+#### Example
+
+```typescript
+import { VeniceWeb } from '@venice-dev-tools/web';
+
+const venice = new VeniceWeb({
+  apiKey: 'your-api-key',
+  timeout: 60000
+});
+```
+
+## Common Methods
+
+The following methods are available on both VeniceNode and VeniceWeb clients.
 
 ### setApiKey
 
@@ -78,6 +121,47 @@ Sets a custom header for API requests.
 
 ```typescript
 venice.setHeader('X-Custom-Header', 'custom-value');
+```
+
+### setLogLevel
+
+```typescript
+setLogLevel(level: LogLevel): void
+```
+
+Sets the log level for the client.
+
+#### Parameters
+
+- `level`: The log level (DEBUG, INFO, WARN, ERROR)
+
+#### Example
+
+```typescript
+import { LogLevel } from '@venice-dev-tools/core';
+
+venice.setLogLevel(LogLevel.DEBUG);
+```
+
+### getLogger
+
+```typescript
+getLogger(): Logger
+```
+
+Gets the logger instance for custom handling.
+
+#### Returns
+
+The logger instance.
+
+#### Example
+
+```typescript
+const logger = venice.getLogger();
+logger.addHandler((entry) => {
+  console.log(`[CUSTOM] ${entry.level}: ${entry.message}`);
+});
 ```
 
 ### on

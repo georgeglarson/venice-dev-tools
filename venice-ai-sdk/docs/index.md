@@ -14,11 +14,11 @@ Welcome to the Venice Dev Tools documentation. This SDK provides a simple, intui
 
 ## Getting Started
 
-The Venice AI SDK allows you to interact with the Venice AI API, which provides access to powerful AI models for text generation, image creation, and more.
+The Venice Dev Tools allows you to interact with the Venice AI API, which provides access to powerful AI models for text generation, image creation, and more.
 
 ### Installation
 
-Install the Venice AI SDK using npm:
+Install the Venice Dev Tools using npm:
 
 ```bash
 npm install venice-dev-tools
@@ -32,10 +32,10 @@ npm install -g venice-dev-tools
 
 ### Authentication
 
-The Venice AI SDK requires an API key for authentication. You can obtain an API key from the [Venice AI website](https://venice.ai/settings/api?ref=VB8W1j).
+The Venice Dev Tools requires an API key for authentication. You can obtain an API key from the [Venice AI website](https://venice.ai/settings/api?ref=VB8W1j).
 
 ```javascript
-const venice = new VeniceAI({
+const venice = new VeniceNode({
   apiKey: 'your-api-key',
 });
 ```
@@ -51,16 +51,16 @@ venice configure
 Here's a simple example to get you started:
 
 ```javascript
-import { VeniceAI } from 'venice-dev-tools';
+import { VeniceNode } from '@venice-dev-tools/node';
 
 // Initialize the client
-const venice = new VeniceAI({
+const venice = new VeniceNode({
   apiKey: 'your-api-key',
 });
 
 // Generate a chat completion
 async function generateChatCompletion() {
-  const response = await venice.chat.completions.create({
+  const response = await venice.chat.createCompletion({
     model: 'llama-3.3-70b',
     messages: [
       { role: 'system', content: 'You are a helpful assistant' },
@@ -111,6 +111,7 @@ generateChatCompletion();
       <li><a href="/venice-dev-tools/documentation/advanced/#debug-logging">Debug Logging</a></li>
       <li><a href="/venice-dev-tools/documentation/advanced/#function-calling">Function Calling</a></li>
       <li><a href="/venice-dev-tools/documentation/advanced/#vision-models">Vision Models</a></li>
+      <li><a href="/venice-dev-tools/documentation/advanced/#pdf-processing">PDF Processing</a></li>
     </ul>
   </div>
   
@@ -123,6 +124,8 @@ generateChatCompletion();
       <li><a href="/venice-dev-tools/documentation/examples/#generate-image">Generate Image</a></li>
       <li><a href="/venice-dev-tools/documentation/examples/#character-interaction">Character Interaction</a></li>
       <li><a href="/venice-dev-tools/documentation/examples/#function-calling">Function Calling</a></li>
+      <li><a href="/venice-dev-tools/documentation/examples/#pdf-processing">PDF Processing</a></li>
+      <li><a href="/venice-dev-tools/documentation/examples/#vision-multimodal">Vision & Multimodal</a></li>
     </ul>
   </div>
 </div>
@@ -137,7 +140,7 @@ generateChatCompletion();
   
   <div class="feature-section">
     <h3><a href="/venice-dev-tools/demo">Live Demo</a></h3>
-    <p>Try out the Venice AI SDK directly in your browser. No API key required!</p>
+    <p>Try out the Venice Dev Tools directly in your browser. No API key required!</p>
   </div>
   
   <div class="feature-section">
@@ -169,6 +172,8 @@ venice chat "Tell me about AI"</code></pre>
 - **Error Handling**: Comprehensive error handling with specific error classes
 - **Rate Limiting**: Automatic rate limit tracking and handling
 - **Debug Logging**: Robust logging system with multiple log levels and runtime configuration
+- **PDF Processing**: Process PDF documents in different modes (image, text, or both)
+- **Vision/Multimodal**: Send both text and images to vision-capable models
 
 ## Privacy-First Approach
 
