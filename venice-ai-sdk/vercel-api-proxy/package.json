@@ -1,0 +1,20 @@
+{
+  "name": "venice-demo-proxy",
+  "version": "1.0.0",
+  "description": "API proxy for Venice AI SDK demo",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel deploy --prod"
+  },
+  "dependencies": {
+    "axios": "^1.6.7",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "vercel": "^33.5.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

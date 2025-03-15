@@ -1,0 +1,8 @@
+{
+  "version": 2,
+  "buildCommand": "mkdir -p public && cp -r docs/* public/",
+  "outputDirectory": "public",
+  "routes": [
+    { "src": "/(.*)", "dest": "/$1" }
+  ]
+}
