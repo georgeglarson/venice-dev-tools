@@ -28,7 +28,7 @@
   "license": "MIT",
   "dependencies": {
     "@venice-dev-tools/core": "workspace:*",
-    "chalk": "^5.4.1",
+    "ansi-colors": "^4.1.3",
     "commander": "^13.1.0",
     "inquirer": "^12.5.0",
     "ora": "^8.2.0",

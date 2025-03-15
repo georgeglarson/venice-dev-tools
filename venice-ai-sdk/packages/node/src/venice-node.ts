@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import * as crypto from 'crypto';
-import { VeniceAI, VeniceClientConfig, GenerateImageResponse } from '@venice-ai/core';
+import { VeniceAI, VeniceClientConfig, GenerateImageResponse } from '@venice-dev-tools/core';
 
 /**
  * Node.js specific implementation of the Venice AI client.

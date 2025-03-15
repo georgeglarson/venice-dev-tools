@@ -3,7 +3,7 @@
  */
 import * as fs from 'fs';
 import * as path from 'path';
-import { ContentItem } from '@venice-ai/core/src/types/multimodal';
+import { ContentItem } from '@venice-dev-tools/core/src/types/multimodal';
 // Import pdf-parse lazily to avoid loading it when not needed
 // import pdfParse from 'pdf-parse';
 

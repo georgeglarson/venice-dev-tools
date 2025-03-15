@@ -1,6 +1,6 @@
 // CLI entry point
 import { Command } from 'commander';
-import * as chalk from 'chalk';
+import colors from 'ansi-colors';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
@@ -103,9 +103,9 @@ program
       // Write config file
       fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
       
-      console.log(chalk.green('API key saved successfully!'));
+      console.log(colors.green('API key saved successfully!'));
     } catch (error) {
-      console.error(chalk.red(`Error: ${(error as Error).message}`));
+      console.error(colors.red(`Error: ${(error as Error).message}`));
       process.exit(1);
     }
   });
@@ -122,7 +122,7 @@ program
   .command('help')
   .description('Display help information')
   .action(() => {
-    console.log(chalk.bold('\nChat Commands:'));
+    console.log(colors.bold('\nChat Commands:'));
     console.log('  Create chat completions with various models');
     console.log('  Support for streaming responses and interactive mode');
     console.log('  Character integration via --character option');
@@ -131,7 +131,7 @@ program
     console.log('  venice chat completion --prompt "Hello" --model llama-3.3-70b');
     console.log('  venice chat interactive --stream --character "assistant-name"');
     
-    console.log(chalk.bold('\nMultimodal Features:'));
+    console.log(colors.bold('\nMultimodal Features:'));
     console.log('  Attach files to your messages using the --attach option');
     console.log('  Supported file types: Images (PNG, JPEG, etc.), PDFs, and text files');
     console.log('\nExamples:');
@@ -142,7 +142,7 @@ program
     console.log('  venice chat interactive --stream  # Enable streaming responses');
     console.log('  > /attach document.pdf');
     
-    console.log(chalk.bold('\nVision Commands:'));
+    console.log(colors.bold('\nVision Commands:'));
     console.log('  Use vision models to analyze images without message history issues');
     console.log('  Supports both positional arguments and option flags for image paths');
     console.log('\nExamples:');
@@ -151,7 +151,7 @@ program
     console.log('  venice vision interactive sunset.png');
     console.log('  venice vision i sunset.png  # Using alias');
     
-    console.log(chalk.bold('\nImage Generation:'));
+    console.log(colors.bold('\nImage Generation:'));
     console.log('  Generate images with AI models');
     console.log('  Upscale existing images');
     console.log('  List available image styles');
@@ -161,7 +161,7 @@ program
     console.log('  venice images upscale image.jpg --scale 4');
     console.log('  venice images styles');
     
-    console.log(chalk.bold('\nModels:'));
+    console.log(colors.bold('\nModels:'));
     console.log('  List available models and their capabilities');
     console.log('  Get model traits and compatibility information');
     console.log('\nExamples:');
@@ -172,7 +172,7 @@ program
     console.log('  venice models traits --json  # Output as JSON');
     console.log('  venice models compatibility');
     
-    console.log(chalk.bold('\nAPI Keys:'));
+    console.log(colors.bold('\nAPI Keys:'));
     console.log('  Manage Venice AI API keys');
     console.log('  List, create, and delete API keys');
     console.log('  Get rate limits and usage information');
@@ -182,7 +182,7 @@ program
     console.log('  venice keys rate-limits');
     console.log('  venice keys delete <key-id>');
     
-    console.log(chalk.bold('\nCharacters:'));
+    console.log(colors.bold('\nCharacters:'));
     console.log('  List and use characters in chat completions');
     console.log('  Characters provide specialized personalities and capabilities');
     console.log('\nExamples:');
@@ -190,7 +190,7 @@ program
     console.log('  venice characters list --json');
     console.log('  venice chat completion --prompt "Hello" --character "assistant-name"');
     
-    console.log(chalk.bold('\nCrypto/Web3 Features:'));
+    console.log(colors.bold('\nCrypto/Web3 Features:'));
     console.log('  API key management with web3 authentication');
     console.log('  Generate tokens for wallet signing');
     console.log('  Create API keys with wallet authentication');
@@ -242,11 +242,11 @@ program.hook('preAction', (thisCommand, actionCommand) => {
       // This will throw an error if no API key is set
       venice.getApiKey();
     } catch (error) {
-      console.error(chalk.red('Error: API key not found or invalid.'));
-      console.error(chalk.yellow('Please provide an API key using one of these methods:'));
-      console.error(chalk.yellow('1. Use the --api-key or -k option: venice -k YOUR_API_KEY ...'));
-      console.error(chalk.yellow('2. Set the VENICE_API_KEY environment variable'));
-      console.error(chalk.yellow('3. Save your API key using: venice set-key YOUR_API_KEY'));
+      console.error(colors.red('Error: API key not found or invalid.'));
+      console.error(colors.yellow('Please provide an API key using one of these methods:'));
+      console.error(colors.yellow('1. Use the --api-key or -k option: venice -k YOUR_API_KEY ...'));
+      console.error(colors.yellow('2. Set the VENICE_API_KEY environment variable'));
+      console.error(colors.yellow('3. Save your API key using: venice set-key YOUR_API_KEY'));
       process.exit(1);
     }
   }

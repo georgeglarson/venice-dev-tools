@@ -4,7 +4,7 @@ import * as chalk from 'chalk';
 import ora from 'ora';
 import { table } from 'table';
 import { VeniceNode } from '../../venice-node';
-import { Model } from '@venice-ai/core';
+import { Model } from '@venice-dev-tools/core';
 
 /**
  * Register model-related commands with the CLI

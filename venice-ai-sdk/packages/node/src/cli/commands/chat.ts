@@ -5,8 +5,8 @@ import * as chalk from 'chalk';
 import * as path from 'path';
 import ora from 'ora';
 import { VeniceNode } from '../../venice-node';
-import type { ChatCompletionRequest as BaseChatCompletionRequest, ChatCompletionResponse as BaseChatCompletionResponse } from '@venice-ai/core';
-import type { ContentItem, TextContent } from '@venice-ai/core/src/types/multimodal';
+import type { ChatCompletionRequest as BaseChatCompletionRequest, ChatCompletionResponse as BaseChatCompletionResponse } from '@venice-dev-tools/core';
+import type { ContentItem, TextContent } from '@venice-dev-tools/core/src/types/multimodal';
 import { processFile } from '../../utils';
 
 // Define ChatMessage interface locally to avoid import issues

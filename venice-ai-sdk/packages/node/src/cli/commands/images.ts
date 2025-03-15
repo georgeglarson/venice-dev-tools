@@ -6,7 +6,7 @@ import * as inquirer from 'inquirer';
 import * as fs from 'fs';
 import * as path from 'path';
 import { VeniceNode } from '../../venice-node';
-import { GenerateImageRequest, ListImageStylesResponse } from '@venice-ai/core';
+import { GenerateImageRequest, ListImageStylesResponse } from '@venice-dev-tools/core';
 
 /**
  * Register image-related commands with the CLI

@@ -1,5 +1,5 @@
 // Web-specific Venice AI client implementation
-import { VeniceAI, VeniceClientConfig, GenerateImageResponse } from '@venice-ai/core';
+import { VeniceAI, VeniceClientConfig, GenerateImageResponse } from '@venice-dev-tools/core';
 
 /**
  * Web implementation of the Venice AI client.

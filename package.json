@@ -4,7 +4,7 @@
   "private": true,
   "description": "Venice AI SDK Monorepo",
   "scripts": {
-    "build": "pnpm recursive run build",
+    "build": "cd venice-ai-sdk && pnpm build",
     "clean": "pnpm recursive run clean",
     "dev": "pnpm recursive run dev",
     "lint": "pnpm recursive run lint",

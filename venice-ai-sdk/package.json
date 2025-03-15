@@ -7,7 +7,7 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm install && cd packages/core && npm install && cd ../node && npm install && cd ../web && npm install && cd ../../ && npm run build:packages",
+    "build": "PNPM_CONFIG_AUTO_INSTALL_PEERS=true pnpm install && cd packages/core && pnpm install && pnpm run build && cd ../node && pnpm install && pnpm run build && cd ../web && pnpm install && pnpm run build && cd ../../",
     "build:packages": "pnpm -r run build",
     "clean": "pnpm -r run clean",
     "dev": "pnpm -r run dev",
