@@ -1,0 +1,52 @@
+{
+  "name": "@venice-ai/node",
+  "version": "2.0.0",
+  "description": "Node.js implementation of the Venice AI SDK",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "venice": "bin/venice.js"
+  },
+  "files": [
+    "dist",
+    "bin"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts src/cli/index.ts --format cjs,esm --dts --clean",
+    "dev": "tsup src/index.ts src/cli/index.ts --format cjs,esm --dts --clean --watch",
+    "lint": "eslint \"src/**/*.ts\"",
+    "clean": "rimraf dist"
+  },
+  "keywords": [
+    "venice",
+    "ai",
+    "sdk",
+    "api",
+    "cli"
+  ],
+  "author": "Venice AI",
+  "license": "MIT",
+  "dependencies": {
+    "@venice-ai/core": "workspace:*",
+    "chalk": "^4.1.2",
+    "commander": "^11.1.0",
+    "inquirer": "^8.2.6",
+    "ora": "^5.4.1",
+    "table": "^6.8.1"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^8.2.10",
+    "@types/node": "^20.10.6",
+    "@typescript-eslint/eslint-plugin": "^6.16.0",
+    "@typescript-eslint/parser": "^6.16.0",
+    "eslint": "^8.56.0",
+    "rimraf": "^5.0.5",
+    "tsup": "^8.0.1",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

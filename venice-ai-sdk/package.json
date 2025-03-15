@@ -1,0 +1,33 @@
+{
+  "name": "venice-ai-sdk",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Official SDK for the Venice AI API",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "pnpm -r run build",
+    "clean": "pnpm -r run clean",
+    "dev": "pnpm -r run dev",
+    "lint": "pnpm -r run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+  },
+  "keywords": [
+    "venice",
+    "ai",
+    "sdk",
+    "api"
+  ],
+  "author": "Venice AI",
+  "license": "MIT",
+  "devDependencies": {
+    "@changesets/cli": "^2.27.1",
+    "@types/node": "^20.10.6",
+    "pdfkit": "^0.16.0",
+    "prettier": "^3.1.1",
+    "turbo": "^1.11.2",
+    "typescript": "^5.3.3"
+  },
+  "packageManager": "pnpm"
+}

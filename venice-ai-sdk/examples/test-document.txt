@@ -1,0 +1,33 @@
+Venice AI SDK - PDF Processing Test Document
+
+This is a sample document to test the PDF processing capabilities of the Venice AI SDK.
+
+The Venice AI SDK v2.1 introduces enhanced PDF processing with three modes:
+
+1. Image mode: Send the PDF as an image (default behavior)
+2. Text mode: Extract text from the PDF and send as text
+3. Both mode: Extract both text and images, sending multiple content items
+
+Benefits of different modes:
+
+- Image mode is best for PDFs with complex layouts, charts, or diagrams
+- Text mode is best for text-heavy documents like research papers or articles
+- Both mode provides the most comprehensive analysis but uses more tokens
+
+Example usage in code:
+
+```typescript
+// Process a PDF file with different modes
+const imageContent = await venice.utils.processFile(pdfPath);
+const textContent = await venice.utils.processFile(pdfPath, { pdfMode: 'text' });
+const bothContent = await venice.utils.processFile(pdfPath, { pdfMode: 'both' });
+```
+
+Example usage in CLI:
+
+```bash
+# Process PDF as text
+venice chat completion --model llama-3.3-70b --attach document.pdf --pdf-mode text
+```
+
+This document can be used to test the different PDF processing modes and compare their results.

@@ -1,0 +1,83 @@
+sequenceDiagram
+    participant App as Application
+    participant VeniceAI as VeniceAI
+    participant Registry as EndpointRegistry
+    participant Endpoint as Endpoint
+    participant HttpClient as HttpClient
+    participant API as Venice AI API
+    participant CLI as CLI
+    participant ConfigMgr as ConfigManager
+    
+    %% 1. SDK Initialization with Endpoint Registry
+    App->>VeniceAI: new VeniceAI({ apiKey, ... })
+    VeniceAI->>VeniceAI: initialize configuration
+    VeniceAI->>HttpClient: create client instance
+    VeniceAI->>Registry: create registry
+    Registry->>Registry: register built-in endpoints
+    VeniceAI->>VeniceAI: initialize API modules
+    opt Endpoint Discovery
+        VeniceAI->>API: GET /api/v1/documentation
+        API-->>VeniceAI: Return API documentation
+        VeniceAI->>Registry: registerEndpoints(discoveredEndpoints)
+    end
+    VeniceAI-->>App: Return initialized SDK
+    
+    %% 2. Endpoint Registration
+    App->>VeniceAI: registerEndpoint({ name, path, method, ... })
+    VeniceAI->>Registry: registerEndpoint(definition)
+    Registry->>Registry: validate and store definition
+    Registry->>Registry: create endpoint instance
+    Registry-->>VeniceAI: Endpoint registered
+    VeniceAI-->>App: Success confirmation
+    
+    %% 3. API Call Using Standard Endpoint
+    App->>VeniceAI: venice.chat.completions.create({ messages, model })
+    VeniceAI->>Registry: getEndpoint("chat.completions")
+    Registry-->>VeniceAI: Return endpoint instance
+    VeniceAI->>Endpoint: call({ messages, model })
+    Endpoint->>Endpoint: validate(params)
+    Endpoint->>HttpClient: request("POST", "/chat/completions", data)
+    HttpClient->>API: POST /api/v1/chat/completions
+    API-->>HttpClient: Return completion response
+    HttpClient-->>Endpoint: Return raw response
+    Endpoint->>Endpoint: parseResponse(response, schema)
+    Endpoint-->>VeniceAI: Return ChatCompletion object
+    VeniceAI-->>App: Return ChatCompletion object
+    
+    %% 4. API Call Using Dynamic Endpoint
+    App->>VeniceAI: venice.endpoint("new_feature").call(params)
+    VeniceAI->>Registry: getEndpoint("new_feature")
+    Registry-->>VeniceAI: Return endpoint instance
+    VeniceAI->>Endpoint: call(params)
+    Endpoint->>Endpoint: validate(params)
+    Endpoint->>HttpClient: request(method, path, data)
+    HttpClient->>API: API Request
+    API-->>HttpClient: Return API response
+    HttpClient-->>Endpoint: Return raw response
+    Endpoint->>Endpoint: parseResponse(response, schema)
+    Endpoint-->>VeniceAI: Return typed response
+    VeniceAI-->>App: Return typed response
+    
+    %% 5. CLI Dynamic Command Discovery
+    CLI->>ConfigMgr: getApiKey()
+    ConfigMgr-->>CLI: Return stored API key
+    CLI->>VeniceAI: new VeniceAI({ apiKey })
+    CLI->>Registry: listEndpoints()
+    Registry-->>CLI: Return registered endpoints
+    CLI->>CLI: buildCommandsFromRegistry()
+    
+    %% 6. CLI Command Execution with Versioning
+    CLI->>VeniceAI: chat.completions.create({
+        messages, 
+        version: "v2"
+    })
+    VeniceAI->>Registry: getEndpoint("chat.completions")
+    Registry-->>VeniceAI: Return endpoint instance
+    VeniceAI->>Endpoint: call with version header
+    Endpoint->>HttpClient: request with version header
+    HttpClient->>API: POST /api/v2/chat/completions
+    API-->>HttpClient: Return v2 completion
+    HttpClient-->>Endpoint: Return raw response
+    Endpoint->>Endpoint: parseResponse(response, schema)
+    Endpoint-->>VeniceAI: Return ChatCompletion
+    VeniceAI-->>CLI: Return ChatCompletion

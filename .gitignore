@@ -1,46 +1,64 @@
+# Dependencies
 node_modules/
 dist/
 build/
 out/
 bin/
 obj/
+
+# Build artifacts
 *.o
 *.exe
 *.log
 logs/
+
+# Environment variables
 .env
 .env.local
 .env.production
 .env.development
+
+# OS and IDE files
 .DS_Store
 .idea/
 *.iml
 .vscode/
 .vscode/extensions.json
-.temp/
-*.tmp
-coverage/
-CMakeFiles/
-CMakeCache.txt
-yarn-error.log
-npm-debug.log
-*~
-*.bak
-*.swp
 Thumbs.db
 ehthumbs.db
 Desktop.ini
-*.local
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
-.sass-cache/
-.vite_opt_cache/
+*.user
+*.code-workspace
+
+# Temporary files
+.temp/
+*.tmp
+*~
+*.bak
+*.swp
+*.local
+
+# Test and coverage
+coverage/
 test-results/
 *.coverage
 *.lcov
-*.user
-*.code-workspace
+
+# Build tools
+CMakeFiles/
+CMakeCache.txt
+.sass-cache/
+.vite_opt_cache/
+
+# Package manager logs
+yarn-error.log
+npm-debug.log
 pnpm-lock.yaml
+
+# Turbo build tool
+.turbo/

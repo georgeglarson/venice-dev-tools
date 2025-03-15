@@ -1,0 +1,11 @@
+This is a test document for the Venice AI SDK vision capabilities.
+
+The Venice AI SDK now supports multimodal content, allowing users to attach images, text files, and PDFs to chat messages.
+
+Key features:
+- Attach files to chat messages
+- Support for multiple file types
+- Automatic vision model selection
+- Interactive mode support
+
+This text file will be used to test the text file processing functionality.

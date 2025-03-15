@@ -1,0 +1,92 @@
+Note: Unnecessary use of -X or --request, POST is already inferred.
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0* Host api.venice.ai:443 was resolved.
+* IPv6: 2606:4700::6812:1ce2, 2606:4700::6812:1de2
+* IPv4: 104.18.28.226, 104.18.29.226
+*   Trying 104.18.28.226:443...
+* Connected to api.venice.ai (104.18.28.226) port 443
+* ALPN: curl offers h2,http/1.1
+} [5 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+} [512 bytes data]
+*  CAfile: /usr/lib/ssl/cert.pem
+*  CApath: /usr/lib/ssl/certs
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+{ [122 bytes data]
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+{ [19 bytes data]
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+{ [2522 bytes data]
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+{ [79 bytes data]
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+{ [52 bytes data]
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+} [1 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+} [52 bytes data]
+* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384 / X25519 / id-ecPublicKey
+* ALPN: server accepted h2
+* Server certificate:
+*  subject: CN=venice.ai
+*  start date: Mar  2 00:29:12 2025 GMT
+*  expire date: May 31 01:29:10 2025 GMT
+*  subjectAltName: host "api.venice.ai" matched cert's "*.venice.ai"
+*  issuer: C=US; O=Google Trust Services; CN=WE1
+*  SSL certificate verify ok.
+*   Certificate level 0: Public key type EC/prime256v1 (256/128 Bits/secBits), signed using ecdsa-with-SHA256
+*   Certificate level 1: Public key type EC/prime256v1 (256/128 Bits/secBits), signed using ecdsa-with-SHA384
+*   Certificate level 2: Public key type EC/secp384r1 (384/192 Bits/secBits), signed using ecdsa-with-SHA384
+} [5 bytes data]
+* using HTTP/2
+* [HTTP/2] [1] OPENED stream for https://api.venice.ai/api/v1/chat/completions
+* [HTTP/2] [1] [:method: POST]
+* [HTTP/2] [1] [:scheme: https]
+* [HTTP/2] [1] [:authority: api.venice.ai]
+* [HTTP/2] [1] [:path: /api/v1/chat/completions]
+* [HTTP/2] [1] [user-agent: curl/8.5.0]
+* [HTTP/2] [1] [accept: */*]
+* [HTTP/2] [1] [content-type: application/json]
+* [HTTP/2] [1] [authorization: Bearer 6EX7ki7GZAtzxnn0D9kkR4KpMpJ_rL9UuSalpfvznl]
+* [HTTP/2] [1] [content-length: 3358581]
+} [5 bytes data]
+> POST /api/v1/chat/completions HTTP/2
+> Host: api.venice.ai
+> User-Agent: curl/8.5.0
+> Accept: */*
+> Content-Type: application/json
+> Authorization: Bearer 6EX7ki7GZAtzxnn0D9kkR4KpMpJ_rL9UuSalpfvznl
+> Content-Length: 3358581
+> 
+} [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [230 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [230 bytes data]
+* old SSL session ID is stale, removing
+{ [5 bytes data]
+* We are completely uploaded and fine
+{ [5 bytes data]
+100 3279k    0     0  100 3279k      0  2725k  0:00:01  0:00:01 --:--:-- 2726k< HTTP/2 400 
+< date: Sun, 09 Mar 2025 16:08:51 GMT
+< content-type: application/json
+< access-control-allow-credentials: true
+< access-control-allow-headers: *
+< access-control-allow-methods: GET,OPTIONS,PATCH,DELETE,POST,PUT
+< access-control-allow-origin: *
+< access-control-expose-headers: *
+< cache-control: public, max-age=0, must-revalidate
+< strict-transport-security: max-age=63072000
+< vary: RSC, Next-Router-State-Tree, Next-Router-Prefetch
+< x-matched-path: /api/v1/chat/completions
+< x-vercel-cache: MISS
+< x-vercel-id: iad1::iad1::ss8d6-1741536529932-0a869c3bc59c
+< cf-cache-status: DYNAMIC
+< server: cloudflare
+< cf-ray: 91dbd54fa83f8cbd-EWR
+< 
+{ [325 bytes data]
+100 3280k    0   325  100 3279k    186  1885k  0:00:01  0:00:01 --:--:-- 1885k100 3280k    0   325  100 3279k    186  1885k  0:00:01  0:00:01 --:--:-- 1885k
+* Connection #0 to host api.venice.ai left intact

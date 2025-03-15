@@ -1,0 +1,1 @@
+{"error":"Invalid request parameters","details":{"_errors":[],"messages":{"_errors":["Only one image URL is allowed and it must be in the last message."]}},"context":{"errorCode":"INVALID_REQUEST","issues":[{"code":"custom","message":"Only one image URL is allowed and it must be in the last message.","path":["messages"]}]}}
