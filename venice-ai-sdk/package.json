@@ -7,7 +7,8 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm install && pnpm -r run build",
+    "build": "npm install && cd packages/core && npm install && cd ../node && npm install && cd ../web && npm install && cd ../../ && npm run build:packages",
+    "build:packages": "pnpm -r run build",
     "clean": "pnpm -r run clean",
     "dev": "pnpm -r run dev",
     "lint": "pnpm -r run lint",
