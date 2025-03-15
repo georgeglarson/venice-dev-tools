@@ -3,7 +3,7 @@ name: GitHub Pages
 on:
   push:
     branches:
-      - master  # Set this to the branch you want to deploy from
+      - gh-pages  # Changed from master to gh-pages
   workflow_dispatch:
 
 permissions:
