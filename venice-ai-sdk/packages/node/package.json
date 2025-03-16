@@ -1,6 +1,6 @@
 {
   "name": "@venice-dev-tools/node",
-  "version": "2.1.3",
+  "version": "2.1.4",
   "description": "Node.js implementation of the Venice AI unOfficial SDK",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -1,6 +1,6 @@
 {
   "name": "venice-ai-sdk-monorepo",
-  "version": "2.1.3",
+  "version": "2.1.4",
   "description": "Venice AI SDK Monorepo",
   "scripts": {
     "build": "cd venice-ai-sdk && pnpm build",
@@ -27,6 +27,6 @@
   "packageManager": "pnpm@8.14.1",
   "dependencies": {
     "pdf-parse": "^1.1.1",
-    "venice-dev-tools": "^2.1.3"
+    "venice-dev-tools": "^2.1.4"
   }
 }

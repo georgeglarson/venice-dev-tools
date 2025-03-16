@@ -1,17 +1,27 @@
 {
   "name": "venice-dev-tools",
-  "version": "2.1.3",
+  "version": "2.1.4",
   "description": "unOfficial SDK for the Venice AI API",
   "workspaces": [
     "packages/*"
   ],
   "bin": {
-    "venice": "bin/venice.js"
+    "venice": "bin/venice-cli.js"
   },
   "files": [
     "packages",
     "bin"
   ],
+  "scripts": {
+    "build": "PNPM_CONFIG_AUTO_INSTALL_PEERS=true pnpm install && cd packages/core && pnpm install && pnpm run build && cd ../node && pnpm install && pnpm run build && cd ../web && pnpm install && pnpm run build && cd ../../",
+    "build:packages": "pnpm -r run build",
+    "clean": "pnpm -r run clean",
+    "dev": "pnpm -r run dev",
+    "lint": "pnpm -r run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "postinstall": "node -e \"try { require('fs').chmodSync(require('path').join(__dirname, 'bin', 'venice-cli.js'), '755'); console.log('Made CLI executable'); } catch (e) { console.error('Failed to make CLI executable:', e); }\"",
+    "install-cli": "node bin/install-cli.js"
+  },
   "scripts": {
     "build": "PNPM_CONFIG_AUTO_INSTALL_PEERS=true pnpm install && cd packages/core && pnpm install && pnpm run build && cd ../node && pnpm install && pnpm run build && cd ../web && pnpm install && pnpm run build && cd ../../",
     "build:packages": "pnpm -r run build",

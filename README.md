@@ -70,15 +70,26 @@ venice chat interactive
 venice images generate --prompt "A beautiful sunset over Venice" --output sunset.png
 ```
 
-> **Note:** After installing globally, you may need to restart your terminal or open a new terminal window for the `venice` command to be available. If the command is still not found, you can try:
+> **Important:** If the `venice` command is not found after installation, you can run the install-cli script:
 > ```bash
-> # On Linux/macOS
-> export PATH="$PATH:$(npm bin -g)"
-> # Or create a symlink manually
-> sudo ln -s $(npm root -g)/venice-dev-tools/bin/venice.js /usr/local/bin/venice
+> # On Linux/macOS (may require sudo)
+> sudo npx venice-dev-tools install-cli
+> # Or directly from the installed package
+> sudo node $(npm root -g)/venice-dev-tools/bin/install-cli.js
 >
 > # On Windows (run as Administrator)
-> mklink C:\Users\YourUsername\AppData\Roaming\npm\venice.cmd %APPDATA%\npm\node_modules\venice-dev-tools\bin\venice.js
+> npx venice-dev-tools install-cli
+> # Or directly from the installed package
+> node %APPDATA%\npm\node_modules\venice-dev-tools\bin\install-cli.js
+> ```
+>
+> Alternatively, you can manually create a symlink:
+> ```bash
+> # On Linux/macOS
+> sudo ln -s $(npm root -g)/venice-dev-tools/bin/venice-cli.js /usr/local/bin/venice
+>
+> # On Windows (run as Administrator)
+> mklink C:\Users\YourUsername\AppData\Roaming\npm\venice.cmd %APPDATA%\npm\node_modules\venice-dev-tools\bin\venice-cli.js
 > ```
 
 ## ✨ Features
