@@ -1,6 +1,6 @@
 {
   "name": "venice-ai-sdk-monorepo",
-  "version": "0.1.0",
+  "version": "2.1.0",
   "description": "Venice AI SDK Monorepo",
   "scripts": {
     "build": "cd venice-ai-sdk && pnpm build",
