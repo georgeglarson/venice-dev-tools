@@ -60,7 +60,6 @@ venice.saveImageToFile(response.images[0], 'venice-sunset.png');
 # Install globally
 npm install -g venice-dev-tools
 
-# The CLI binary is included in the main package
 # Set your API key
 venice set-key YOUR_API_KEY --global
 
@@ -71,12 +70,15 @@ venice chat interactive
 venice images generate --prompt "A beautiful sunset over Venice" --output sunset.png
 ```
 
-> **Note:** If you encounter issues with the CLI, you may need to manually create a symbolic link to the CLI binary:
+> **Note:** After installing globally, you may need to restart your terminal or open a new terminal window for the `venice` command to be available. If the command is still not found, you can try:
 > ```bash
-> # Create a symlink to the CLI binary
-> ln -s ./node_modules/venice-dev-tools/packages/node/bin/venice.js /usr/local/bin/venice
-> # Or on Windows:
-> # mklink C:\Users\YourUsername\AppData\Roaming\npm\venice.cmd %CD%\node_modules\venice-dev-tools\packages\node\bin\venice.js
+> # On Linux/macOS
+> export PATH="$PATH:$(npm bin -g)"
+> # Or create a symlink manually
+> sudo ln -s $(npm root -g)/venice-dev-tools/bin/venice.js /usr/local/bin/venice
+>
+> # On Windows (run as Administrator)
+> mklink C:\Users\YourUsername\AppData\Roaming\npm\venice.cmd %APPDATA%\npm\node_modules\venice-dev-tools\bin\venice.js
 > ```
 
 ## ✨ Features
