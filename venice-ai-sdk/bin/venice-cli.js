@@ -12,10 +12,10 @@ try {
   console.error('   npm uninstall -g venice-dev-tools');
   console.error('   pnpm add -g venice-dev-tools');
   console.error('   pnpm approve-builds -g');
-  console.error('2. If you prefer npm, try reinstalling:');
-  console.error('   npm uninstall -g venice-dev-tools && npm install -g venice-dev-tools');
+  console.error('2. Try reinstalling:');
+  console.error('   pnpm uninstall -g venice-dev-tools && pnpm add -g venice-dev-tools');
   console.error('3. Try running the fix script:');
-  console.error('   npm explore venice-dev-tools -- npm run fix-cli');
+  console.error('   PACKAGE_DIR=$(pnpm root -g)/venice-dev-tools && pnpm run fix-cli --prefix "$PACKAGE_DIR"');
   console.error('4. Check if the CLI binary is properly linked:');
   console.error('   - On Linux/macOS: ln -s $(npm root -g)/venice-dev-tools/bin/venice-cli.js /usr/local/bin/venice');
   console.error('   - On Windows: mklink C:\\Users\\YourUsername\\AppData\\Roaming\\npm\\venice.cmd %APPDATA%\\npm\\node_modules\\venice-dev-tools\\bin\\venice-cli.js');

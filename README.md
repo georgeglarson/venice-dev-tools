@@ -80,31 +80,11 @@ venice images generate --prompt "A beautiful sunset over Venice" --output sunset
 
 Using pnpm is recommended as it correctly handles workspace dependencies in the package. The `pnpm approve-builds -g` command is necessary to allow the package's postinstall scripts to run, which are required for the CLI to function properly.
 
-#### Alternative: Install with npm
+#### Alternative Fixes
 
-```bash
-# Install globally with npm
-npm install -g venice-dev-tools
-```
-
-> **Important:** When installing with npm, you might encounter dependency issues due to workspace dependencies. If the `venice` command fails with errors about missing modules like `@venice-dev-tools/core`, try one of these solutions:
+> **Important:** If the `venice` command is not found after installation, try one of these solutions:
 >
-> **Option 1: Switch to pnpm (recommended):**
-> ```bash
-> # Install pnpm if you don't have it
-> npm install -g pnpm
->
-> # Uninstall the npm version
-> npm uninstall -g venice-dev-tools
->
-> # Install with pnpm
-> pnpm add -g venice-dev-tools
->
-> # Approve build scripts
-> pnpm approve-builds -g
-> ```
->
-> **Option 2: Download and run the fix script (requires sudo):**
+> **Option 1: Download and run the fix script (requires sudo):**
 > ```bash
 > # Download the fix script
 > curl -O https://raw.githubusercontent.com/georgeglarson/venice-dev-tools/main/scripts/fix-venice-cli.sh
@@ -114,7 +94,7 @@ npm install -g venice-dev-tools
 > sudo ./fix-venice-cli.sh
 > ```
 >
-> **Option 3: Download and run the simple fix script (no sudo required):**
+> **Option 2: Download and run the simple fix script (no sudo required):**
 > ```bash
 > # Download the simple fix script
 > curl -O https://raw.githubusercontent.com/georgeglarson/venice-dev-tools/main/scripts/fix-venice-cli-simple.sh
@@ -124,21 +104,23 @@ npm install -g venice-dev-tools
 > ./fix-venice-cli-simple.sh
 > ```
 >
-> **Option 4: Run the fix-cli script from the package:**
+> **Option 3: Run the fix-cli script from the package:**
 > ```bash
+> # Find the package directory
+> PACKAGE_DIR=$(pnpm root -g)/venice-dev-tools
+>
 > # Run the fix-cli script
-> npm explore venice-dev-tools -- npm run fix-cli
+> pnpm run fix-cli --prefix "$PACKAGE_DIR"
 > ```
 >
-> **Option 5: Manually create a symlink:**
+> **Option 4: Manually create a symlink:**
 > ```bash
 > # On Linux/macOS
-> sudo ln -s $(npm root -g)/venice-dev-tools/bin/venice-cli.js /usr/local/bin/venice
+> sudo ln -s $(pnpm root -g)/venice-dev-tools/bin/venice-cli.js /usr/local/bin/venice
 >
 > # On Windows (run as Administrator)
 > mklink C:\Users\YourUsername\AppData\Roaming\npm\venice.cmd %APPDATA%\npm\node_modules\venice-dev-tools\bin\venice-cli.js
 > ```
-
 ## ✨ Features
 
 - **🤖 Advanced AI Models**: Access to Venice AI's powerful LLMs including Llama 3.3, Claude, and more
