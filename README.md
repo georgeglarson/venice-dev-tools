@@ -15,11 +15,18 @@ The unOfficial SDK for the [Venice AI](https://venice.ai) platform. This SDK pro
 ### Installation
 
 ```bash
-# Node.js
+# Install the complete SDK (includes all packages)
+npm install venice-dev-tools
+
+# Or install individual packages
+# Node.js only
 npm install @venice-dev-tools/node
 
-# Browser
+# Browser only
 npm install @venice-dev-tools/web
+
+# Core functionality only
+npm install @venice-dev-tools/core
 ```
 
 ### Chat Completion Example
@@ -125,6 +132,32 @@ const chatResponse = await venice.pdf.chat({
 });
 
 console.log(chatResponse.answer);
+
+// Process PDF with different modes
+// 1. As image (default)
+const imageContent = await venice.utils.processFile('./document.pdf');
+
+// 2. As text
+const textContent = await venice.utils.processFile('./document.pdf', { pdfMode: 'text' });
+
+// 3. As both text and image
+const bothContent = await venice.utils.processFile('./document.pdf', { pdfMode: 'both' });
+```
+
+#### CLI PDF Processing
+
+```bash
+# Process PDF as image (default mode)
+venice chat completion --model llama-3.3-70b --attach document.pdf --prompt "Summarize this document"
+
+# Process PDF as text
+venice chat completion --model llama-3.3-70b --attach document.pdf --pdf-mode text --prompt "Summarize this document"
+
+# Process PDF as both text and image
+venice chat completion --model llama-3.3-70b --attach document.pdf --pdf-mode both --prompt "Summarize this document"
+
+# Interactive chat with PDF processing as both text and image
+venice chat interactive --attach document.pdf --pdf-mode both
 ```
 
 #### API Key Management
