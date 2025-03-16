@@ -1,6 +1,8 @@
 ---
 layout: default
-title: Troubleshooting - Venice Dev Tools
+title: Troubleshooting - Venice Dev Tools | Common Issues and Solutions
+description: "Comprehensive troubleshooting guide for Venice Dev Tools SDK. Solutions for authentication issues, rate limiting, network problems, PDF processing errors, and more."
+keywords: "Venice Dev Tools troubleshooting, Venice AI SDK errors, API key issues, rate limit errors, PDF processing errors"
 ---
 
 # Troubleshooting
@@ -277,9 +279,113 @@ This guide helps you resolve common issues you might encounter when using the Ve
 
 ## PDF Processing Issues
 
-### PDF Processing Fails
+### Text Extraction Error
 
-**Symptom:** PDF processing fails with errors.
+**Symptom:** You receive an error like "Error extracting text from PDF: ENOENT: no such file or directory, open './test/data/05-versions-space.pdf'" when using `--pdf-mode text` or `--pdf-mode both`.
+
+**Solution:**
+
+1. This is a known issue with the current implementation. Try these workarounds:
+
+   ```javascript
+   // Option 1: Use an external PDF text extraction tool
+   // Extract text from PDF using an external tool like pdftotext
+   const { execSync } = require('child_process');
+   const extractedText = execSync(`pdftotext document.pdf -`).toString();
+   
+   // Then use the extracted text with the API
+   const response = await venice.chat.createCompletion({
+     model: 'llama-3.3-70b',
+     messages: [
+       { role: 'user', content: `Analyze this text: ${extractedText}` }
+     ]
+   });
+   ```
+
+2. For CLI usage, extract the text first and then use it:
+
+   ```bash
+   # Extract text from PDF
+   pdftotext document.pdf document.txt
+   
+   # Then use the text file
+   venice chat --attach document.txt "Summarize this document"
+   ```
+
+### PDF-to-Image Conversion Issues
+
+**Symptom:** The default image mode doesn't actually convert PDFs to images but sends them as binary data, which may not work well with all models.
+
+**Solution:**
+
+1. Use an external library for proper PDF-to-image conversion:
+
+   ```javascript
+   // Using pdf-img-convert library
+   const pdfImgConvert = require('pdf-img-convert');
+   const pdfImages = await pdfImgConvert.convert('./document.pdf', {
+     width: 1024,
+     height: 1450
+   });
+   
+   // Save the first page as PNG
+   fs.writeFileSync('document-page-1.png', pdfImages[0]);
+   
+   // Then use the image with a vision model
+   const imageBuffer = fs.readFileSync('document-page-1.png');
+   const base64Image = imageBuffer.toString('base64');
+   ```
+
+2. For CLI usage, convert the PDF to images first:
+
+   ```bash
+   # Using ImageMagick
+   convert -density 150 document.pdf -quality 90 document.png
+   
+   # Then use the image
+   venice chat --attach document.png "Analyze this image"
+   ```
+
+### Multiple File Attachments Alternative
+
+**Symptom:** PDF processing modes don't work as expected.
+
+**Solution:**
+
+1. Use multiple file attachments as an alternative:
+
+   ```javascript
+   // Extract text from PDF using an external tool
+   const extractedText = fs.readFileSync('document-text.txt', 'utf8');
+   
+   // Convert PDF to image using an external tool
+   const imageBuffer = fs.readFileSync('document-image.png');
+   
+   // Send both to the model
+   const response = await venice.chat.createCompletion({
+     model: 'llama-3.3-70b',
+     messages: [
+       {
+         role: 'user',
+         content: [
+           { type: 'text', text: 'Analyze this document: ' + extractedText },
+           { type: 'image', image: imageBuffer.toString('base64') }
+         ]
+       }
+     ]
+   });
+   ```
+
+2. For CLI usage:
+
+   ```bash
+   # Attach both a text file and an image file
+   venice chat --attach ./document.txt,./document.png --prompt "Analyze these files"
+   ```
+
+### General PDF Processing Issues
+
+**Symptom:** PDF processing fails with other errors.
 
 **Solution:**
 

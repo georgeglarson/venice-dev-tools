@@ -1,6 +1,8 @@
 ---
 layout: default
-title: Venice Dev Tools CLI Reference
+title: Venice Dev Tools CLI Reference | Command Line Interface Guide
+description: "Complete reference for the Venice Dev Tools CLI. Learn how to use the command line interface for chat completions, image generation, PDF processing, and more."
+keywords: "Venice Dev Tools CLI, Venice AI command line, chat CLI, image generation CLI, PDF processing CLI"
 ---
 
 # Venice Dev Tools CLI Reference
@@ -40,6 +42,8 @@ Options:
 - `--system <message>`: Set a system message
 - `--stream`: Enable streaming mode for real-time responses
 - `--web-search`: Enable web search capability
+- `--attach <files>`: Attach files to the message (comma-separated paths)
+- `--pdf-mode <mode>`: How to process PDF files (image, text, or both) (default: image)
 
 ### Image Generation
 
@@ -100,6 +104,38 @@ Enable web search capability for more up-to-date information:
 
 ```bash
 venice chat --web-search "What are the latest developments in AI?"
+```
+
+### PDF Processing
+
+Process PDF documents with different modes:
+
+```bash
+# Process PDF as binary data (default mode)
+venice chat --attach document.pdf "Summarize this document"
+
+# Process PDF as text
+venice chat --attach document.pdf --pdf-mode text "Summarize this document"
+
+# Process PDF as both text and binary data
+venice chat --attach document.pdf --pdf-mode both "Summarize this document"
+```
+
+For proper PDF-to-image conversion, you'll need to convert the PDF first:
+
+```bash
+# Using ImageMagick (if installed)
+convert -density 150 document.pdf -quality 90 document.png
+
+# Then use the converted image
+venice chat --attach document.png "Analyze this image"
+```
+
+You can also attach multiple files to provide both text and image context:
+
+```bash
+# Attach both a text file and an image file
+venice chat --attach "document.txt,image.png" "Analyze these files"
 ```
 
 ### Piping and Redirection

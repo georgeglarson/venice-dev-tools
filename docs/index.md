@@ -1,6 +1,8 @@
 ---
 layout: default
-title: Venice Dev Tools Documentation
+title: Venice Dev Tools Documentation | Official SDK for Venice AI API
+description: "Comprehensive documentation for Venice Dev Tools, the official SDK for interacting with Venice AI API. Features include chat completions, image generation, PDF processing, and more."
+keywords: "Venice Dev Tools, Venice AI SDK, AI API, LLM API, chat completion API, image generation, PDF processing"
 ---
 
 # Venice Dev Tools Documentation
@@ -18,16 +20,27 @@ The Venice Dev Tools allows you to interact with the Venice AI API, which provid
 
 ### Installation
 
-Install the Venice Dev Tools using npm:
+Install the Venice Dev Tools SDK using npm:
 
 ```bash
+# Install the complete SDK (includes all packages)
 npm install venice-dev-tools
+
+# Or install individual packages
+# Node.js only
+npm install @venice-dev-tools/node
+
+# Browser only
+npm install @venice-dev-tools/web
+
+# Core functionality only
+npm install @venice-dev-tools/core
 ```
 
 Or install globally to use the CLI:
 
 ```bash
-npm install -g venice-dev-tools
+npm install -g @venice-dev-tools/node
 ```
 
 ### Authentication
@@ -173,7 +186,7 @@ venice chat "Tell me about AI"</code></pre>
 - **Error Handling**: Comprehensive error handling with specific error classes
 - **Rate Limiting**: Automatic rate limit tracking and handling
 - **Debug Logging**: Robust logging system with multiple log levels and runtime configuration
-- **PDF Processing**: Process PDF documents in different modes (image, text, or both)
+- **PDF Processing**: Process PDF documents in different modes (binary data, text extraction, or both) with support for external PDF-to-image conversion
 - **Vision/Multimodal**: Send both text and images to vision-capable models
 
 ## Privacy-First Approach

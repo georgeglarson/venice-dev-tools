@@ -1,6 +1,8 @@
 ---
 layout: default
-title: Character Interaction - Venice Dev Tools
+title: Character Interaction - Venice Dev Tools | AI Personality Guide
+description: "Learn how to interact with Venice AI's predefined characters. Enhance your conversational experiences with specialized AI personalities for education, creative writing, technical support, and more."
+keywords: "Venice AI characters, AI personalities, character interaction, specialized AI, Venice Dev Tools characters"
 ---
 
 # Character Interaction

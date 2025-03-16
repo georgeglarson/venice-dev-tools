@@ -1,6 +1,8 @@
 ---
 layout: default
-title: Examples - Venice Dev Tools
+title: Examples - Venice Dev Tools | Practical SDK Implementation
+description: "Practical code examples for Venice Dev Tools SDK implementation. Learn how to use chat completions, streaming, image generation, character interaction, PDF processing, and more."
+keywords: "Venice Dev Tools examples, Venice AI SDK code, chat examples, streaming examples, image generation, PDF processing examples"
 ---
 
 # Code Examples

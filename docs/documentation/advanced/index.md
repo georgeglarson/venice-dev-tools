@@ -1,6 +1,8 @@
 ---
 layout: default
-title: Advanced Topics - Venice Dev Tools
+title: Advanced Topics - Venice Dev Tools | Expert SDK Usage
+description: "Advanced usage guide for Venice Dev Tools SDK. Learn about streaming, error handling, rate limiting, function calling, vision models, PDF processing, and more."
+keywords: "Venice Dev Tools advanced, Venice AI SDK streaming, error handling, rate limiting, function calling, vision models, PDF processing"
 ---
 
 # Advanced Topics

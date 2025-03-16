@@ -1,6 +1,8 @@
 ---
 layout: default
-title: API Reference - Venice Dev Tools
+title: API Reference - Venice Dev Tools | Complete SDK Documentation
+description: "Comprehensive API reference for Venice Dev Tools SDK. Detailed documentation for Chat API, Image API, Models API, API Keys, Characters, and more."
+keywords: "Venice Dev Tools API, Venice AI SDK, Chat API, Image API, Models API, API Keys, Characters, VVV Token"
 ---
 
 # API Reference
@@ -202,7 +204,7 @@ The API Keys API allows you to manage your Venice AI API keys.
 List all your API keys.
 
 ```javascript
-const keys = await venice.keys.list();
+const keys = await venice.apiKeys.list();
 ```
 
 #### `create(options)`
@@ -210,7 +212,7 @@ const keys = await venice.keys.list();
 Create a new API key.
 
 ```javascript
-const key = await venice.keys.create({
+const key = await venice.apiKeys.create({
   name: 'My New API Key',
   expiration: '30d'
 });
@@ -221,7 +223,7 @@ const key = await venice.keys.create({
 Delete an API key.
 
 ```javascript
-await venice.keys.delete('key-123456789');
+await venice.apiKeys.delete('key-123456789');
 ```
 
 #### `rateLimits()`
@@ -229,8 +231,10 @@ await venice.keys.delete('key-123456789');
 Get rate limit information for your API keys.
 
 ```javascript
-const limits = await venice.keys.rateLimits();
+const limits = await venice.apiKeys.rateLimits();
 ```
+
+> **Note:** The API Keys endpoint can be accessed via both `venice.apiKeys` and `venice.keys` for backward compatibility, but `venice.apiKeys` is the recommended approach.
 
 ## Characters {#characters}
 
