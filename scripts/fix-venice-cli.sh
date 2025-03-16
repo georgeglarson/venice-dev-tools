@@ -51,6 +51,21 @@ EOF
 chmod +x "$PACKAGE_DIR/bin/venice-cli.js"
 echo "Made CLI script executable"
 
+# Install dependencies for the node package
+NODE_PACKAGE_DIR="$PACKAGE_DIR/packages/node"
+if [ -d "$NODE_PACKAGE_DIR" ]; then
+  echo "Installing dependencies for the node package..."
+  cd "$NODE_PACKAGE_DIR" && npm install --no-save
+  echo "Successfully installed node package dependencies"
+else
+  echo "Warning: Node package directory not found: $NODE_PACKAGE_DIR"
+fi
+
+# Install dependencies in the main package
+echo "Installing dependencies in the main package..."
+cd "$PACKAGE_DIR" && npm install --no-save
+echo "Successfully installed main package dependencies"
+
 # Create symlink to the CLI script
 BIN_DIR="/usr/local/bin"
 if [ -d "$BIN_DIR" ]; then

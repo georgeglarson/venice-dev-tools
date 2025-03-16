@@ -9,6 +9,22 @@ try {
   const cliPath = path.join(__dirname, 'venice-cli.js');
   fs.chmodSync(cliPath, '755');
   console.log(`Made CLI executable: ${cliPath}`);
+  
+  // Install dependencies for the node package
+  const nodePackagePath = path.join(__dirname, '..', 'packages', 'node');
+  const nodeModulesPath = path.join(nodePackagePath, 'node_modules');
+  
+  if (!fs.existsSync(nodeModulesPath)) {
+    console.log('Installing node package dependencies...');
+    try {
+      execSync(`cd "${nodePackagePath}" && npm install --no-save`, { stdio: 'inherit' });
+      console.log('Successfully installed node package dependencies');
+    } catch (installError) {
+      console.error('Failed to install node package dependencies:', installError.message);
+      console.error('You may need to install them manually:');
+      console.error(`cd "${nodePackagePath}" && npm install`);
+    }
+  }
 } catch (error) {
   console.error('Failed to make CLI executable:', error.message);
 }
