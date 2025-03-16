@@ -15,24 +15,17 @@ The unOfficial SDK for the [Venice AI](https://venice.ai) platform. This SDK pro
 ### Installation
 
 ```bash
-# Install the complete SDK (includes all packages)
+# Install the SDK
 npm install venice-dev-tools
-
-# Or install individual packages
-# Node.js only
-npm install @venice-dev-tools/node
-
-# Browser only
-npm install @venice-dev-tools/web
-
-# Core functionality only
-npm install @venice-dev-tools/core
 ```
+
+> **Note:** While the SDK is structured as multiple packages internally, only the main package `venice-dev-tools` is currently published to npm. The individual packages (`@venice-dev-tools/node`, `@venice-dev-tools/web`, `@venice-dev-tools/core`) are not available as separate npm packages yet.
 
 ### Chat Completion Example
 
 ```javascript
-import { VeniceNode } from '@venice-dev-tools/node';
+// Import from the node package within the main package
+import { VeniceNode } from 'venice-dev-tools/packages/node/dist';
 
 // Initialize with your API key
 const venice = new VeniceNode({ apiKey: 'your-api-key' });
@@ -65,8 +58,9 @@ venice.saveImageToFile(response.images[0], 'venice-sunset.png');
 
 ```bash
 # Install globally
-npm install -g @venice-dev-tools/node
+npm install -g venice-dev-tools
 
+# The CLI binary is included in the main package
 # Set your API key
 venice set-key YOUR_API_KEY --global
 
@@ -76,6 +70,14 @@ venice chat interactive
 # Generate an image
 venice images generate --prompt "A beautiful sunset over Venice" --output sunset.png
 ```
+
+> **Note:** If you encounter issues with the CLI, you may need to manually create a symbolic link to the CLI binary:
+> ```bash
+> # Create a symlink to the CLI binary
+> ln -s ./node_modules/venice-dev-tools/packages/node/bin/venice.js /usr/local/bin/venice
+> # Or on Windows:
+> # mklink C:\Users\YourUsername\AppData\Roaming\npm\venice.cmd %CD%\node_modules\venice-dev-tools\packages\node\bin\venice.js
+> ```
 
 ## ✨ Features
 
@@ -104,6 +106,12 @@ Visit our [documentation site](https://georgeglarson.github.io/venice-dev-tools/
 #### Streaming Chat Completions
 
 ```javascript
+// Import from the node package within the main package
+import { VeniceNode } from 'venice-dev-tools/packages/node/dist';
+
+// Initialize with your API key
+const venice = new VeniceNode({ apiKey: 'your-api-key' });
+
 const stream = await venice.chat.createCompletionStream({
   model: 'llama-3.3-70b',
   messages: [{ role: 'user', content: 'Write a short poem about AI' }]
@@ -117,6 +125,12 @@ for await (const chunk of stream) {
 #### PDF Processing
 
 ```javascript
+// Import from the node package within the main package
+import { VeniceNode } from 'venice-dev-tools/packages/node/dist';
+
+// Initialize with your API key
+const venice = new VeniceNode({ apiKey: 'your-api-key' });
+
 // Process a PDF file
 const pdfResponse = await venice.pdf.process({
   file: './document.pdf',
@@ -196,6 +210,12 @@ This approach allows the AI to analyze both textual content and visual elements,
 #### API Key Management
 
 ```javascript
+// Import from the node package within the main package
+import { VeniceNode } from 'venice-dev-tools/packages/node/dist';
+
+// Initialize with your API key
+const venice = new VeniceNode({ apiKey: 'your-api-key' });
+
 // List all API keys
 const keys = await venice.apiKeys.list();
 console.log(keys);
@@ -209,11 +229,30 @@ const newKey = await venice.apiKeys.create({
 
 ## 🧰 Packages
 
-This SDK is organized into multiple packages:
+This SDK is organized into multiple packages internally:
 
-- **[@venice-dev-tools/core](https://www.npmjs.com/package/@venice-dev-tools/core)**: Core functionality and types
-- **[@venice-dev-tools/node](https://www.npmjs.com/package/@venice-dev-tools/node)**: Node.js implementation with CLI
-- **[@venice-dev-tools/web](https://www.npmjs.com/package/@venice-dev-tools/web)**: Browser implementation
+- **@venice-dev-tools/core**: Core functionality and types
+- **@venice-dev-tools/node**: Node.js implementation with CLI
+- **@venice-dev-tools/web**: Browser implementation
+
+> **Note:** Currently, only the main package `venice-dev-tools` is published to npm. The individual packages are included within the main package but are not published separately. To use them, you need to import directly from their paths within the main package.
+
+### TypeScript Configuration
+
+If you're using TypeScript and encounter module resolution issues, add this to your tsconfig.json:
+
+```json
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "venice-dev-tools/*": ["./node_modules/venice-dev-tools/*"]
+    }
+  }
+}
+```
+
+This helps TypeScript find the modules within the main package structure.
 
 ## 🛠️ Development
 
