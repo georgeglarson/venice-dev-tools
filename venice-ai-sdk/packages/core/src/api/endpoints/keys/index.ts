@@ -1,3 +1,11 @@
+/**
+ * API endpoint for API key management operations
+ * 
+ * This module provides functionality for managing API keys, including:
+ * - Standard CRUD operations (list, create, retrieve, update, delete)
+ * - Rate limit operations (get rate limits, get rate limit logs)
+ * - Web3 authentication operations (generate token, create with web3)
+ */
 import { ApiEndpoint } from '../../registry/endpoint';
 import {
   ApiKey,
@@ -24,6 +32,10 @@ export class KeysEndpoint extends ApiEndpoint {
   getEndpointPath(): string {
     return '/api_keys';
   }
+
+  //=============================================================================
+  // Standard CRUD Operations
+  //=============================================================================
 
   /**
    * List all API keys
@@ -138,50 +150,6 @@ export class KeysEndpoint extends ApiEndpoint {
   }
 
   /**
-   * Get API key rate limits
-   * @returns A promise that resolves to the rate limits
-   */
-  public async getRateLimits(): Promise<{ data: any }> {
-    // Emit a request event
-    this.emit('request', { type: 'keys.rateLimits' });
-
-    // Make the API request
-    const response = await this.http.get<{ data: any }>(
-      this.getPath('/rate_limits')
-    );
-
-    // Emit a response event
-    this.emit('response', {
-      type: 'keys.rateLimits',
-      data: { success: true }
-    });
-
-    return response.data;
-  }
-
-  /**
-   * Get API key rate limit logs
-   * @returns A promise that resolves to the rate limit logs
-   */
-  public async getRateLimitLogs(): Promise<ListRateLimitLogsResponse> {
-    // Emit a request event
-    this.emit('request', { type: 'keys.rateLimitLogs' });
-
-    // Make the API request
-    const response = await this.http.get<ListRateLimitLogsResponse>(
-      this.getPath('/rate_limits/log')
-    );
-
-    // Emit a response event
-    this.emit('response', {
-      type: 'keys.rateLimitLogs',
-      data: { count: response.data.data.length }
-    });
-
-    return response.data;
-  }
-
-  /**
    * Delete an API key
    * @param params - The parameters for deleting an API key
    * @returns A promise that resolves when the API key is deleted
@@ -234,6 +202,58 @@ export class KeysEndpoint extends ApiEndpoint {
     });
   }
 
+  //=============================================================================
+  // Rate Limit Operations
+  //=============================================================================
+
+  /**
+   * Get API key rate limits
+   * @returns A promise that resolves to the rate limits
+   */
+  public async getRateLimits(): Promise<{ data: any }> {
+    // Emit a request event
+    this.emit('request', { type: 'keys.rateLimits' });
+
+    // Make the API request
+    const response = await this.http.get<{ data: any }>(
+      this.getPath('/rate_limits')
+    );
+
+    // Emit a response event
+    this.emit('response', {
+      type: 'keys.rateLimits',
+      data: { success: true }
+    });
+
+    return response.data;
+  }
+
+  /**
+   * Get API key rate limit logs
+   * @returns A promise that resolves to the rate limit logs
+   */
+  public async getRateLimitLogs(): Promise<ListRateLimitLogsResponse> {
+    // Emit a request event
+    this.emit('request', { type: 'keys.rateLimitLogs' });
+
+    // Make the API request
+    const response = await this.http.get<ListRateLimitLogsResponse>(
+      this.getPath('/rate_limits/log')
+    );
+
+    // Emit a response event
+    this.emit('response', {
+      type: 'keys.rateLimitLogs',
+      data: { count: response.data.data.length }
+    });
+
+    return response.data;
+  }
+
+  //=============================================================================
+  // Web3 Authentication Operations
+  //=============================================================================
+
   /**
    * Generate a token for web3 authentication
    * @returns A promise that resolves to the generated token
@@ -267,29 +287,13 @@ export class KeysEndpoint extends ApiEndpoint {
    */
   public async createWithWeb3(params: CreateWeb3ApiKeyRequest): Promise<CreateWeb3ApiKeyResponse> {
     // Validate required parameters
-    if (!params.address) {
-      throw new VeniceValidationError('Missing required parameter: address');
-    }
-    if (!params.signature) {
-      throw new VeniceValidationError('Missing required parameter: signature');
-    }
-    if (!params.token) {
-      throw new VeniceValidationError('Missing required parameter: token');
-    }
+    this.validateWeb3Params(params);
 
     // Emit a request event
     this.emit('request', { type: 'keys.createWithWeb3', data: params });
 
     // Prepare request payload
-    const payload = {
-      address: params.address,
-      signature: params.signature,
-      token: params.token,
-      description: params.description || 'Web3 API Key',
-      apiKeyType: params.apiKeyType || 'INFERENCE',
-      expiresAt: params.expiresAt,
-      consumptionLimit: params.consumptionLimit
-    };
+    const payload = this.prepareWeb3Payload(params);
 
     // Make the API request
     const response = await this.http.post<{
@@ -322,6 +326,40 @@ export class KeysEndpoint extends ApiEndpoint {
         created_at: new Date().toISOString(),
         expires_at: response.data.data.expiresAt
       }
+    };
+  }
+
+  /**
+   * Validate web3 authentication parameters
+   * @param params - The parameters to validate
+   * @throws VeniceValidationError if any required parameter is missing
+   */
+  private validateWeb3Params(params: CreateWeb3ApiKeyRequest): void {
+    if (!params.address) {
+      throw new VeniceValidationError('Missing required parameter: address');
+    }
+    if (!params.signature) {
+      throw new VeniceValidationError('Missing required parameter: signature');
+    }
+    if (!params.token) {
+      throw new VeniceValidationError('Missing required parameter: token');
+    }
+  }
+
+  /**
+   * Prepare web3 authentication payload
+   * @param params - The parameters to prepare
+   * @returns The prepared payload
+   */
+  private prepareWeb3Payload(params: CreateWeb3ApiKeyRequest): any {
+    return {
+      address: params.address,
+      signature: params.signature,
+      token: params.token,
+      description: params.description || 'Web3 API Key',
+      apiKeyType: params.apiKeyType || 'INFERENCE',
+      expiresAt: params.expiresAt,
+      consumptionLimit: params.consumptionLimit
     };
   }
 }
