@@ -461,7 +461,7 @@ weatherFunctionExample();
 
 ## PDF Processing {#pdf-processing}
 
-### Basic PDF Processing
+### Processing PDF with Different Modes
 
 ```javascript
 import { VeniceNode } from '@venice-dev-tools/node';
@@ -471,36 +471,100 @@ const venice = new VeniceNode({
   apiKey: 'your-api-key',
 });
 
-async function processPdf() {
-  // Read a PDF file
-  const pdfBuffer = fs.readFileSync('document.pdf');
-  const base64Pdf = pdfBuffer.toString('base64');
+async function processPdfWithDifferentModes() {
+  // Process PDF with different modes
+  console.log('Processing PDF with different modes...');
   
-  // Process the PDF
-  const result = await venice.pdf.process({
-    pdf: base64Pdf,
-    mode: 'text',
-    pages: 'all'
-  });
+  // 1. As binary data (default)
+  console.log('\n1. Processing as binary data (default):');
+  const imageContent = await venice.utils.processFile('./document.pdf');
+  console.log(`Type: ${imageContent.type}`);
+  console.log(`MIME Type: ${imageContent.mimeType}`);
+  console.log(`Data size: ${imageContent.data.length} bytes`);
   
-  console.log('Extracted text:', result.text.substring(0, 500) + '...');
+  // 2. As extracted text
+  console.log('\n2. Processing as text:');
+  const textContent = await venice.utils.processFile('./document.pdf', { pdfMode: 'text' });
+  console.log(`Type: ${textContent.type}`);
+  console.log(`Text length: ${textContent.text.length} characters`);
+  console.log(`Text preview: ${textContent.text.substring(0, 100)}...`);
+  
+  // 3. As both text and binary data
+  console.log('\n3. Processing as both text and binary data:');
+  const bothContent = await venice.utils.processFile('./document.pdf', { pdfMode: 'both' });
+  console.log(`Result is array: ${Array.isArray(bothContent)}`);
+  console.log(`Number of items: ${bothContent.length}`);
   
   // Use the processed content with a model
   const response = await venice.chat.createCompletion({
     model: 'llama-3.3-70b',
     messages: [
       { role: 'system', content: 'Summarize the following document in 3-5 bullet points' },
-      { role: 'user', content: result.text }
+      { role: 'user', content: textContent.text }
     ]
   });
   
-  console.log('Summary:', response.choices[0].message.content);
+  console.log('\nSummary:', response.choices[0].message.content);
 }
 
-processPdf();
+processPdfWithDifferentModes();
 ```
 
-### PDF Question Answering
+### PDF-to-Image Conversion
+
+```javascript
+import { VeniceNode } from '@venice-dev-tools/node';
+import fs from 'fs';
+
+const venice = new VeniceNode({
+  apiKey: 'your-api-key',
+});
+
+async function convertPdfToImage() {
+  // Using pdf-img-convert library (you'll need to install it first)
+  // npm install pdf-img-convert
+  const pdfImgConvert = require('pdf-img-convert');
+  
+  console.log('Converting PDF to images...');
+  const pdfImages = await pdfImgConvert.convert('./document.pdf', {
+    width: 1024,  // output image width in pixels
+    height: 1450  // output image height in pixels
+  });
+  
+  console.log(`Converted ${pdfImages.length} pages to images`);
+  
+  // Save the images
+  for (let i = 0; i < pdfImages.length; i++) {
+    const outputPath = `document-page-${i+1}.png`;
+    fs.writeFileSync(outputPath, pdfImages[i]);
+    console.log(`Saved page ${i+1} to ${outputPath}`);
+  }
+  
+  // Use the first image with a vision model
+  if (pdfImages.length > 0) {
+    const base64Image = pdfImages[0].toString('base64');
+    
+    const response = await venice.chat.createCompletion({
+      model: 'claude-3-opus', // Must be a vision-capable model
+      messages: [
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: 'Analyze this document and tell me what it contains.' },
+            { type: 'image', image: base64Image }
+          ]
+        }
+      ]
+    });
+    
+    console.log('\nImage analysis:', response.choices[0].message.content);
+  }
+}
+
+convertPdfToImage();
+```
+
+### PDF Question Answering with Multiple Modes
 
 ```javascript
 import { VeniceNode } from '@venice-dev-tools/node';
@@ -511,17 +575,17 @@ const venice = new VeniceNode({
   apiKey: 'your-api-key',
 });
 
-async function pdfQuestionAnswering() {
-  // Read a PDF file
-  const pdfBuffer = fs.readFileSync('document.pdf');
-  const base64Pdf = pdfBuffer.toString('base64');
+async function pdfQuestionAnsweringWithMultipleModes() {
+  // Process the PDF in both modes
+  console.log('Processing PDF in both text and image modes...');
+  const bothContent = await venice.utils.processFile('./document.pdf', { pdfMode: 'both' });
   
-  // Process the PDF
-  const result = await venice.pdf.process({
-    pdf: base64Pdf,
-    mode: 'text',
-    pages: 'all'
-  });
+  // Extract text and image content
+  const textContent = bothContent.find(item => item.type === 'text');
+  const imageContent = bothContent.find(item => item.type === 'image');
+  
+  // Convert image content to base64
+  const base64Image = imageContent.data.toString('base64');
   
   console.log('PDF processed. You can now ask questions about it.');
   
@@ -534,15 +598,18 @@ async function pdfQuestionAnswering() {
   // Function to ask a question
   const askQuestion = async (question) => {
     const response = await venice.chat.createCompletion({
-      model: 'llama-3.3-70b',
+      model: 'claude-3-opus', // Vision-capable model
       messages: [
-        { 
-          role: 'system', 
-          content: 'You are a helpful assistant that answers questions based on the provided document.' 
+        {
+          role: 'system',
+          content: 'You are a helpful assistant that answers questions based on the provided document.'
         },
-        { 
-          role: 'user', 
-          content: `Document content:\n${result.text}\n\nQuestion: ${question}` 
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: `Document content:\n${textContent.text}\n\nQuestion: ${question}` },
+            { type: 'image', image: base64Image }
+          ]
         }
       ]
     });
@@ -569,7 +636,7 @@ async function pdfQuestionAnswering() {
   promptUser();
 }
 
-pdfQuestionAnswering();
+pdfQuestionAnsweringWithMultipleModes();
 ```
 
 ## Vision & Multimodal {#vision-multimodal}

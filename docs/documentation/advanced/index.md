@@ -341,7 +341,20 @@ visionExample();
 
 ## PDF Processing {#pdf-processing}
 
-The SDK includes utilities for processing PDF documents.
+The SDK includes utilities for processing PDF documents in different modes to optimize for different types of content.
+
+### PDF Processing Modes
+
+The Venice Dev Tools SDK offers three modes for processing PDF files:
+
+1. **Image Mode (Default)**: Processes the PDF as binary data, treating it as an image
+2. **Text Mode**: Extracts and processes only the text content from the PDF
+3. **Both Mode**: Processes the PDF as both text and binary data, providing the most comprehensive analysis
+
+Each mode has specific use cases:
+- **Image mode** is best for PDFs with complex layouts, charts, or diagrams
+- **Text mode** is best for text-heavy documents like research papers or articles
+- **Both mode** provides the most comprehensive analysis but uses more tokens
 
 ### Basic PDF Processing
 
@@ -354,25 +367,23 @@ const venice = new VeniceNode({
 });
 
 async function processPdf() {
-  // Read a PDF file
-  const pdfBuffer = fs.readFileSync('document.pdf');
-  const base64Pdf = pdfBuffer.toString('base64');
-  
-  // Process the PDF
-  const result = await venice.pdf.process({
-    pdf: base64Pdf,
-    mode: 'text', // 'text', 'image', or 'both'
-    pages: 'all'
-  });
-  
-  console.log('Extracted text:', result.text);
+  // Process PDF with different modes
+  // 1. As binary data (default)
+  // Note: This doesn't convert the PDF to an image format, but sends it as binary data
+  const imageContent = await venice.utils.processFile('./document.pdf');
+
+  // 2. As extracted text
+  const textContent = await venice.utils.processFile('./document.pdf', { pdfMode: 'text' });
+
+  // 3. As both text and binary data
+  const bothContent = await venice.utils.processFile('./document.pdf', { pdfMode: 'both' });
   
   // Use the processed content with a model
   const response = await venice.chat.createCompletion({
     model: 'llama-3.3-70b',
     messages: [
       { role: 'system', content: 'Summarize the following document' },
-      { role: 'user', content: result.text }
+      { role: 'user', content: textContent.text }
     ]
   });
   
@@ -382,26 +393,81 @@ async function processPdf() {
 processPdf();
 ```
 
-### PDF Processing Modes
+### CLI PDF Processing
+
+```bash
+# Process PDF as binary data (default mode)
+venice chat completion --model llama-3.3-70b --attach document.pdf --prompt "Summarize this document"
+
+# Process PDF as text
+venice chat completion --model llama-3.3-70b --attach document.pdf --pdf-mode text --prompt "Summarize this document"
+
+# Process PDF as both text and binary data
+venice chat completion --model llama-3.3-70b --attach document.pdf --pdf-mode both --prompt "Summarize this document"
+```
+
+### Proper PDF-to-Image Conversion
+
+For proper PDF-to-image conversion, you'll need to use external tools:
 
 ```javascript
-// Text mode (extract text only)
-const textResult = await venice.pdf.process({
-  pdf: base64Pdf,
-  mode: 'text',
-  pages: '1-3'
+// Using pdf-img-convert library (you'll need to install it first)
+// npm install pdf-img-convert
+const pdfImgConvert = require('pdf-img-convert');
+const pdfImages = await pdfImgConvert.convert('./document.pdf', {
+  width: 1024,  // output image width in pixels
+  height: 1450  // output image height in pixels
 });
+// pdfImages is an array of Buffer objects, one for each page
+// Save the first page as PNG
+fs.writeFileSync('document-page-1.png', pdfImages[0]);
+```
 
-// Image mode (convert pages to images)
-const imageResult = await venice.pdf.process({
-  pdf: base64Pdf,
-  mode: 'image',
-  pages: '1'
-});
+From the command line:
+```bash
+# Using ImageMagick (if installed)
+convert -density 150 document.pdf -quality 90 document.png
+# Then use the converted image
+venice chat completion --model llama-3.3-70b --attach document.png --prompt "Summarize this image"
+```
 
-// Both modes (extract text and convert to images)
-const bothResult = await venice.pdf.process({
-  pdf: base64Pdf,
-  mode: 'both',
-  pages: 'all'
+### Known Limitations and Workarounds
+
+The current implementation may have some limitations:
+
+1. **Text Extraction Issues**: You might encounter errors when trying to extract text from PDFs
+2. **Image Processing Limitations**: The default image mode doesn't actually convert the PDF to an image format, but sends it as binary data
+
+#### Alternative: Multiple File Attachments
+
+If you encounter issues with PDF processing modes, you can achieve similar functionality by attaching multiple files of different types:
+
+```javascript
+// Extract text from PDF using an external tool
+const extractedText = fs.readFileSync('document-text.txt', 'utf8');
+
+// Convert PDF to image using an external tool
+const imageBuffer = fs.readFileSync('document-image.png');
+
+// Send both to the model
+const response = await venice.chat.createCompletion({
+  model: 'llama-3.3-70b',
+  messages: [
+    {
+      role: 'user',
+      content: [
+        { type: 'text', text: 'Analyze this document: ' + extractedText },
+        { type: 'image', image: imageBuffer.toString('base64') }
+      ]
+    }
+  ]
 });
+```
+
+From the command line:
+```bash
+# Attach both a text file and an image file
+venice chat completion --model llama-3.3-70b --attach ./document.txt,./document.png --prompt "Analyze these files"
+```
+
+This approach allows the AI to analyze both textual content and visual elements, providing a comprehensive response.
