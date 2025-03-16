@@ -1,6 +1,6 @@
 {
   "name": "@venice-dev-tools/web",
-  "version": "2.1.7",
+  "version": "2.1.8",
   "description": "Web implementation of the Venice AI unOfficial SDK",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
