@@ -134,30 +134,49 @@ const chatResponse = await venice.pdf.chat({
 console.log(chatResponse.answer);
 
 // Process PDF with different modes
-// 1. As image (default)
+// 1. As binary data (default)
+// Note: This doesn't convert the PDF to an image format, but sends it as binary data
 const imageContent = await venice.utils.processFile('./document.pdf');
 
-// 2. As text
+// 2. As extracted text
 const textContent = await venice.utils.processFile('./document.pdf', { pdfMode: 'text' });
 
-// 3. As both text and image
+// 3. As both text and binary data
 const bothContent = await venice.utils.processFile('./document.pdf', { pdfMode: 'both' });
+
+// To properly convert PDF to image format, use a dedicated library
+// Example with pdf-img-convert (you'll need to install it first):
+// npm install pdf-img-convert
+const pdfImgConvert = require('pdf-img-convert');
+const pdfImages = await pdfImgConvert.convert('./document.pdf', {
+  width: 1024,  // output image width in pixels
+  height: 1450  // output image height in pixels
+});
+// pdfImages is an array of Buffer objects, one for each page
+// Save the first page as PNG
+fs.writeFileSync('document-page-1.png', pdfImages[0]);
 ```
 
 #### CLI PDF Processing
 
 ```bash
-# Process PDF as image (default mode)
+# Process PDF as binary data (default mode)
 venice chat completion --model llama-3.3-70b --attach document.pdf --prompt "Summarize this document"
 
 # Process PDF as text
 venice chat completion --model llama-3.3-70b --attach document.pdf --pdf-mode text --prompt "Summarize this document"
 
-# Process PDF as both text and image
+# Process PDF as both text and binary data
 venice chat completion --model llama-3.3-70b --attach document.pdf --pdf-mode both --prompt "Summarize this document"
 
-# Interactive chat with PDF processing as both text and image
+# Interactive chat with PDF processing as both text and binary data
 venice chat interactive --attach document.pdf --pdf-mode both
+
+# For proper PDF-to-image conversion, you'll need to convert the PDF first:
+# Using ImageMagick (if installed)
+convert -density 150 document.pdf -quality 90 document.png
+# Then use the converted image
+venice chat completion --model llama-3.3-70b --attach document.png --prompt "Summarize this image"
 ```
 
 #### API Key Management
