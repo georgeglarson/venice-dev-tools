@@ -56,12 +56,17 @@ venice.saveImageToFile(response.images[0], 'venice-sunset.png');
 
 ### CLI Usage
 
+#### Recommended: Install with pnpm
+
 ```bash
-# Install globally
-npm install -g venice-dev-tools
+# Install pnpm if you don't have it
+npm install -g pnpm
+
+# Install venice-dev-tools globally with pnpm
+pnpm add -g venice-dev-tools
 
 # Set your API key
-venice set-key YOUR_API_KEY 
+venice set-key YOUR_API_KEY
 
 # Start an interactive chat session
 venice chat interactive
@@ -70,9 +75,30 @@ venice chat interactive
 venice images generate --prompt "A beautiful sunset over Venice" --output sunset.png
 ```
 
-> **Important:** If the `venice` command is not found after installation, you can use one of these fix scripts:
+Using pnpm is recommended as it correctly handles workspace dependencies in the package.
+
+#### Alternative: Install with npm
+
+```bash
+# Install globally with npm
+npm install -g venice-dev-tools
+```
+
+> **Important:** When installing with npm, you might encounter dependency issues due to workspace dependencies. If the `venice` command fails with errors about missing modules like `@venice-dev-tools/core`, try one of these solutions:
 >
-> **Option 1: Download and run the fix script (requires sudo):**
+> **Option 1: Switch to pnpm (recommended):**
+> ```bash
+> # Install pnpm if you don't have it
+> npm install -g pnpm
+>
+> # Uninstall the npm version
+> npm uninstall -g venice-dev-tools
+>
+> # Install with pnpm
+> pnpm add -g venice-dev-tools
+> ```
+>
+> **Option 2: Download and run the fix script (requires sudo):**
 > ```bash
 > # Download the fix script
 > curl -O https://raw.githubusercontent.com/georgeglarson/venice-dev-tools/main/scripts/fix-venice-cli.sh
@@ -82,7 +108,7 @@ venice images generate --prompt "A beautiful sunset over Venice" --output sunset
 > sudo ./fix-venice-cli.sh
 > ```
 >
-> **Option 2: Download and run the simple fix script (no sudo required):**
+> **Option 3: Download and run the simple fix script (no sudo required):**
 > ```bash
 > # Download the simple fix script
 > curl -O https://raw.githubusercontent.com/georgeglarson/venice-dev-tools/main/scripts/fix-venice-cli-simple.sh
@@ -92,13 +118,13 @@ venice images generate --prompt "A beautiful sunset over Venice" --output sunset
 > ./fix-venice-cli-simple.sh
 > ```
 >
-> **Option 3: Run the fix-cli script from the package:**
+> **Option 4: Run the fix-cli script from the package:**
 > ```bash
 > # Run the fix-cli script
 > npm explore venice-dev-tools -- npm run fix-cli
 > ```
 >
-> **Option 4: Manually create a symlink:**
+> **Option 5: Manually create a symlink:**
 > ```bash
 > # On Linux/macOS
 > sudo ln -s $(npm root -g)/venice-dev-tools/bin/venice-cli.js /usr/local/bin/venice
