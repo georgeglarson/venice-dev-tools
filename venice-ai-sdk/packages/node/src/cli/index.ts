@@ -6,7 +6,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as packageJson from '../../package.json';
 import { VeniceNode } from '../venice-node';
-import { registerChatCommands } from './commands/chat';
+import { registerChatCommands } from './chat';
 import { registerModelsCommands } from './commands/models';
 import { registerKeysCommands } from './commands/keys';
 import { registerImagesCommands } from './commands/images';
