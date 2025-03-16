@@ -1,133 +1,187 @@
 # Venice Dev Tools
 
-The unOfficial SDK for the [Venice AI](https://venice.ai) platform. This SDK provides a simple and elegant way to integrate with Venice AI's API for chat completions, image generation, and more.
+[![npm version](https://img.shields.io/npm/v/@venice-dev-tools/node.svg)](https://www.npmjs.com/package/@venice-dev-tools/node)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue.svg)](https://www.typescriptlang.org/)
 
-## Features
+The unOfficial SDK for the [Venice AI](https://venice.ai) platform. This SDK provides a simple, elegant, and type-safe way to integrate with Venice AI's API for chat completions, image generation, PDF processing, and more.
 
-- 🚀 **Comprehensive API Coverage**: Access all Venice AI's API endpoints including chat, models, images, and API key management
-- 🔌 **Platform-Specific Implementations**: Dedicated packages for Node.js and web environments
-- 🛠️ **Powerful CLI**: Command-line interface for all API functionality
-- ⚡ **Streaming Support**: Real-time streaming for chat completions
-- 🧩 **Extensible Architecture**: Register custom endpoints to extend functionality
+<div align="center">
+  <img src="sunset.png" alt="Venice AI Generated Image" width="400"/>
+</div>
 
-## Installation
+## 🚀 Quick Start
 
-### Node.js
+### Installation
 
 ```bash
+# Node.js
 npm install @venice-dev-tools/node
-# or
-yarn add @venice-dev-tools/node
-# or
-pnpm add @venice-dev-tools/node
-```
 
-### Browser
-
-```bash
+# Browser
 npm install @venice-dev-tools/web
-# or
-yarn add @venice-dev-tools/web
-# or
-pnpm add @venice-dev-tools/web
 ```
 
-## Quick Start
-
-### Node.js
+### Chat Completion Example
 
 ```javascript
 import { VeniceNode } from '@venice-dev-tools/node';
 
-// Create a new client
-const venice = new VeniceNode({
-  apiKey: 'your-api-key'
-});
+// Initialize with your API key
+const venice = new VeniceNode({ apiKey: 'your-api-key' });
 
 // Generate a chat completion
-async function chatExample() {
-  const response = await venice.chat.createCompletion({
-    model: 'llama-3.3-70b',
-    messages: [
-      { role: 'user', content: 'Tell me a joke about AI.' }
-    ]
-  });
-  
-  console.log(response.choices[0].message.content);
-}
+const response = await venice.chat.createCompletion({
+  model: 'llama-3.3-70b',
+  messages: [{ role: 'user', content: 'Explain quantum computing in simple terms' }]
+});
 
-// Generate an image
-async function imageExample() {
-  const response = await venice.images.generate({
-    model: 'fluently-xl',
-    prompt: 'A beautiful sunset over a calm ocean',
-    width: 1024,
-    height: 1024
-  });
-  
-  // Save the image to a file
-  venice.saveImageToFile(response.images[0], 'sunset.png');
-}
+console.log(response.choices[0].message.content);
 ```
 
-### Browser
+### Image Generation Example
 
 ```javascript
-import { VeniceWeb } from '@venice-dev-tools/web';
-
-// Create a new client
-const venice = new VeniceWeb({
-  apiKey: 'your-api-key'
+// Generate an image
+const response = await venice.images.generate({
+  model: 'fluently-xl',
+  prompt: 'A beautiful sunset over Venice, Italy',
+  width: 1024,
+  height: 1024
 });
 
-// Generate a chat completion
-async function chatExample() {
-  const response = await venice.chat.createCompletion({
-    model: 'llama-3.3-70b',
-    messages: [
-      { role: 'user', content: 'Tell me a joke about AI.' }
-    ]
-  });
-  
-  document.getElementById('result').innerText = response.choices[0].message.content;
-}
-
-// Generate an image
-async function imageExample() {
-  const { url } = await venice.generateImageAsUrl({
-    model: 'fluently-xl',
-    prompt: 'A beautiful sunset over a calm ocean',
-    width: 1024,
-    height: 1024
-  });
-  
-  document.getElementById('image').src = url;
-}
+// Save the image (Node.js only)
+venice.saveImageToFile(response.images[0], 'venice-sunset.png');
 ```
 
-## CLI Usage
+### CLI Usage
 
 ```bash
+# Install globally
+npm install -g @venice-dev-tools/node
+
 # Set your API key
 venice set-key YOUR_API_KEY --global
-
-# Chat with an AI model
-venice chat completion --model llama-3.3-70b --prompt "Tell me a joke about AI"
 
 # Start an interactive chat session
 venice chat interactive
 
 # Generate an image
-venice images generate --prompt "A beautiful sunset over a calm ocean" --output sunset.png
-
-# List available models
-venice models list
+venice images generate --prompt "A beautiful sunset over Venice" --output sunset.png
 ```
 
-## API Documentation
+## ✨ Features
 
-For detailed API documentation, please see the [Venice AI API documentation](https://api.venice.ai/doc/api/swagger.yaml).
+- **🤖 Advanced AI Models**: Access to Venice AI's powerful LLMs including Llama 3.3, Claude, and more
+- **🖼️ Image Generation**: Create stunning images with models like Fluently XL
+- **📄 PDF Processing**: Extract, analyze, and chat with PDF documents
+- **🔄 Streaming Support**: Real-time streaming for chat completions
+- **🌐 Cross-Platform**: Works in Node.js and browser environments
+- **⚙️ CLI Tools**: Powerful command-line interface for all API functionality
+- **🔒 Type Safety**: Full TypeScript support with comprehensive type definitions
+- **🧩 Extensible**: Register custom endpoints to extend functionality
 
-## License
+## 📚 Documentation
 
-MIT
+### Comprehensive Guides
+
+Visit our [documentation site](https://georgeglarson.github.io/venice-dev-tools/) for comprehensive guides, API references, and examples.
+
+- [Getting Started Guide](https://georgeglarson.github.io/venice-dev-tools/guides/getting-started.html)
+- [API Reference](https://georgeglarson.github.io/venice-dev-tools/api/client.html)
+- [PDF Processing Guide](https://georgeglarson.github.io/venice-dev-tools/guides/pdf-processing.html)
+- [Migration Guide (v1 to v2)](https://georgeglarson.github.io/venice-dev-tools/guides/migration-v1-to-v2.html)
+
+### Code Examples
+
+#### Streaming Chat Completions
+
+```javascript
+const stream = await venice.chat.createCompletionStream({
+  model: 'llama-3.3-70b',
+  messages: [{ role: 'user', content: 'Write a short poem about AI' }]
+});
+
+for await (const chunk of stream) {
+  process.stdout.write(chunk.choices[0]?.delta?.content || '');
+}
+```
+
+#### PDF Processing
+
+```javascript
+// Process a PDF file
+const pdfResponse = await venice.pdf.process({
+  file: './document.pdf',
+  mode: 'extract'  // 'extract', 'analyze', or 'chat'
+});
+
+console.log(pdfResponse.content);
+
+// Chat with a PDF
+const chatResponse = await venice.pdf.chat({
+  file: './document.pdf',
+  query: 'Summarize the main points of this document'
+});
+
+console.log(chatResponse.answer);
+```
+
+#### API Key Management
+
+```javascript
+// List all API keys
+const keys = await venice.apiKeys.list();
+console.log(keys);
+
+// Create a new API key
+const newKey = await venice.apiKeys.create({
+  name: 'My New API Key',
+  expiresAt: '2025-12-31'
+});
+```
+
+## 🧰 Packages
+
+This SDK is organized into multiple packages:
+
+- **[@venice-dev-tools/core](https://www.npmjs.com/package/@venice-dev-tools/core)**: Core functionality and types
+- **[@venice-dev-tools/node](https://www.npmjs.com/package/@venice-dev-tools/node)**: Node.js implementation with CLI
+- **[@venice-dev-tools/web](https://www.npmjs.com/package/@venice-dev-tools/web)**: Browser implementation
+
+## 🛠️ Development
+
+```bash
+# Clone the repository
+git clone https://github.com/georgeglarson/venice-dev-tools.git
+cd venice-dev-tools
+
+# Install dependencies
+pnpm install
+
+# Build all packages
+pnpm build
+
+# Run tests
+pnpm test
+```
+
+## 📋 Requirements
+
+- Node.js 18.0.0 or later
+- A Venice AI API key ([Get one here](https://venice.ai))
+
+## 📜 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🔗 Links
+
+- [Venice AI Official Website](https://venice.ai)
+- [Venice AI API Documentation](https://api.venice.ai/doc/api/swagger.yaml)
+- [GitHub Repository](https://github.com/georgeglarson/venice-dev-tools)
+- [npm Package](https://www.npmjs.com/package/@venice-dev-tools/node)
+
+## 🙏 Acknowledgements
+
+This SDK is not officially affiliated with Venice AI. It is maintained by the community for the community.
