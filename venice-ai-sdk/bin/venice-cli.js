@@ -11,6 +11,7 @@ try {
   console.error('   npm install -g pnpm');
   console.error('   npm uninstall -g venice-dev-tools');
   console.error('   pnpm add -g venice-dev-tools');
+  console.error('   pnpm approve-builds -g');
   console.error('2. If you prefer npm, try reinstalling:');
   console.error('   npm uninstall -g venice-dev-tools && npm install -g venice-dev-tools');
   console.error('3. Try running the fix script:');

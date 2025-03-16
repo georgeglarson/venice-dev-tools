@@ -10,6 +10,7 @@ echo "NOTE: For best results, we recommend using pnpm instead of npm:"
 echo "  npm install -g pnpm"
 echo "  npm uninstall -g venice-dev-tools"
 echo "  pnpm add -g venice-dev-tools"
+echo "  pnpm approve-builds -g"
 echo
 echo "Continuing with fix script..."
 echo

@@ -65,6 +65,9 @@ npm install -g pnpm
 # Install venice-dev-tools globally with pnpm
 pnpm add -g venice-dev-tools
 
+# Approve build scripts (important for CLI functionality)
+pnpm approve-builds -g
+
 # Set your API key
 venice set-key YOUR_API_KEY
 
@@ -75,7 +78,7 @@ venice chat interactive
 venice images generate --prompt "A beautiful sunset over Venice" --output sunset.png
 ```
 
-Using pnpm is recommended as it correctly handles workspace dependencies in the package.
+Using pnpm is recommended as it correctly handles workspace dependencies in the package. The `pnpm approve-builds -g` command is necessary to allow the package's postinstall scripts to run, which are required for the CLI to function properly.
 
 #### Alternative: Install with npm
 
@@ -96,6 +99,9 @@ npm install -g venice-dev-tools
 >
 > # Install with pnpm
 > pnpm add -g venice-dev-tools
+>
+> # Approve build scripts
+> pnpm approve-builds -g
 > ```
 >
 > **Option 2: Download and run the fix script (requires sudo):**
