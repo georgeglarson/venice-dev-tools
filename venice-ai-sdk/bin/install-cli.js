@@ -5,11 +5,7 @@ const path = require('path');
 const { execSync } = require('child_process');
 
 // Print recommendation to use pnpm
-console.log('NOTE: For best results, we recommend using pnpm instead of npm:');
-console.log('  npm install -g pnpm');
-console.log('  npm uninstall -g venice-dev-tools');
-console.log('  pnpm add -g venice-dev-tools');
-console.log('  pnpm approve-builds -g');
+console.log('For best results, we recommend using pnpm instead of npm.');
 console.log('\nContinuing with installation script...\n');
 
 // Make the CLI script executable
