@@ -169,15 +169,29 @@ venice chat completion --model llama-3.3-70b --attach document.pdf --pdf-mode te
 # Process PDF as both text and binary data
 venice chat completion --model llama-3.3-70b --attach document.pdf --pdf-mode both --prompt "Summarize this document"
 
-# Interactive chat with PDF processing as both text and binary data
-venice chat interactive --attach document.pdf --pdf-mode both
-
 # For proper PDF-to-image conversion, you'll need to convert the PDF first:
 # Using ImageMagick (if installed)
 convert -density 150 document.pdf -quality 90 document.png
 # Then use the converted image
 venice chat completion --model llama-3.3-70b --attach document.png --prompt "Summarize this image"
 ```
+
+#### Alternative: Multiple File Attachments
+
+If you encounter issues with PDF processing modes, you can achieve similar functionality by attaching multiple files of different types:
+
+```bash
+# Attach both a text file and an image file
+venice chat completion --model llama-3.3-70b --attach ./document.txt,./image.png --prompt "Analyze these files"
+```
+
+This approach allows the AI to analyze both textual content and visual elements, providing a comprehensive response.
+
+#### Known Limitations
+
+- The current implementation may have issues with text extraction from PDFs, showing an error about a missing file path
+- For best results with PDFs containing both text and images, consider extracting the text separately and converting the PDF to images using external tools
+- Then attach both the text file and image file(s) to your request
 
 #### API Key Management
 
