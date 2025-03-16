@@ -1,6 +1,6 @@
 {
   "name": "@venice-dev-tools/core",
-  "version": "2.1.6",
+  "version": "2.1.7",
   "description": "Core package for the Venice AI unOfficial SDK",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
