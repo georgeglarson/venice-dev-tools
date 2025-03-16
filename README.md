@@ -61,7 +61,7 @@ venice.saveImageToFile(response.images[0], 'venice-sunset.png');
 npm install -g venice-dev-tools
 
 # Set your API key
-venice set-key YOUR_API_KEY --global
+venice set-key YOUR_API_KEY 
 
 # Start an interactive chat session
 venice chat interactive
@@ -70,20 +70,35 @@ venice chat interactive
 venice images generate --prompt "A beautiful sunset over Venice" --output sunset.png
 ```
 
-> **Important:** If the `venice` command is not found after installation, you can run the install-cli script:
-> ```bash
-> # On Linux/macOS (may require sudo)
-> sudo npx venice-dev-tools install-cli
-> # Or directly from the installed package
-> sudo node $(npm root -g)/venice-dev-tools/bin/install-cli.js
+> **Important:** If the `venice` command is not found after installation, you can use one of these fix scripts:
 >
-> # On Windows (run as Administrator)
-> npx venice-dev-tools install-cli
-> # Or directly from the installed package
-> node %APPDATA%\npm\node_modules\venice-dev-tools\bin\install-cli.js
+> **Option 1: Download and run the fix script (requires sudo):**
+> ```bash
+> # Download the fix script
+> curl -O https://raw.githubusercontent.com/georgeglarson/venice-dev-tools/main/scripts/fix-venice-cli.sh
+> # Make it executable
+> chmod +x fix-venice-cli.sh
+> # Run it (requires sudo)
+> sudo ./fix-venice-cli.sh
 > ```
 >
-> Alternatively, you can manually create a symlink:
+> **Option 2: Download and run the simple fix script (no sudo required):**
+> ```bash
+> # Download the simple fix script
+> curl -O https://raw.githubusercontent.com/georgeglarson/venice-dev-tools/main/scripts/fix-venice-cli-simple.sh
+> # Make it executable
+> chmod +x fix-venice-cli-simple.sh
+> # Run it
+> ./fix-venice-cli-simple.sh
+> ```
+>
+> **Option 3: Run the fix-cli script from the package:**
+> ```bash
+> # Run the fix-cli script
+> npm explore venice-dev-tools -- npm run fix-cli
+> ```
+>
+> **Option 4: Manually create a symlink:**
 > ```bash
 > # On Linux/macOS
 > sudo ln -s $(npm root -g)/venice-dev-tools/bin/venice-cli.js /usr/local/bin/venice
