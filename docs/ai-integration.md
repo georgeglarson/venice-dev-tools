@@ -36,7 +36,7 @@ console.log(JSON.stringify(metadata, null, 2));
 **Output structure:**
 ```json
 {
-  "version": "2025.11.5",
+  "version": "2025.11.6",
   "capabilities": [...],
   "errorCodes": {...},
   "models": {...}

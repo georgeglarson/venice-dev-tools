@@ -5,6 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and releases now follow a calendar versioning scheme `YYYY.MM.D` aligned with Venice API drop dates.
 
+## [2025.11.6] - 2025-11-06
+
+### Added
+- **OpenAI-compatible API**: New `chat.completions.create()` method matching OpenAI SDK exactly
+- **Middleware system**: Request/response/error interception with 6 built-in middleware (logging, timing, headers, request-ID, retry-metadata, caching)
+- **Enhanced streaming utilities**: 15+ helper functions for stream processing (collectStream, mapStream, filterStream, takeStream, etc.)
+- **Error recovery hints**: Machine-readable error codes with automated recovery suggestions and code examples
+- **AI metadata API**: Complete SDK capability discovery system for AI agents (`getSDKMetadata()`)
+- **ESM support**: Dual CJS/ESM builds with tree-shaking enabled
+- **Retry handler**: Built-in exponential backoff with jitter for transient errors
+- **18 TypeScript examples**: Comprehensive example suite covering all SDK features (01-18)
+- **Architecture documentation**: Complete system architecture guide (400+ lines)
+- **Migration guide**: Step-by-step upgrade instructions with OpenAI SDK migration path (400+ lines)
+- **AI integration guide**: Complete guide for AI agents to interact with SDK (400+ lines)
+- **177 unit tests**: Comprehensive test coverage for all new features (100% coverage for middleware, error recovery)
+
+### Changed
+- Deprecated `chat.createCompletion()` in favor of `chat.completions.create()` (backward compatible)
+- Deprecated `chatStream` in favor of `chat.completions.create({ stream: true })` (backward compatible)
+- Deprecated `imageGeneration`, `imageUpscale`, `imageStyles` in favor of unified `images` endpoint (backward compatible)
+- Updated all examples to use environment variables (security fix)
+- Improved type definitions with better IntelliSense support
+
+### Fixed
+- Removed 3 hardcoded API keys from example files (security issue)
+- Fixed `AudioSpeechEndpoint.create()` return type
+- Fixed `ImageValidator` import type inconsistencies
+- Fixed type system issues for ESM compatibility
+
+### Security
+- All API keys now use environment variables
+- Created `.env.example` template for secure key management
+- Added security best practices to documentation
+
 ## [2025.11.5] - 2025-11-05
 
 ### Added

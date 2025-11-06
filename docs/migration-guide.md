@@ -4,18 +4,18 @@ This guide helps you migrate to the latest version of the Venice AI SDK.
 
 ## Table of Contents
 
-- [v2025.11.5 Migration (Latest)](#v202511-5-migration-latest)
+- [v2025.11.6 Migration (Latest)](#v202511-6-migration-latest)
 - [Benefits of Upgrading](#benefits-of-upgrading)
 - [Breaking Changes](#breaking-changes)
 - [Deprecated APIs](#deprecated-apis)
 - [New Features](#new-features)
 - [Step-by-Step Migration](#step-by-step-migration)
 
-## v2025.11.5 Migration (Latest)
+## v2025.11.6 Migration (Latest)
 
 ### Overview
 
-Version 2025.11.5 introduces OpenAI-compatible APIs, middleware system, enhanced streaming, and intelligent error handling while maintaining backward compatibility with existing code.
+Version 2025.11.6 introduces OpenAI-compatible APIs, middleware system, enhanced streaming, and intelligent error handling while maintaining backward compatibility with existing code.
 
 ### Benefits of Upgrading
 
