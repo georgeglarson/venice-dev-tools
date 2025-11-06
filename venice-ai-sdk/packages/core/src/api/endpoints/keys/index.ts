@@ -251,10 +251,7 @@ export class KeysEndpoint extends ApiEndpoint {
       data: { id: apiKey.id }
     });
 
-    return {
-      api_key: apiKey,
-      data: apiKey,
-    };
+    return { api_key: apiKey };
   }
 
   /**

@@ -1,5 +1,6 @@
 import { BaseValidator } from './base-validator';
 import type { CreateEmbeddingRequest } from '../../types/embeddings';
+import { VeniceValidationError } from '../../errors';
 
 /**
  * Validator for embeddings API requests
@@ -20,7 +21,7 @@ export class EmbeddingsValidator extends BaseValidator {
         this.validateString(item, `input[${index}]`);
       });
     } else {
-      throw this.createValidationError(
+      throw new VeniceValidationError(
         'input must be a string or array of strings'
       );
     }

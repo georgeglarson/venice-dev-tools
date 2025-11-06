@@ -1,5 +1,6 @@
 import { BaseValidator } from './base-validator';
 import type { CreateSpeechRequest } from '../../types/audio';
+import { VeniceValidationError } from '../../errors';
 
 /**
  * Validator for audio API requests
@@ -15,8 +16,9 @@ export class AudioValidator extends BaseValidator {
     this.validateString(request.input, 'input');
     
     if (request.input.length > 4096) {
-      throw this.createValidationError(
-        'input must be 4096 characters or less'
+      throw new VeniceValidationError(
+        'input must be 4096 characters or less',
+        { input: 'Must be 4096 characters or less' }
       );
     }
 

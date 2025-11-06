@@ -1,10 +1,10 @@
-export { Character as CharactersCharacter, ListCharactersResponse as CharactersListCharactersResponse } from './characters';
-export * from './audio';
-export * from './billing';
-export * from './chat';
+// Type definitions
 export * from './common';
-export * from './embeddings';
+export * from './chat';
 export * from './images';
-export * from './keys';
+export * from './audio';
+export * from './embeddings';
 export * from './models';
-export * from './multimodal';
+export * from './keys';
+export * from './characters';
+export * from './billing';

@@ -77,41 +77,6 @@ export interface VeniceClientConfig {
 }
 
 /**
- * Interface for Venice-specific parameters for requests.
- */
-export interface VeniceParameters {
-  enable_web_search?: 'auto' | 'on' | 'off';
-  include_venice_system_prompt?: boolean;
-  character_slug?: string;
-}
-
-/**
- * Interface for character information.
- */
-export interface Character {
-  name: string;
-  description: string | null;
-  slug: string;
-  shareUrl: string | null;
-  createdAt: string;
-  updatedAt: string;
-  webEnabled: boolean;
-  adult: boolean;
-  tags: string[];
-  stats: {
-    imports: number;
-  };
-}
-
-/**
- * Interface for the response from listing characters.
- */
-export interface ListCharactersResponse {
-  object: 'list';
-  data: Character[];
-}
-
-/**
  * Type for HTTP methods.
  */
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
