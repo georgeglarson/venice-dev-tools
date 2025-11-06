@@ -13,15 +13,16 @@ Complete example suite demonstrating all features of the Venice AI SDK from begi
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/venice-ai-sdk.git
-cd venice-ai-sdk
+git clone https://github.com/georgeglarson/venice-dev-tools.git
+cd venice-dev-tools
 
 # Install dependencies
-npm install
-# or
-bun install
+pnpm install
 
-# Set up your API key
+# Quick setup with script (interactive)
+./scripts/setup-examples.sh
+
+# OR manual setup
 cp examples/.env.example examples/.env
 # Edit examples/.env and add your API key
 ```
@@ -39,10 +40,15 @@ cat README.md
 **TypeScript Examples:**
 
 ```bash
+# All TypeScript examples automatically load examples/.env
+
+# Using tsx (recommended)
+npx tsx examples/typescript/01-hello-world.ts
+
 # Using ts-node
 npx ts-node examples/typescript/01-hello-world.ts
 
-# Using Bun (faster)
+# Using Bun
 bun run examples/typescript/01-hello-world.ts
 ```
 
@@ -130,15 +136,33 @@ Examples organized by language and runtime:
 
 ## Environment Variables
 
-Create `examples/.env` with the following:
+All TypeScript examples automatically load `examples/.env`.
+
+**Setup (one time):**
 
 ```bash
-# Required
-VENICE_API_KEY=your_api_key_here
+# Quick setup (interactive)
+./scripts/setup-examples.sh
 
-# Optional (for specific examples)
-IMAGE_URL=https://example.com/image.jpg  # For vision examples
-AUDIO_OUTPUT_PATH=/path/to/output.mp3    # For audio examples
+# OR manual setup
+cp examples/.env.example examples/.env
+nano examples/.env  # Edit with your API key
+```
+
+**Required:**
+
+```bash
+VENICE_API_KEY=your_api_key_here
+```
+
+**Optional:**
+
+```bash
+# Override default model
+VENICE_MODEL=llama-3.3-70b
+
+# Set log level (0=off, 1=info, 2=debug)
+VENICE_LOG_LEVEL=1
 ```
 
 **Never commit your `.env` file or hardcode API keys!**
