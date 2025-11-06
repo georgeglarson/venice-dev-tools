@@ -70,6 +70,15 @@
     "sdk",
     "api"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/georgeglarson/venice-dev-tools.git",
+    "directory": "venice-ai-sdk/packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/georgeglarson/venice-dev-tools/issues"
+  },
+  "homepage": "https://github.com/georgeglarson/venice-dev-tools#readme",
   "author": "Venice AI",
   "license": "MIT",
   "dependencies": {
