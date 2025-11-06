@@ -12,6 +12,9 @@ export { EventManager } from './events';
 // Export middleware
 export * from './middleware';
 
+// Export AI metadata
+export * from './ai/metadata';
+
 // Export types
 export * from './types';
 
