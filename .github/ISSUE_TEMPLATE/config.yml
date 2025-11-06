@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Questions & Discussions
+    url: https://github.com/georgeglarson/venice-dev-tools/discussions
+    about: Ask questions, share ideas, or discuss the SDK with the community
+  - name: Security Vulnerability
+    url: https://github.com/georgeglarson/venice-dev-tools/security/policy
+    about: Report security vulnerabilities privately (do not use public issues)
+  - name: Venice AI Support
+    url: https://venice.ai/support
+    about: General Venice.ai platform support (not SDK-specific)
