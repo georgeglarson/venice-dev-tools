@@ -24,7 +24,7 @@ async function main() {
   console.log('🤖 Sending your first message to Venice AI...\n');
 
   // Create a simple chat completion
-  const response = await venice.chat.createCompletion({
+  const response = await venice.chat.completions.create({
     model: 'llama-3.3-70b',
     messages: [
       { role: 'user', content: 'Say hello and introduce yourself in one sentence!' }
