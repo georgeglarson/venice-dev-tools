@@ -31,7 +31,7 @@ async function main() {
   console.log('═'.repeat(50));
 
   try {
-    const webSearchResponse = await venice.chat.createCompletion({
+    const webSearchResponse = await venice.chat.completions.create({
       model: 'llama-3.3-70b',
       messages: [
         { 
@@ -57,7 +57,7 @@ async function main() {
   console.log('═'.repeat(50));
 
   try {
-    const characterResponse = await venice.chat.createCompletion({
+    const characterResponse = await venice.chat.completions.create({
       model: 'llama-3.3-70b',
       messages: [
         { 
@@ -88,7 +88,7 @@ async function main() {
   console.log(`Prompt: "${prompt}"\n`);
 
   // Low creativity (temperature = 0.3)
-  const conservativeResponse = await venice.chat.createCompletion({
+  const conservativeResponse = await venice.chat.completions.create({
     model: 'llama-3.3-70b',
     messages: [{ role: 'user', content: prompt }],
     temperature: 0.3,
@@ -100,7 +100,7 @@ async function main() {
   console.log('');
 
   // High creativity (temperature = 1.5)
-  const creativeResponse = await venice.chat.createCompletion({
+  const creativeResponse = await venice.chat.completions.create({
     model: 'llama-3.3-70b',
     messages: [{ role: 'user', content: prompt }],
     temperature: 1.5,
@@ -115,7 +115,7 @@ async function main() {
   console.log('\n📋 Example 4: Response Format Control');
   console.log('═'.repeat(50));
 
-  const formatResponse = await venice.chat.createCompletion({
+  const formatResponse = await venice.chat.completions.create({
     model: 'llama-3.3-70b',
     messages: [
       { 

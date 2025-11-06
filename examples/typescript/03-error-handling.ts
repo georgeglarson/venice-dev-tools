@@ -45,7 +45,7 @@ async function main() {
 
   try {
     // Make a request (this might fail for demonstration)
-    const response = await venice.chat.createCompletion({
+    const response = await venice.chat.completions.create({
       model: 'llama-3.3-70b',
       messages: [
         { role: 'user', content: 'Hello!' }

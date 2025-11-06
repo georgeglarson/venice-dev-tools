@@ -97,7 +97,7 @@ async function main() {
 
       try {
         // Get AI response with full conversation context
-        const response = await venice.chat.createCompletion({
+        const response = await venice.chat.completions.create({
           model: 'llama-3.3-70b',
           messages: conversation,
           temperature: 0.7, // Slight creativity

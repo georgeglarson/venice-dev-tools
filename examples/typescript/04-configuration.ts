@@ -68,7 +68,7 @@ async function main() {
   // Make a test request
   console.log('🧪 Testing configuration...\n');
 
-  const response = await venice.chat.createCompletion({
+  const response = await venice.chat.completions.create({
     model: 'llama-3.3-70b',
     messages: [
       { role: 'user', content: 'Say "Configuration works!" and nothing else.' }

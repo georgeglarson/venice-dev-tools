@@ -50,7 +50,7 @@ async function main() {
     const dataUrl = `data:${mimeType};base64,${base64Image}`;
 
     // Analyze image
-    const response = await venice.chat.createCompletion({
+    const response = await venice.chat.completions.create({
       model: 'qwen-2.5-vl', // Vision-enabled model
       messages: [
         {
@@ -79,7 +79,7 @@ async function main() {
     // Follow-up question
     console.log('🔍 Asking follow-up question...\n');
 
-    const followUp = await venice.chat.createCompletion({
+    const followUp = await venice.chat.completions.create({
       model: 'qwen-2.5-vl',
       messages: [
         {

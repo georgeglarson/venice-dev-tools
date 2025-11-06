@@ -59,7 +59,7 @@ async function main() {
         const reqStart = Date.now();
         
         try {
-          const response = await venice.chat.createCompletion({
+          const response = await venice.chat.completions.create({
             model: 'llama-3.3-70b',
             messages: [{ role: 'user', content: req.prompt }],
             max_tokens: 50,
@@ -120,7 +120,7 @@ async function main() {
 
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
-        const response = await venice.chat.createCompletion({
+        const response = await venice.chat.completions.create({
           model: 'llama-3.3-70b',
           messages: [{ role: 'user', content: prompt }],
           max_tokens: 50,

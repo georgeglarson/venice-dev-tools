@@ -37,7 +37,7 @@ async function streamWithTimeout(timeoutMs: number = 3000) {
     }, timeoutMs);
 
     // Start streaming
-    const stream = await venice.chat.stream.createCompletion({
+    const stream = await venice.chat.completions.create({
       model: 'llama-3.3-70b',
       messages: [
         { 
@@ -47,6 +47,8 @@ async function streamWithTimeout(timeoutMs: number = 3000) {
       ],
       // Note: AbortSignal support would be added to SDK
       // signal: abortController.signal,
+      stream: true
+          stream: true
     });
 
     let chunkCount = 0;
@@ -109,7 +111,7 @@ async function manualAbort() {
   try {
     console.log('🤖 Assistant: ');
 
-    const stream = await venice.chat.stream.createCompletion({
+    const stream = await venice.chat.completions.create({
       model: 'llama-3.3-70b',
       messages: [
         { 
@@ -117,6 +119,7 @@ async function manualAbort() {
           content: 'Tell me a very long story about artificial intelligence.' 
         }
       ],
+      stream: true
     });
 
     for await (const chunk of stream) {
