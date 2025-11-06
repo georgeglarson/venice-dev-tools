@@ -1,5 +1,5 @@
 import { ApiEndpoint } from '../../../registry/endpoint';
-import { UpscaleImageParams } from '../../../../types';
+import { UpscaleImageRequest } from '../../../../types';
 import { ImageValidator } from '../../../../utils/validators/image-validator';
 import { VeniceApiError } from '../../../../errors';
 
@@ -33,7 +33,7 @@ export class ImageUpscaleEndpoint extends ApiEndpoint {
    * @param params - The upscale parameters.
    * @returns The upscaled image as a blob.
    */
-  public async upscale(params: UpscaleImageParams): Promise<Blob> {
+  public async upscale(params: UpscaleImageRequest): Promise<Blob> {
     // Validate parameters
     this.validator.validateUpscaleImageParams(params);
     

@@ -4,6 +4,7 @@ import {
   ChatCompletionResponse
 } from '../../../../types';
 import { ChatValidator } from '../../../../utils/validators/chat-validator';
+import { parseSSEStream } from '../../../../utils/stream-parser';
 
 /**
  * API endpoint for standard (non-streaming) chat completions.
@@ -13,7 +14,7 @@ import { ChatValidator } from '../../../../utils/validators/chat-validator';
  *
  * @example
  * ```typescript
- * const response = await venice.chat.createCompletion({
+ * const response = await venice.chat.completions.create({
  *   model: 'llama-3.3-70b',
  *   messages: [
  *     { role: 'system', content: 'You are a helpful assistant.' },
@@ -42,6 +43,26 @@ export class ChatEndpoint extends ApiEndpoint {
   }
 
   /**
+   * Standard chat completions namespace (OpenAI-compatible).
+   */
+  public get completions() {
+    return {
+      /**
+       * Creates a chat completion using the specified model.
+       *
+       * @param request - The chat completion request parameters
+       * @returns A promise resolving to the chat completion response, or an async generator if stream=true
+       */
+      create: (request: ChatCompletionRequest): Promise<ChatCompletionResponse> | AsyncGenerator<any, void, unknown> => {
+        if (request.stream) {
+          return this._stream(request);
+        }
+        return this._create(request);
+      }
+    };
+  }
+
+  /**
    * Gets the base endpoint path for chat requests.
    *
    * @returns The endpoint path ('/chat')
@@ -51,8 +72,60 @@ export class ChatEndpoint extends ApiEndpoint {
   }
 
   /**
+   * Internal method for creating chat completions.
+   * 
+   * @param request - The chat completion request parameters
+   * @returns A promise resolving to the chat completion response
+   * @private
+   */
+  private async _create(request: ChatCompletionRequest): Promise<ChatCompletionResponse> {
+    this.validator.validateChatCompletionRequest(request);
+    this.emit('request', { type: 'chat.completion', data: request });
+
+    const response = await this.http.post<ChatCompletionResponse>(
+      this.getPath('/completions'),
+      request
+    );
+
+    this.emit('response', { type: 'chat.completion', data: response.data });
+    return response.data;
+  }
+
+  /**
+   * Internal method for streaming chat completions.
+   * 
+   * @param request - The chat completion request parameters
+   * @returns An async generator that yields completion chunks
+   * @private
+   */
+  private async *_stream(request: ChatCompletionRequest): AsyncGenerator<any, void, unknown> {
+    const streamingRequest = { ...request, stream: true };
+    this.validator.validateChatCompletionRequest(streamingRequest);
+    this.emit('request', { type: 'chat.completion.stream', data: streamingRequest });
+
+    const response = await this.streamingHttp.stream(
+      this.getPath('/completions'),
+      streamingRequest
+    );
+
+    try {
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error('Stream response body is null');
+      }
+
+      for await (const chunk of parseSSEStream(reader, this.logger)) {
+        yield chunk;
+      }
+    } finally {
+      this.emit('response', { type: 'chat.completion.stream', data: { status: 'completed' } });
+    }
+  }
+
+  /**
    * Creates a chat completion using the specified model.
    *
+   * @deprecated Use `chat.completions.create()` instead for OpenAI compatibility.
    * @param request - The chat completion request parameters
    * @param request.model - The model to use (e.g., 'llama-3.3-70b')
    * @param request.messages - The conversation messages array
@@ -71,22 +144,8 @@ export class ChatEndpoint extends ApiEndpoint {
    * @throws {VeniceTimeoutError} If the request times out
    */
   public async createCompletion(request: ChatCompletionRequest): Promise<ChatCompletionResponse> {
-    // Validate request parameters
-    this.validator.validateChatCompletionRequest(request);
-
-    // Emit a request event
-    this.emit('request', { type: 'chat.completion', data: request });
-
-    // Make the API request
-    const response = await this.http.post<ChatCompletionResponse>(
-      this.getPath('/completions'),
-      request
-    );
-
-    // Emit a response event
-    this.emit('response', { type: 'chat.completion', data: response.data });
-
-    return response.data;
+    this.logger.warn('[DEPRECATED] chat.createCompletion() is deprecated. Use chat.completions.create() instead.');
+    return this._create(request);
   }
 }
 

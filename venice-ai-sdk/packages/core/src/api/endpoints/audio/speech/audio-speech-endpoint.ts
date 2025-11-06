@@ -63,6 +63,6 @@ export class AudioSpeechEndpoint extends ApiEndpoint {
       }
     );
 
-    return response;
+    return response.data;
   }
 }

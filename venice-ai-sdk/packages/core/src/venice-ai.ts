@@ -113,6 +113,7 @@ export class VeniceAI extends VeniceClient {
   /**
    * Get the chat streaming API endpoint.
    *
+   * @deprecated Use `chat.completions.create({ stream: true })` instead for OpenAI compatibility.
    * @returns The chat streaming endpoint.
    */
   public get chatStream(): ChatStreamEndpoint {
@@ -140,6 +141,7 @@ export class VeniceAI extends VeniceClient {
   /**
    * Get the image generation API endpoint.
    *
+   * @deprecated Use `images.generate()` instead.
    * @returns The image generation endpoint.
    */
   public get imageGeneration(): ImageGenerationEndpoint {
@@ -149,6 +151,7 @@ export class VeniceAI extends VeniceClient {
   /**
    * Get the image upscale API endpoint.
    *
+   * @deprecated Use `images.upscale()` instead.
    * @returns The image upscale endpoint.
    */
   public get imageUpscale(): ImageUpscaleEndpoint {
@@ -158,6 +161,7 @@ export class VeniceAI extends VeniceClient {
   /**
    * Get the image styles API endpoint.
    *
+   * @deprecated Use `images.listStyles()` instead.
    * @returns The image styles endpoint.
    */
   public get imageStyles(): ImageStylesEndpoint {

@@ -1,7 +1,7 @@
 import { 
   ImageRequest, 
   GenerateImageRequest, 
-  UpscaleImageParams 
+  UpscaleImageRequest 
 } from '../../types/images';
 import { BaseValidator } from './base-validator';
 
@@ -82,7 +82,7 @@ export class ImageValidator extends BaseValidator {
    * @param params - The upscale parameters to validate.
    * @throws VeniceValidationError if the parameters are invalid.
    */
-  public validateUpscaleImageParams(params: UpscaleImageParams): void {
+  public validateUpscaleImageParams(params: UpscaleImageRequest): void {
     this.validateRequired(params, 'params');
     this.validateRequired(params.image, 'image');
     
