@@ -1,0 +1,49 @@
+name: Update API Schema
+
+on:
+  schedule:
+    # Run every Monday at 00:00 UTC
+    - cron: '0 0 * * 1'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  update-schema:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Fetch latest OpenAPI schema
+        run: |
+          mkdir -p docs/api
+          curl -fsSL https://api.venice.ai/api/openapi.json -o docs/api/openapi.yaml
+      
+      - name: Check for changes
+        id: check
+        run: |
+          git diff --quiet docs/api/openapi.yaml || echo "changed=true" >> $GITHUB_OUTPUT
+      
+      - name: Commit and push changes
+        if: steps.check.outputs.changed == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add docs/api/openapi.yaml
+          git commit -m "chore: update OpenAPI schema from Venice API"
+          git push
+      
+      - name: Create PR notification
+        if: steps.check.outputs.changed == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'API Schema Updated',
+              body: 'The Venice AI OpenAPI schema has been updated automatically. Please review the changes for breaking updates.',
+              labels: ['documentation', 'api']
+            })
