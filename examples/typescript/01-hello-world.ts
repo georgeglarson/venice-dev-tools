@@ -6,22 +6,17 @@
  * 
  * Prerequisites:
  * - Node.js 18+ installed
- * - VENICE_API_KEY environment variable set
+ * - VENICE_API_KEY in examples/.env file OR set as environment variable
  * 
  * Run with: npx tsx examples/typescript/01-hello-world.ts
  */
 
 import { VeniceAI } from '@venice-dev-tools/core';
+import { requireEnv } from './env-config';
 
 async function main() {
-  // Check for API key
-  const apiKey = process.env.VENICE_API_KEY;
-  if (!apiKey) {
-    console.error('❌ Error: VENICE_API_KEY environment variable not set');
-    console.error('📝 Get your API key at: https://venice.ai/settings/api');
-    console.error('💡 Set it with: export VENICE_API_KEY="your-api-key-here"');
-    process.exit(1);
-  }
+  // Get API key from environment
+  const apiKey = requireEnv('VENICE_API_KEY');
 
   // Initialize the Venice AI client
   const venice = new VeniceAI({ apiKey });

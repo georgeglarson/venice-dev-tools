@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@venice-dev-tools/core':
+    specifier: ^2025.11.6
+    version: 2025.11.6
   pdf-parse:
     specifier: ^1.1.1
     version: 1.1.4
@@ -25,6 +28,9 @@ devDependencies:
   axios:
     specifier: ^1.8.2
     version: 1.13.2
+  dotenv:
+    specifier: ^17.2.3
+    version: 17.2.3
   jest:
     specifier: ^29.7.0
     version: 29.7.0
@@ -938,6 +944,15 @@ packages:
       '@types/yargs-parser': 21.0.3
     dev: true
 
+  /@venice-dev-tools/core@2025.11.6:
+    resolution: {integrity: sha512-TvnhjUAdDDXcr4u/Vk7Z2CVbDf+YBqOvc2XfhOuCoFkCrHfknU19VpoGrR4QQP6Hh3NGyb4yJaGL6Cpt5raGbw==}
+    dependencies:
+      axios: 1.13.2
+      eventemitter3: 5.0.1
+    transitivePeerDependencies:
+      - debug
+    dev: false
+
   /ajv@8.17.1:
     resolution: {integrity: sha512-B/gBuNg5SiMTrPkC+A2+cW0RszwxYmn6VYxB/inlBStS5nx6xHIt/ehKRhIMhqusl7a8LjQoZnjCs5vhwxOQ1g==}
     dependencies:
@@ -1323,6 +1338,11 @@ packages:
   /diff-sequences@29.6.3:
     resolution: {integrity: sha512-EjePK1srD3P08o2j4f0ExnylqRs5B9tJjcp9t1krH2qRi8CCdsYfwe9JgSLurFBWwq4uOlipzfk5fHNvwFKr8Q==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
+    dev: true
+
+  /dotenv@17.2.3:
+    resolution: {integrity: sha512-JVUnt+DUIzu87TABbhPmNfVdBDt18BLOWjMUFJMSi/Qqg7NTYtabbvSNJGOJ7afbRuv9D/lngizHtP7QyLQ+9w==}
+    engines: {node: '>=12'}
     dev: true
 
   /dunder-proto@1.0.1:

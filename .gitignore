@@ -18,6 +18,8 @@ coverage/
 .env
 .env.local
 .env.*.local
+**/.env
+!**/.env.example
 
 # IDE
 .vscode/
