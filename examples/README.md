@@ -28,6 +28,14 @@ cp examples/.env.example examples/.env
 
 ### Running Examples
 
+**5-Minute Quickstart:**
+
+```bash
+# Start here for fastest path to success
+cd examples/quickstart
+cat README.md
+```
+
 **TypeScript Examples:**
 
 ```bash
@@ -41,20 +49,30 @@ bun run examples/typescript/01-hello-world.ts
 **JavaScript Examples:**
 
 ```bash
-node examples/qwen-vision-example.js
+node examples/javascript/qwen-vision-example.js
 ```
 
 **Shell Scripts:**
 
 ```bash
 # Make executable
-chmod +x examples/venice-vision-stream-cli.sh
+chmod +x examples/shell/venice-vision-stream-cli.sh
 
 # Run
-./examples/venice-vision-stream-cli.sh
+./examples/shell/venice-vision-stream-cli.sh
 ```
 
 ## Example Categories
+
+### Quickstart
+
+**New to the SDK? Start here:**
+
+| Example | Description | Time |
+|---------|-------------|------|
+| [quickstart/](quickstart/README.md) | 5-minute getting started guide | 5 min |
+
+The quickstart walks you through installation, setup, and your first API call with zero assumptions about prior knowledge.
 
 ### Beginner Examples
 
@@ -92,15 +110,23 @@ Production-ready patterns for experienced developers.
 | [14-rate-limit-handling.ts](typescript/14-rate-limit-handling.ts) | Rate limit strategies | Queuing, backoff, batch processing |
 | [15-custom-parameters.ts](typescript/15-custom-parameters.ts) | Venice-specific features | Web search, characters, parameters |
 
-### Legacy Examples
+### Language-Specific Examples
 
-Original examples maintained for backward compatibility.
+Examples organized by language and runtime:
+
+**JavaScript** (`examples/javascript/`)
 
 | Example | Description |
 |---------|-------------|
-| [qwen-vision-example.js](qwen-vision-example.js) | Qwen vision model in JavaScript |
-| [qwen-vision-curl-example.sh](qwen-vision-curl-example.sh) | Vision API via curl |
-| [venice-vision-stream-cli.sh](venice-vision-stream-cli.sh) | Streaming vision CLI |
+| [qwen-vision-example.js](javascript/qwen-vision-example.js) | Qwen vision model in JavaScript |
+
+**Shell Scripts** (`examples/shell/`)
+
+| Example | Description |
+|---------|-------------|
+| [qwen-vision-curl-example.sh](shell/qwen-vision-curl-example.sh) | Vision API via curl |
+| [qwen-vision-curl.sh](shell/qwen-vision-curl.sh) | Qwen vision curl wrapper |
+| [venice-vision-stream-cli.sh](shell/venice-vision-stream-cli.sh) | Streaming vision CLI |
 
 ## Environment Variables
 

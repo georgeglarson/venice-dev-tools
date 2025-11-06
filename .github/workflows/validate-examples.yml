@@ -1,0 +1,145 @@
+name: Validate Examples
+
+on:
+  pull_request:
+    paths:
+      - 'examples/**'
+      - 'venice-ai-sdk/packages/**'
+  push:
+    branches:
+      - main
+    paths:
+      - 'examples/**'
+  schedule:
+    # Run every Sunday at 00:00 UTC
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
+
+jobs:
+  validate-typescript:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      
+      - name: Install dependencies
+        run: |
+          cd venice-ai-sdk
+          bun install
+      
+      - name: Build SDK
+        run: |
+          cd venice-ai-sdk
+          bun run build
+      
+      - name: Validate TypeScript examples
+        run: |
+          echo "Validating TypeScript examples..."
+          for file in examples/typescript/*.ts; do
+            if [ -f "$file" ]; then
+              echo "Checking $(basename $file)..."
+              bunx tsc --noEmit --skipLibCheck "$file"
+            fi
+          done
+  
+  validate-javascript:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install dependencies
+        run: |
+          cd venice-ai-sdk
+          npm install
+      
+      - name: Build SDK
+        run: |
+          cd venice-ai-sdk
+          npm run build
+      
+      - name: Validate JavaScript examples
+        run: |
+          echo "Validating JavaScript examples..."
+          for file in examples/javascript/*.js; do
+            if [ -f "$file" ]; then
+              echo "Checking $(basename $file)..."
+              node --check "$file"
+            fi
+          done
+  
+  validate-shell:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Install shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+      
+      - name: Validate shell scripts
+        run: |
+          echo "Validating shell scripts..."
+          for file in examples/shell/*.sh; do
+            if [ -f "$file" ]; then
+              echo "Checking $(basename $file)..."
+              shellcheck "$file"
+            fi
+          done
+      
+      - name: Check execute permissions
+        run: |
+          echo "Checking execute permissions..."
+          for file in examples/shell/*.sh; do
+            if [ -f "$file" ]; then
+              if [ ! -x "$file" ]; then
+                echo "ERROR: $file is not executable"
+                exit 1
+              fi
+            fi
+          done
+  
+  validate-scripts:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Install shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+      
+      - name: Validate automation scripts
+        run: |
+          echo "Validating automation scripts..."
+          for file in scripts/*.sh; do
+            if [ -f "$file" ]; then
+              echo "Checking $(basename $file)..."
+              shellcheck "$file"
+            fi
+          done
+      
+      - name: Test update-api-schema.sh
+        run: |
+          chmod +x scripts/update-api-schema.sh
+          # Test dry run (check syntax only)
+          bash -n scripts/update-api-schema.sh
+      
+      - name: Test sync-docs.sh
+        run: |
+          chmod +x scripts/sync-docs.sh
+          # Test dry run (check syntax only)
+          bash -n scripts/sync-docs.sh
