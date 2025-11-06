@@ -4,7 +4,9 @@
 Release `v2025.11.5` aligns with the Venice API updates published on **2025‑11‑05**.
 
 [![npm version](https://img.shields.io/npm/v/@venice-dev-tools/core?style=flat-square)](https://www.npmjs.com/package/@venice-dev-tools/core)
+[![Node.js Version](https://img.shields.io/node/v/@venice-dev-tools/core?style=flat-square)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue?style=flat-square)](https://www.typescriptlang.org/)
+[![CI Status](https://img.shields.io/github/actions/workflow/status/georgeglarson/venice-dev-tools/validate-examples.yml?style=flat-square&label=CI)](https://github.com/georgeglarson/venice-dev-tools/actions)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
 
 ---
