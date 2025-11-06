@@ -4,6 +4,7 @@ import { ErrorHandler } from '../error/error-handler';
 import { HttpMethod, HttpRequestOptions, HttpResponse } from '../../types';
 import { RateLimiter } from '../../utils/rate-limiter';
 import { Logger } from '../../utils/logger';
+import { MiddlewareManager } from '../../middleware/middleware-manager';
 
 /**
  * HTTP client for making standard (non-streaming) requests to the Venice AI API.
@@ -30,6 +31,11 @@ export class StandardHttpClient extends BaseHttpClient {
   private logger?: Logger;
 
   /**
+   * The middleware manager for request/response interception.
+   */
+  private middlewareManager: MiddlewareManager;
+
+  /**
    * Create a new standard HTTP client.
    * @param baseUrl - The base URL for the API.
    * @param headers - Additional headers to include in requests.
@@ -51,6 +57,7 @@ export class StandardHttpClient extends BaseHttpClient {
     this.errorHandler = errorHandler;
     this.rateLimiter = rateLimiter;
     this.logger = logger;
+    this.middlewareManager = new MiddlewareManager();
     
     if (this.logger) {
       this.logger.debug('Initializing standard HTTP client', {
@@ -86,12 +93,24 @@ export class StandardHttpClient extends BaseHttpClient {
   }
 
   /**
+   * Get the middleware manager.
+   * @returns The middleware manager.
+   */
+  public getMiddlewareManager(): MiddlewareManager {
+    return this.middlewareManager;
+  }
+
+  /**
    * Make an HTTP request.
    * @param path - The API path (will be appended to the base URL).
    * @param options - Request options.
    * @returns The response data.
    */
   public async request<T = any>(path: string, options: HttpRequestOptions = {}): Promise<HttpResponse<T>> {
+    const startTime = Date.now();
+    
+    let requestContext = await this.middlewareManager.executeRequest(path, options);
+    
     const {
       method = 'GET',
       headers = {},
@@ -100,11 +119,11 @@ export class StandardHttpClient extends BaseHttpClient {
       timeout,
       responseType = 'json',
       signal,
-    } = options;
+    } = requestContext.options;
 
     const config: AxiosRequestConfig = {
       method: method,
-      url: path,
+      url: requestContext.path,
       headers,
       params: query,
       data: body,
@@ -117,43 +136,60 @@ export class StandardHttpClient extends BaseHttpClient {
     }
 
     if (this.logger) {
-      this.logger.debug(`Preparing ${method} request to ${path}`, {
+      this.logger.debug(`Preparing ${method} request to ${requestContext.path}`, {
         params: query,
         headers: headers
       });
     }
 
-    // Define the request function
     const makeRequest = async (): Promise<HttpResponse<T>> => {
       try {
         const response: AxiosResponse<T> = await this.client.request(config);
 
         if (this.logger) {
-          this.logger.debug(`${method} request to ${path} succeeded`, {
+          this.logger.debug(`${method} request to ${requestContext.path} succeeded`, {
             status: response.status
           });
         }
 
-        return {
+        const httpResponse: HttpResponse<T> = {
           data: response.data,
           status: response.status,
           statusText: response.statusText,
           headers: response.headers as Record<string, string>,
         };
+
+        const responseContext = await this.middlewareManager.executeResponse(
+          requestContext.path,
+          requestContext.options,
+          httpResponse,
+          startTime,
+          requestContext.metadata
+        );
+
+        return responseContext.response;
       } catch (error) {
         if (this.logger) {
-          this.logger.error(`${method} request to ${path} failed`, {
+          this.logger.error(`${method} request to ${requestContext.path} failed`, {
             error: (error as any).message
           });
         }
+
+        await this.middlewareManager.executeError(
+          requestContext.path,
+          requestContext.options,
+          error as Error,
+          startTime,
+          requestContext.metadata
+        );
+
         return this.errorHandler.handleRequestError(error as any);
       }
     };
 
-    // Use rate limiter if available, otherwise make the request directly
     if (this.rateLimiter) {
       if (this.logger) {
-        this.logger.debug(`Rate limiting ${method} request to ${path}`);
+        this.logger.debug(`Rate limiting ${method} request to ${requestContext.path}`);
       }
       return this.rateLimiter.add(makeRequest);
     } else {

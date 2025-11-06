@@ -5,6 +5,7 @@ import { VeniceClientConfig } from './types';
 import { LogLevel } from './types/common';
 import { RateLimiter } from './utils/rate-limiter';
 import { Logger } from './utils/logger';
+import { Middleware } from './middleware';
 
 /**
  * The base class for the Venice AI SDK client.
@@ -195,6 +196,40 @@ export class VeniceClient {
    */
   public getLogger(): Logger {
     return this.logger;
+  }
+
+  /**
+   * Register a middleware for request/response interception.
+   * 
+   * @param middleware - The middleware to register
+   * @returns This client instance for chaining
+   */
+  public use(middleware: Middleware): this {
+    this.standardHttpClient.getMiddlewareManager().use(middleware);
+    this.logger.debug('Middleware registered', { name: middleware.name });
+    return this;
+  }
+
+  /**
+   * Remove a middleware by name.
+   * 
+   * @param name - The middleware name
+   * @returns True if removed, false if not found
+   */
+  public removeMiddleware(name: string): boolean {
+    const removed = this.standardHttpClient.getMiddlewareManager().remove(name);
+    if (removed) {
+      this.logger.debug('Middleware removed', { name });
+    }
+    return removed;
+  }
+
+  /**
+   * Clear all middlewares.
+   */
+  public clearMiddlewares(): void {
+    this.standardHttpClient.getMiddlewareManager().clear();
+    this.logger.debug('All middlewares cleared');
   }
 
   /**

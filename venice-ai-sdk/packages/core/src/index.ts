@@ -9,6 +9,9 @@ export { VeniceClient } from './client';
 export { ConfigManager } from './config';
 export { EventManager } from './events';
 
+// Export middleware
+export * from './middleware';
+
 // Export types
 export * from './types';
 
