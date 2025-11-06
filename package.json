@@ -2,6 +2,14 @@
   "name": "venice-ai-sdk-monorepo",
   "version": "2025.11.5",
   "description": "Venice AI SDK Monorepo",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/georgeglarson/venice-dev-tools.git"
+  },
+  "bugs": {
+    "url": "https://github.com/georgeglarson/venice-dev-tools/issues"
+  },
+  "homepage": "https://github.com/georgeglarson/venice-dev-tools#readme",
   "scripts": {
     "build": "cd venice-ai-sdk && pnpm build",
     "clean": "pnpm recursive run clean",
