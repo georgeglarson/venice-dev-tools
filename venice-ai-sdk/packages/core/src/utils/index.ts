@@ -137,6 +137,9 @@ export * from './validators';
 // Export stream parser
 export * from "./stream-parser";
 
+// Export stream helpers
+export * from "./stream-helpers";
+
 // Export retry utilities
 export * from "./retry";
 export * from "./retry-handler";
