@@ -18,6 +18,19 @@ export enum LogLevel {
 }
 
 /**
+ * Retry policy configuration for handling transient failures
+ */
+export interface RetryPolicy {
+  maxRetries?: number;
+  initialDelayMs?: number;
+  maxDelayMs?: number;
+  backoffMultiplier?: number;
+  retryableStatusCodes?: number[];
+  retryableErrorTypes?: string[];
+  jitter?: boolean;
+}
+
+/**
  * Interface for Venice API client configuration.
  */
 export interface VeniceClientConfig {
@@ -55,6 +68,12 @@ export interface VeniceClientConfig {
    * Log level for the client.
    */
   logLevel?: LogLevel;
+  
+  /**
+   * Retry policy for handling transient failures.
+   * Set to false to disable retries.
+   */
+  retryPolicy?: RetryPolicy | false;
 }
 
 /**

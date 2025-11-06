@@ -22,8 +22,15 @@ if [ ! -f "$IMAGE_FILE" ]; then
   exit 1
 fi
 
-# Your API key (replace with your actual key or pass as environment variable)
-API_KEY="${VENICE_API_KEY:-6EX7ki7GZAtzxnn0D9kkR4KpMpJ_rL9UuSalpfvznl}"
+# Your API key (must be set as environment variable)
+if [ -z "$VENICE_API_KEY" ]; then
+  echo "Error: VENICE_API_KEY environment variable not set"
+  echo "Get your API key at: https://venice.ai/settings/api"
+  echo ""
+  echo "Set it with: export VENICE_API_KEY=\"your-api-key-here\""
+  exit 1
+fi
+API_KEY="$VENICE_API_KEY"
 
 # Convert image to base64
 IMAGE_BASE64=$(base64 -w 0 "$IMAGE_FILE")

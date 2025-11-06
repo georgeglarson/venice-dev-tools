@@ -6,7 +6,14 @@ const { exec } = require('child_process');
 const path = require('path');
 
 // Configuration
-const API_KEY = '6EX7ki7GZAtzxnn0D9kkR4KpMpJ_rL9UuSalpfvznl';
+const API_KEY = process.env.VENICE_API_KEY;
+if (!API_KEY) {
+  console.error('Error: VENICE_API_KEY environment variable not set');
+  console.error('Get your API key at: https://venice.ai/settings/api');
+  console.error('\nSet it with: export VENICE_API_KEY="your-api-key-here"');
+  process.exit(1);
+}
+
 const IMAGE_PATH = './venice-ai-sdk/sunset.png';
 const INITIAL_PROMPT = 'Describe this image';
 const FOLLOWUP_PROMPT = 'What colors do you see in this image?';
