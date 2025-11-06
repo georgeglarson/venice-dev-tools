@@ -15,6 +15,9 @@ import {
 } from './api/endpoints/images';
 import { KeysEndpoint } from './api/endpoints/keys';
 import { CharactersEndpoint } from './api/endpoints/characters';
+import { EmbeddingsEndpoint } from './api/endpoints/embeddings';
+import { BillingEndpoint } from './api/endpoints/billing';
+import { AudioSpeechEndpoint } from './api/endpoints/audio';
 
 /**
  * Main client for interacting with the Venice AI API.
@@ -54,6 +57,9 @@ export class VeniceAI extends VeniceClient {
       .register('images', ImagesEndpoint)
       .register('keys', KeysEndpoint)
       .register('characters', CharactersEndpoint)
+      .register('embeddings', EmbeddingsEndpoint)
+      .register('billing', BillingEndpoint)
+      .register('audio.speech', AudioSpeechEndpoint)
       
       // Register specialized chat endpoints
       .register('chat.stream', ChatStreamEndpoint)
@@ -175,10 +181,39 @@ export class VeniceAI extends VeniceClient {
   public get characters(): CharactersEndpoint {
     return this.endpoint<CharactersEndpoint>('characters');
   }
+
+  /**
+   * Get the embeddings API endpoint.
+   *
+   * @returns The embeddings endpoint.
+   */
+  public get embeddings(): EmbeddingsEndpoint {
+    return this.endpoint<EmbeddingsEndpoint>('embeddings');
+  }
+
+  /**
+   * Get the billing API endpoint.
+   *
+   * @returns The billing endpoint.
+   */
+  public get billing(): BillingEndpoint {
+    return this.endpoint<BillingEndpoint>('billing');
+  }
+
+  /**
+   * Get the audio API endpoint.
+   *
+   * @returns The audio endpoint.
+   */
+  public get audio(): { speech: AudioSpeechEndpoint } {
+    return {
+      speech: this.endpoint<AudioSpeechEndpoint>('audio.speech')
+    };
+  }
   
   /**
    * Get the current API key.
-   * 
+   *
    * @returns The current API key.
    * @throws VeniceAuthError if no API key is set.
    */

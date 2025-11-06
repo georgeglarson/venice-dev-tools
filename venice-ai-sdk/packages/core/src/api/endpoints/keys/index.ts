@@ -9,6 +9,7 @@
 import { ApiEndpoint } from '../../registry/endpoint';
 import {
   ApiKey,
+  ApiKeyConsumptionLimits,
   CreateApiKeyRequest,
   CreateApiKeyResponse,
   ListApiKeysResponse,
@@ -20,6 +21,129 @@ import {
   ListRateLimitLogsResponse
 } from '../../../types';
 import { VeniceValidationError } from '../../../errors/types/validation-error';
+
+/**
+ * Normalize API key payloads returned by the Venice API to the SDK shape.
+ * Adds backwards-compatible aliases so legacy consumers continue working.
+ */
+function normalizeApiKeyPayload(raw: any, keyValue?: string): ApiKey {
+  if (!raw || !raw.id) {
+    throw new VeniceValidationError('Malformed API key response from Venice API');
+  }
+
+  const consumption: ApiKeyConsumptionLimits | null =
+    raw.consumptionLimits ??
+    raw.consumptionLimit ??
+    (raw.consumpionLimits as ApiKeyConsumptionLimits) ??
+    null;
+
+  const usage = raw.usage;
+  const apiKeyValue = keyValue ?? raw.apiKey ?? raw.key;
+
+  const description = raw.description ?? raw.name ?? '';
+  const createdAt = raw.createdAt ?? raw.created_at ?? null;
+  const expiresAt = raw.expiresAt ?? raw.expires_at ?? null;
+  const lastUsedAt = raw.lastUsedAt ?? raw.last_used_at ?? null;
+
+  return {
+    id: raw.id,
+    description,
+    apiKeyType: raw.apiKeyType ?? raw.api_key_type ?? 'INFERENCE',
+    createdAt,
+    expiresAt,
+    lastUsedAt,
+    last6Chars: raw.last6Chars ?? raw.last_6_chars ?? (apiKeyValue ? apiKeyValue.slice(-6) : undefined),
+    consumptionLimits: consumption
+      ? {
+          usd: consumption.usd ?? null,
+          vcu: consumption.vcu ?? null,
+          diem: consumption.diem ?? null,
+        }
+      : null,
+    usage,
+    apiKey: apiKeyValue,
+    key: apiKeyValue,
+    name: description,
+    created_at: createdAt,
+    expires_at: expiresAt,
+    last_used_at: lastUsedAt,
+    is_revoked: raw.isRevoked ?? raw.is_revoked ?? false,
+  };
+}
+
+/**
+ * Utility to coerce optional consumption limits into the correct shape
+ */
+function normalizeConsumptionLimit(limit?: ApiKeyConsumptionLimits | null): ApiKeyConsumptionLimits | undefined {
+  if (!limit) {
+    return undefined;
+  }
+
+  return {
+    usd: limit.usd ?? null,
+    vcu: limit.vcu ?? null,
+    diem: limit.diem ?? null,
+  };
+}
+
+/**
+ * Prepare the payload for creating an API key, adapting legacy aliases.
+ */
+function buildCreatePayload(request: CreateApiKeyRequest): Record<string, unknown> {
+  const description = request.description ?? request.name;
+  if (!description) {
+    throw new VeniceValidationError('Missing required parameter: description');
+  }
+
+  const payload: Record<string, unknown> = {
+    description,
+    apiKeyType: request.apiKeyType ?? 'INFERENCE',
+  };
+
+  const expiresAt = request.expiresAt ?? request.expires_at;
+  if (expiresAt !== undefined) {
+    payload.expiresAt = expiresAt;
+  }
+
+  const consumptionLimit = normalizeConsumptionLimit(request.consumptionLimit);
+  if (consumptionLimit) {
+    payload.consumptionLimit = consumptionLimit;
+  }
+
+  return payload;
+}
+
+/**
+ * Prepare payload for update requests (when supported).
+ */
+function buildUpdatePayload(request: UpdateApiKeyRequest): Record<string, unknown> {
+  const payload: Record<string, unknown> = {};
+
+  const description = request.description ?? request.name;
+  if (description !== undefined) {
+    payload.description = description;
+  }
+
+  if (request.apiKeyType) {
+    payload.apiKeyType = request.apiKeyType;
+  }
+
+  const expiresAt = request.expiresAt ?? request.expires_at;
+  if (expiresAt !== undefined) {
+    payload.expiresAt = expiresAt;
+  }
+
+  const consumptionLimit = normalizeConsumptionLimit(request.consumptionLimit);
+  if (consumptionLimit) {
+    payload.consumptionLimit = consumptionLimit;
+  }
+
+  if (Object.keys(payload).length === 0) {
+    throw new VeniceValidationError('At least one field must be provided when updating an API key');
+  }
+
+  return payload;
+}
 
 /**
  * API endpoint for API key management operations
@@ -46,17 +170,23 @@ export class KeysEndpoint extends ApiEndpoint {
     this.emit('request', { type: 'keys.list' });
 
     // Make the API request
-    const response = await this.http.get<ListApiKeysResponse>(
+    const response = await this.http.get<{ object: string; data: any[] }>(
       this.getPath('')
     );
+
+    const normalized = (response.data?.data ?? []).map((item: any) => normalizeApiKeyPayload(item));
 
     // Emit a response event
     this.emit('response', {
       type: 'keys.list',
-      data: { count: response.data.api_keys ? response.data.api_keys.length : 0 }
+      data: { count: normalized.length }
     });
 
-    return response.data;
+    return {
+      object: response.data?.object ?? 'list',
+      data: normalized,
+      api_keys: normalized, // backward compatibility
+    };
   }
 
   /**
@@ -65,27 +195,32 @@ export class KeysEndpoint extends ApiEndpoint {
    * @returns A promise that resolves to the created API key
    */
   public async create(request: CreateApiKeyRequest): Promise<CreateApiKeyResponse> {
-    // Validate request
-    if (!request.name) {
-      throw new VeniceValidationError('Missing required parameter: name');
-    }
-
     // Emit a request event
     this.emit('request', { type: 'keys.create', data: request });
 
+    const payload = buildCreatePayload(request);
+
     // Make the API request
-    const response = await this.http.post<CreateApiKeyResponse>(
+    const response = await this.http.post<{
+      success?: boolean;
+      data: any;
+    }>(
       this.getPath(''),
-      request
+      payload
     );
+
+    const apiKey = normalizeApiKeyPayload(response.data?.data, response.data?.data?.apiKey);
 
     // Emit a response event
     this.emit('response', {
       type: 'keys.create',
-      data: { success: true }
+      data: { success: true, id: apiKey.id }
     });
 
-    return response.data;
+    return {
+      success: response.data?.success ?? true,
+      api_key: apiKey,
+    };
   }
 
   /**
@@ -103,17 +238,23 @@ export class KeysEndpoint extends ApiEndpoint {
     this.emit('request', { type: 'keys.retrieve', data: { id } });
 
     // Make the API request
-    const response = await this.http.get<{ api_key: ApiKey }>(
+    const response = await this.http.get<{ data?: any; api_key?: any }>(
       this.getPath(`/${id}`)
     );
+
+    const apiKeyPayload = response.data?.data ?? response.data?.api_key ?? response.data;
+    const apiKey = normalizeApiKeyPayload(apiKeyPayload);
 
     // Emit a response event
     this.emit('response', {
       type: 'keys.retrieve',
-      data: { id: response.data.api_key.id }
+      data: { id: apiKey.id }
     });
 
-    return response.data;
+    return {
+      api_key: apiKey,
+      data: apiKey,
+    };
   }
 
   /**
@@ -131,22 +272,30 @@ export class KeysEndpoint extends ApiEndpoint {
     // Emit a request event
     this.emit('request', { type: 'keys.update', data: { id, ...request } });
 
-    // Make the API request
-    const response = await this.http.request<UpdateApiKeyResponse>(
-      this.getPath(`/${id}`),
-      {
-        method: 'PATCH',
-        body: request
-      }
+    // The Venice API currently does not expose an update endpoint.
+    // Provide a clear error to callers until support is added.
+    throw new VeniceValidationError(
+      'Updating API keys is not supported by the Venice API at this time.'
     );
 
-    // Emit a response event
-    this.emit('response', {
-      type: 'keys.update',
-      data: { id: response.data.api_key.id }
-    });
-
-    return response.data;
+    // The code below is preserved for forward compatibility when the API adds support.
+    // const payload = buildUpdatePayload(request);
+    // const response = await this.http.request<{ data: any }>(
+    //   this.getPath(`/${id}`),
+    //   {
+    //     method: 'PATCH',
+    //     body: payload
+    //   }
+    // );
+    //
+    // const apiKey = normalizeApiKeyPayload(response.data?.data ?? response.data);
+    //
+    // this.emit('response', {
+    //   type: 'keys.update',
+    //   data: { id: apiKey.id }
+    // });
+    //
+    // return { api_key: apiKey };
   }
 
   /**
@@ -302,14 +451,13 @@ export class KeysEndpoint extends ApiEndpoint {
         id: string;
         apiKey: string;
         description: string;
-        expiresAt: string | undefined;
+        expiresAt: string | null | undefined;
         apiKeyType: string;
-        consumptionLimit: {
-          vcu: number | null;
-          usd: number | null;
-        };
+        consumptionLimit: ApiKeyConsumptionLimits;
       };
     }>(this.getPath('/generate_web3_key'), payload);
+
+    const apiKey = normalizeApiKeyPayload(response.data.data, response.data.data.apiKey);
 
     // Emit a response event
     this.emit('response', {
@@ -317,15 +465,8 @@ export class KeysEndpoint extends ApiEndpoint {
       data: { success: true }
     });
 
-    // Return the API key in the expected format
     return {
-      api_key: {
-        id: response.data.data.id,
-        key: response.data.data.apiKey,
-        name: response.data.data.description,
-        created_at: new Date().toISOString(),
-        expires_at: response.data.data.expiresAt
-      }
+      api_key: apiKey
     };
   }
 

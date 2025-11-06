@@ -25,6 +25,16 @@ export interface ChatCompletionMessage {
 }
 
 /**
+ * Venice-specific parameters for chat completion
+ */
+export interface VeniceParameters {
+  /**
+   * The character slug to use for the chat completion
+   */
+  character_slug?: string;
+}
+
+/**
  * Request parameters for chat completion
  */
 export interface ChatCompletionRequest {
@@ -57,6 +67,11 @@ export interface ChatCompletionRequest {
    * Whether to stream the response
    */
   stream?: boolean;
+  
+  /**
+   * Venice-specific parameters
+   */
+  venice_parameters?: VeniceParameters;
 }
 
 /**

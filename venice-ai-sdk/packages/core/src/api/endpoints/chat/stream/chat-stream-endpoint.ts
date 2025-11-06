@@ -1,6 +1,7 @@
 import { ApiEndpoint } from '../../../registry/endpoint';
 import { ChatCompletionRequest } from '../../../../types';
 import { ChatValidator } from '../../../../utils/validators/chat-validator';
+import { parseSSEStream } from '../../../../utils/stream-parser';
 
 /**
  * API endpoint for streaming chat completions.
@@ -92,64 +93,13 @@ export class ChatStreamEndpoint extends ApiEndpoint {
     );
 
     try {
-      // Get the reader from the response body
       const reader = response.body?.getReader();
       if (!reader) {
         throw new Error('Stream response body is null');
       }
-      
-      // Read chunks from the stream
-      const decoder = new TextDecoder();
-      let buffer = '';
-      
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        
-        // Decode the chunk and add it to our buffer
-        buffer += decoder.decode(value, { stream: true });
-        
-        // Process complete lines from the buffer
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || ''; // Keep the last (potentially incomplete) line in the buffer
-        
-        for (const line of lines) {
-          const trimmedLine = line.trim();
-          if (!trimmedLine) continue;
-          
-          if (trimmedLine.startsWith('data: ')) {
-            const data = trimmedLine.substring(6);
-            if (data === '[DONE]') break;
-            
-            try {
-              const parsed = JSON.parse(data);
-              yield parsed;
-            } catch (e) {
-              console.error('Error parsing stream data:', e);
-            }
-          }
-        }
-      }
-      
-      // Process any remaining data in the buffer
-      if (buffer.trim()) {
-        const lines = buffer.split('\n');
-        for (const line of lines) {
-          const trimmedLine = line.trim();
-          if (!trimmedLine) continue;
-          
-          if (trimmedLine.startsWith('data: ')) {
-            const data = trimmedLine.substring(6);
-            if (data === '[DONE]') break;
-            
-            try {
-              const parsed = JSON.parse(data);
-              yield parsed;
-            } catch (e) {
-              console.error('Error parsing stream data:', e);
-            }
-          }
-        }
+
+      for await (const chunk of parseSSEStream(reader, this.logger)) {
+        yield chunk;
       }
     } finally {
       // Emit a response event when the stream ends

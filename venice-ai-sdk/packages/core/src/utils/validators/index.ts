@@ -1,11 +1,15 @@
+export { AudioValidator } from './audio-validator';
 export { BaseValidator } from './base-validator';
 export { ChatValidator } from './chat-validator';
+export { EmbeddingsValidator } from './embeddings-validator';
 export { ImageValidator } from './image-validator';
 export { ModelValidator } from './model-validator';
 
 // For backward compatibility
+import { AudioValidator } from './audio-validator';
 import { BaseValidator } from './base-validator';
 import { ChatValidator } from './chat-validator';
+import { EmbeddingsValidator } from './embeddings-validator';
 import { ImageValidator } from './image-validator';
 import { ModelValidator } from './model-validator';
 
@@ -68,8 +72,10 @@ export const validateModelRequest = (request: any): void => {
 
 // Default export
 export default {
+  AudioValidator,
   BaseValidator,
   ChatValidator,
+  EmbeddingsValidator,
   ImageValidator,
   ModelValidator,
   validateRequired,

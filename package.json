@@ -1,6 +1,6 @@
 {
   "name": "venice-ai-sdk-monorepo",
-  "version": "2.1.10",
+  "version": "2025.11.5",
   "description": "Venice AI SDK Monorepo",
   "scripts": {
     "build": "cd venice-ai-sdk && pnpm build",
@@ -8,6 +8,9 @@
     "dev": "pnpm recursive run dev",
     "lint": "pnpm recursive run lint",
     "test": "pnpm recursive run test",
+    "test:all": "cd venice-ai-sdk/packages/core && pnpm test:all",
+    "test:integration": "cd venice-ai-sdk/packages/core && pnpm test:integration",
+    "test:coverage": "cd venice-ai-sdk/packages/core && pnpm test:coverage",
     "test:api": "node tests/test-api-key.js",
     "test:sdk": "node tests/test-venice-sdk.js",
     "test:sdk:2": "node tests/test-venice-sdk-2.js",

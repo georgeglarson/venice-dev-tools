@@ -1,0 +1,92 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+.turbo/
+
+# Testing
+coverage/
+.nyc_output/
+*.lcov
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Runtime
+.cache/
+.temp/
+tmp/
+
+# OS
+Thumbs.db
+.DS_Store
+# Source files
+src/
+*.ts
+!*.d.ts
+
+# Tests
+**/__tests__/
+**/__integration__/
+**/*.test.ts
+**/*.spec.ts
+vitest.config.ts
+coverage/
+
+# Development files
+.env
+.env.*
+tsconfig.json
+tsconfig.*.json
+.eslintrc*
+.prettierrc*
+.editorconfig
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Documentation (keep README)
+docs/
+*.md
+!README.md
+
+# Build artifacts
+.turbo/
+.cache/
+tmp/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Misc
+.DS_Store
+Thumbs.db

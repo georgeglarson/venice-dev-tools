@@ -1,6 +1,7 @@
 import { VeniceClient } from '../../client';
 import { StandardHttpClient } from '../../http/standard/standard-http-client';
 import { StreamingHttpClient } from '../../http/streaming/streaming-http-client';
+import { Logger } from '../../utils/logger';
 
 /**
  * Base class for all API endpoints in the Venice AI SDK.
@@ -23,6 +24,11 @@ export abstract class ApiEndpoint {
   protected client: VeniceClient;
 
   /**
+   * The logger for this endpoint.
+   */
+  protected logger: Logger;
+
+  /**
    * Create a new API endpoint.
    * @param client - The Venice client that owns this endpoint.
    */
@@ -30,6 +36,7 @@ export abstract class ApiEndpoint {
     this.client = client;
     this.http = client.getStandardHttpClient();
     this.streamingHttp = client.getStreamingHttpClient();
+    this.logger = client.getLogger();
   }
 
   /**

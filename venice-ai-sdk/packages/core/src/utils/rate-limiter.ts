@@ -8,7 +8,7 @@ export class RateLimiter {
   /**
    * Queue of pending requests.
    */
-  private queue: Array<() => Promise<any>> = [];
+  private queue: Array<() => void> = [];
   
   /**
    * Number of currently running requests.
@@ -49,47 +49,48 @@ export class RateLimiter {
    * @throws {VeniceRateLimitError} If the rate limit is exceeded
    */
   async add<T>(fn: () => Promise<T>): Promise<T> {
-    // Check rate limit
-    this.enforceRateLimit();
-    
-    // Add to queue if at capacity
-    if (this.running >= this.maxConcurrent) {
-      return new Promise<T>((resolve, reject) => {
-        this.queue.push(async () => {
-          try {
-            const result = await fn();
+    return new Promise<T>((resolve, reject) => {
+      const execute = () => {
+        try {
+          this.enforceRateLimit();
+        } catch (error) {
+          reject(error);
+          this.processQueue();
+          return;
+        }
+
+        this.running++;
+        Promise.resolve()
+          .then(fn)
+          .then((result) => {
+            this.recordRequest();
             resolve(result);
-          } catch (error) {
+          })
+          .catch((error) => {
             reject(error);
-          }
-        });
-      });
-    }
-    
-    // Otherwise execute immediately
-    this.running++;
-    try {
-      const result = await fn();
-      this.recordRequest();
-      return result;
-    } finally {
-      this.running--;
-      this.processQueue();
-    }
+          })
+          .finally(() => {
+            this.running--;
+            this.processQueue();
+          });
+      };
+
+      if (this.running < this.maxConcurrent) {
+        execute();
+      } else {
+        this.queue.push(execute);
+      }
+    });
   }
 
   /**
    * Processes the next request in the queue.
    */
   private processQueue() {
-    if (this.queue.length > 0 && this.running < this.maxConcurrent) {
+    while (this.queue.length > 0 && this.running < this.maxConcurrent) {
       const next = this.queue.shift();
       if (next) {
-        this.running++;
-        next().finally(() => {
-          this.running--;
-          this.processQueue();
-        });
+        next();
       }
     }
   }

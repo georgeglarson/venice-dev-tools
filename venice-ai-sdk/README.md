@@ -1,253 +1,112 @@
-# Venice Dev Tools
+# Venice Dev Tools Monorepo
 
-[![npm version](https://img.shields.io/npm/v/@venice-dev-tools/node.svg)](https://www.npmjs.com/package/@venice-dev-tools/node)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue.svg)](https://www.typescriptlang.org/)
+**Unofficial TypeScript / JavaScript SDK for the Venice.ai API**  
+Current release: **v2025.11.5** (calendar version aligned with the 2025‑11‑05 Venice platform update).
 
-The unOfficial SDK for the [Venice AI](https://venice.ai) platform. This SDK provides a simple, elegant, and type-safe way to integrate with Venice AI's API for chat completions, image generation, PDF processing, and more.
+---
 
-<div align="center">
-  <img src="sunset.png" alt="Venice AI Generated Image" width="400"/>
-</div>
+## Packages in this workspace
 
-## 🚀 Quick Start
+| Package | npm | Purpose |
+| --- | --- | --- |
+| `@venice-dev-tools/core` | [![npm](https://img.shields.io/npm/v/@venice-dev-tools/core?style=flat-square)](https://www.npmjs.com/package/@venice-dev-tools/core) | Shared runtime, HTTP stack, typings, and endpoint registry that work in both Node.js and browser builds. |
+| `@venice-dev-tools/node` | [![npm](https://img.shields.io/npm/v/@venice-dev-tools/node?style=flat-square)](https://www.npmjs.com/package/@venice-dev-tools/node) | Node-focused helpers and the `venice` CLI. |
+| `@venice-dev-tools/web` | [![npm](https://img.shields.io/npm/v/@venice-dev-tools/web?style=flat-square)](https://www.npmjs.com/package/@venice-dev-tools/web) | Browser-friendly bundle entry that re-exports the core client. |
 
-### Installation
+Each package ships the same calendar version so downstream users can map SDK behaviour to Venice API changelog entries at a glance.
+
+---
+
+## Quick start (Node.js)
 
 ```bash
-# Install the complete SDK (includes all packages)
-npm install venice-dev-tools
-
-# Or install individual packages
-# Node.js only
-npm install @venice-dev-tools/node
-
-# Browser only
-npm install @venice-dev-tools/web
-
-# Core functionality only
-npm install @venice-dev-tools/core
+pnpm add @venice-dev-tools/core
 ```
 
-### Chat Completion Example
+```ts
+import { VeniceClient } from '@venice-dev-tools/core';
 
-```javascript
-import { VeniceNode } from '@venice-dev-tools/node';
+const venice = new VeniceClient({
+  apiKey: process.env.VENICE_API_KEY!,
+  logLevel: 1 // INFO
+});
 
-// Initialize with your API key
-const venice = new VeniceNode({ apiKey: 'your-api-key' });
-
-// Generate a chat completion
-const response = await venice.chat.createCompletion({
+const completion = await venice.chat.completions.create({
   model: 'llama-3.3-70b',
-  messages: [{ role: 'user', content: 'Explain quantum computing in simple terms' }]
+  messages: [{ role: 'user', content: 'Explain the Venice AI API in one sentence.' }]
 });
 
-console.log(response.choices[0].message.content);
+console.log(completion.choices[0].message.content);
 ```
 
-### Image Generation Example
-
-```javascript
-// Generate an image
-const response = await venice.images.generate({
-  model: 'fluently-xl',
-  prompt: 'A beautiful sunset over Venice, Italy',
-  width: 1024,
-  height: 1024
-});
-
-// Save the image (Node.js only)
-venice.saveImageToFile(response.images[0], 'venice-sunset.png');
-```
-
-### CLI Usage
+Need a key? Visit [venice.ai/settings/api](https://venice.ai/settings/api) and export it:
 
 ```bash
-# Install globally
-npm install -g @venice-dev-tools/node
-
-# Set your API key
-venice set-key YOUR_API_KEY --global
-
-# Start an interactive chat session
-venice chat interactive
-
-# Generate an image
-venice images generate --prompt "A beautiful sunset over Venice" --output sunset.png
+export VENICE_API_KEY="sk-..."
 ```
 
-## ✨ Features
+> Looking for web bundler or CLI usage? Start with the [Getting Started guide](../docs/guides/getting-started.md).
 
-- **🤖 Advanced AI Models**: Access to Venice AI's powerful LLMs including Llama 3.3, Claude, and more
-- **🖼️ Image Generation**: Create stunning images with models like Fluently XL
-- **📄 PDF Processing**: Extract, analyze, and chat with PDF documents
-- **🔄 Streaming Support**: Real-time streaming for chat completions
-- **🌐 Cross-Platform**: Works in Node.js and browser environments
-- **⚙️ CLI Tools**: Powerful command-line interface for all API functionality
-- **🔒 Type Safety**: Full TypeScript support with comprehensive type definitions
-- **🧩 Extensible**: Register custom endpoints to extend functionality
+---
 
-## 📚 Documentation
+## Repository layout
 
-### Comprehensive Guides
-
-Visit our [documentation site](https://georgeglarson.github.io/venice-dev-tools/) for comprehensive guides, API references, and examples.
-
-- [Getting Started Guide](https://georgeglarson.github.io/venice-dev-tools/guides/getting-started.html)
-- [API Reference](https://georgeglarson.github.io/venice-dev-tools/api/client.html)
-- [PDF Processing Guide](https://georgeglarson.github.io/venice-dev-tools/guides/pdf-processing.html)
-- [Migration Guide (v1 to v2)](https://georgeglarson.github.io/venice-dev-tools/guides/migration-v1-to-v2.html)
-
-### Code Examples
-
-#### Streaming Chat Completions
-
-```javascript
-const stream = await venice.chat.createCompletionStream({
-  model: 'llama-3.3-70b',
-  messages: [{ role: 'user', content: 'Write a short poem about AI' }]
-});
-
-for await (const chunk of stream) {
-  process.stdout.write(chunk.choices[0]?.delta?.content || '');
-}
+```
+venice-ai-sdk/
+├── packages/
+│   ├── core/        # Source of truth for HTTP, endpoints, types, tests
+│   ├── node/        # CLI entry points, Node-specific helpers
+│   └── web/         # Browser bundle wrapper
+├── docs/            # Guides, technical notes, API research, legacy archive
+├── examples/        # Scenario-based samples
+└── tests/           # Legacy CLI smoke scripts
 ```
 
-#### PDF Processing
+Active documentation lives under `docs/guides/` and `docs/technical/`. Long-form historical analyses and sunset plans are preserved in `docs/archive/`.
 
-```javascript
-// Process a PDF file
-const pdfResponse = await venice.pdf.process({
-  file: './document.pdf',
-  mode: 'extract'  // 'extract', 'analyze', or 'chat'
-});
+---
 
-console.log(pdfResponse.content);
-
-// Chat with a PDF
-const chatResponse = await venice.pdf.chat({
-  file: './document.pdf',
-  query: 'Summarize the main points of this document'
-});
-
-console.log(chatResponse.answer);
-
-// Process PDF with different modes
-// 1. As binary data (default)
-// Note: This doesn't convert the PDF to an image format, but sends it as binary data
-const imageContent = await venice.utils.processFile('./document.pdf');
-
-// 2. As extracted text
-const textContent = await venice.utils.processFile('./document.pdf', { pdfMode: 'text' });
-
-// 3. As both text and binary data
-const bothContent = await venice.utils.processFile('./document.pdf', { pdfMode: 'both' });
-
-// To properly convert PDF to image format, use a dedicated library
-// Example with pdf-img-convert (you'll need to install it first):
-// npm install pdf-img-convert
-const pdfImgConvert = require('pdf-img-convert');
-const pdfImages = await pdfImgConvert.convert('./document.pdf', {
-  width: 1024,  // output image width in pixels
-  height: 1450  // output image height in pixels
-});
-// pdfImages is an array of Buffer objects, one for each page
-// Save the first page as PNG
-fs.writeFileSync('document-page-1.png', pdfImages[0]);
-```
-
-#### CLI PDF Processing
+## Development workflow
 
 ```bash
-# Process PDF as binary data (default mode)
-venice chat completion --model llama-3.3-70b --attach document.pdf --prompt "Summarize this document"
-
-# Process PDF as text
-venice chat completion --model llama-3.3-70b --attach document.pdf --pdf-mode text --prompt "Summarize this document"
-
-# Process PDF as both text and binary data
-venice chat completion --model llama-3.3-70b --attach document.pdf --pdf-mode both --prompt "Summarize this document"
-
-# For proper PDF-to-image conversion, you'll need to convert the PDF first:
-# Using ImageMagick (if installed)
-convert -density 150 document.pdf -quality 90 document.png
-# Then use the converted image
-venice chat completion --model llama-3.3-70b --attach document.png --prompt "Summarize this image"
-```
-
-#### Alternative: Multiple File Attachments
-
-If you encounter issues with PDF processing modes, you can achieve similar functionality by attaching multiple files of different types:
-
-```bash
-# Attach both a text file and an image file
-venice chat completion --model llama-3.3-70b --attach ./document.txt,./image.png --prompt "Analyze these files"
-```
-
-This approach allows the AI to analyze both textual content and visual elements, providing a comprehensive response.
-
-#### Known Limitations
-
-- The current implementation may have issues with text extraction from PDFs, showing an error about a missing file path
-- For best results with PDFs containing both text and images, consider extracting the text separately and converting the PDF to images using external tools
-- Then attach both the text file and image file(s) to your request
-
-#### API Key Management
-
-```javascript
-// List all API keys
-const keys = await venice.apiKeys.list();
-console.log(keys);
-
-// Create a new API key
-const newKey = await venice.apiKeys.create({
-  name: 'My New API Key',
-  expiresAt: '2025-12-31'
-});
-```
-
-## 🧰 Packages
-
-This SDK is organized into multiple packages:
-
-- **[@venice-dev-tools/core](https://www.npmjs.com/package/@venice-dev-tools/core)**: Core functionality and types
-- **[@venice-dev-tools/node](https://www.npmjs.com/package/@venice-dev-tools/node)**: Node.js implementation with CLI
-- **[@venice-dev-tools/web](https://www.npmjs.com/package/@venice-dev-tools/web)**: Browser implementation
-
-## 🛠️ Development
-
-```bash
-# Clone the repository
-git clone https://github.com/georgeglarson/venice-dev-tools.git
-cd venice-dev-tools
-
-# Install dependencies
+# Install dependencies (requires pnpm 8+)
 pnpm install
 
-# Build all packages
+# Build every workspace
 pnpm build
 
-# Run tests
-pnpm test
+# Unit tests (no network access required)
+pnpm -C packages/core test
+
+# Integration matrix (requires VENICE_API_KEY + VENICE_ADMIN_API_KEY)
+pnpm -C packages/core test:integration -- --runInBand
+
+# Optional hygiene
+pnpm lint
+pnpm format
 ```
 
-## 📋 Requirements
+Integration suites degrade gracefully when Venice returns ArrayBuffers instead of URLs (image/audio) or when Web3 endpoints decline token generation. Watch the test output for informative `skipping ...` messages.
 
-- Node.js 18.0.0 or later
-- A Venice AI API key ([Get one here](https://venice.ai))
+---
 
-## 📜 License
+## Calendar versioning & release checklist
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+1. Update every `package.json` to the new calendar stamp (`YYYY.MM.D`).
+2. Document the release in `venice-ai-sdk/CHANGELOG.md`.
+3. Run `pnpm -r test` and the targeted integration commands above.
+4. Tag the commit (`git tag vYYYY.MM.D`) and publish each workspace (`pnpm -r publish --filter ...`).
 
-## 🔗 Links
+Hotfixes append an integer suffix (`2025.11.5-1`, `2025.11.5-2`, ...). We keep the latest two calendars in “active fix” status; older releases move to `docs/archive/` for posterity.
 
-- [Venice AI Official Website](https://venice.ai)
-- [Venice AI API Documentation](https://api.venice.ai/doc/api/swagger.yaml)
-- [GitHub Repository](https://github.com/georgeglarson/venice-dev-tools)
-- [npm Package](https://www.npmjs.com/package/@venice-dev-tools/node)
+---
 
-## 🙏 Acknowledgements
+## Documentation index
 
-This SDK is not officially affiliated with Venice AI. It is maintained by the community for the community.
+- [Getting Started](../docs/guides/getting-started.md)
+- [Testing Playbook](../docs/guides/testing.md)
+- [Calendar Versioning FAQ](../docs/guides/calendar-versioning.md)
+- [Technical Notes](../docs/technical/)
+- [Venice API Research](../docs/venice-api/)
+
+For coding standards, commit conventions, and security contacts, see the root [CONTRIBUTING.md](../CONTRIBUTING.md).

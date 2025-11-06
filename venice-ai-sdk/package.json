@@ -1,6 +1,6 @@
 {
   "name": "venice-dev-tools",
-  "version": "2.1.10",
+  "version": "2025.11.5",
   "description": "unOfficial SDK for the Venice AI API",
   "workspaces": [
     "packages/*"
@@ -19,6 +19,10 @@
     "dev": "pnpm -r run dev",
     "lint": "pnpm -r run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "test": "pnpm -r run test",
+    "test:watch": "pnpm -r run test:watch",
+    "test:coverage": "pnpm -r run test:coverage",
+    "typecheck": "pnpm -r run typecheck",
     "postinstall": "node -e \"try { const fs = require('fs'); const path = require('path'); const binPath = path.join(__dirname, 'bin', 'venice-cli.js'); fs.chmodSync(binPath, '755'); console.log('Made CLI executable: ' + binPath); const nodeModulesPath = path.join(__dirname, 'packages', 'node', 'node_modules'); if (!fs.existsSync(nodeModulesPath)) { console.log('Installing node package dependencies...'); require('child_process').execSync('cd ' + path.join(__dirname, 'packages', 'node') + ' && npm install --no-save', {stdio: 'inherit'}); } } catch (e) { console.error('Error in postinstall script:', e); }\"",
     "install-cli": "node bin/install-cli.js",
     "fix-cli": "node -e \"try { const fs = require('fs'); const path = require('path'); const binPath = path.join(__dirname, 'bin', 'venice-cli.js'); fs.chmodSync(binPath, '755'); console.log('Made CLI executable: ' + binPath); const nodeModulesPath = path.join(__dirname, 'packages', 'node', 'node_modules'); if (!fs.existsSync(nodeModulesPath)) { console.log('Installing node package dependencies...'); require('child_process').execSync('cd ' + path.join(__dirname, 'packages', 'node') + ' && npm install --no-save', {stdio: 'inherit'}); } } catch (e) { console.error('Error in fix-cli script:', e); }\""
@@ -33,19 +37,21 @@
   "license": "MIT",
   "dependencies": {
     "ansi-colors": "^4.1.3",
+    "axios": "^1.6.3",
     "commander": "^13.1.0",
+    "eventemitter3": "^5.0.1",
     "inquirer": "^12.5.0",
     "ora": "^8.2.0",
-    "table": "^6.9.0",
-    "axios": "^1.6.3",
-    "eventemitter3": "^5.0.1"
+    "table": "^6.9.0"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.1",
     "@types/node": "^22.13.10",
+    "@vitest/coverage-v8": "^1.6.1",
     "pdfkit": "^0.16.0",
     "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "vitest": "^1.6.1"
   },
   "packageManager": "pnpm"
 }

@@ -1,4 +1,4 @@
-import { LogLevel } from '../types';
+import { LogLevel } from '../types/common';
 
 /**
  * A log entry.
@@ -39,7 +39,7 @@ export class Logger {
    * @param options - Logger options
    */
   constructor(options: LoggerOptions = {}) {
-    this.level = options.level ?? LogLevel.INFO;
+    this.level = options.level ?? 1;
     this.handlers = options.handlers ?? [this.defaultHandler.bind(this)];
   }
   
@@ -68,7 +68,7 @@ export class Logger {
    * @param data - Additional data to log
    */
   debug(message: string, data?: any): void {
-    this.log(LogLevel.DEBUG, message, data);
+    this.log(0, message, data);
   }
   
   /**
@@ -78,7 +78,7 @@ export class Logger {
    * @param data - Additional data to log
    */
   info(message: string, data?: any): void {
-    this.log(LogLevel.INFO, message, data);
+    this.log(1, message, data);
   }
   
   /**
@@ -88,7 +88,7 @@ export class Logger {
    * @param data - Additional data to log
    */
   warn(message: string, data?: any): void {
-    this.log(LogLevel.WARN, message, data);
+    this.log(2, message, data);
   }
   
   /**
@@ -98,7 +98,7 @@ export class Logger {
    * @param data - Additional data to log
    */
   error(message: string, data?: any): void {
-    this.log(LogLevel.ERROR, message, data);
+    this.log(3, message, data);
   }
   
   /**
@@ -147,15 +147,15 @@ export class Logger {
     
     // In Node.js environment
     if (typeof process !== 'undefined' && process.stdout) {
-      const stream = entry.level >= LogLevel.ERROR ? process.stderr : process.stdout;
+      const stream = entry.level >= 3 ? process.stderr : process.stdout;
       stream.write(`${logMessage}\n`);
     } else {
       // In browser environment
-      const method = entry.level >= LogLevel.ERROR 
+      const method = entry.level >= 3 
         ? 'error' 
-        : entry.level === LogLevel.WARN 
+        : entry.level === 2 
           ? 'warn' 
-          : entry.level === LogLevel.INFO 
+          : entry.level === 1 
             ? 'info' 
             : 'debug';
       console[method](logMessage);

@@ -1,7 +1,8 @@
 import { ConfigManager } from './config/config-manager';
 import { EventManager } from './events/event-manager';
 import { HttpClientFactory, StandardHttpClient, StreamingHttpClient } from './http';
-import { VeniceClientConfig, LogLevel } from './types';
+import { VeniceClientConfig } from './types';
+import { LogLevel } from './types/common';
 import { RateLimiter } from './utils/rate-limiter';
 import { Logger } from './utils/logger';
 
@@ -56,11 +57,11 @@ export class VeniceClient {
     
     // Initialize logger
     this.logger = new Logger({
-      level: config.logLevel || LogLevel.INFO
+      level: config.logLevel !== undefined ? config.logLevel : 1  // LogLevel.INFO = 1
     });
     
     // Only log initialization info if log level is not NONE
-    if (config.logLevel !== LogLevel.NONE) {
+    if (config.logLevel !== 4) {  // LogLevel.NONE = 4
       this.logger.info('Initializing Venice AI client', {
         baseUrl: config.baseUrl || 'https://api.venice.ai/api/v1',
         timeout: config.timeout || 30000

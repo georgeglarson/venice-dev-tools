@@ -3,7 +3,19 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+and releases now follow a calendar versioning scheme `YYYY.MM.D` aligned with Venice API drop dates.
+
+## [2025.11.5] - 2025-11-05
+
+### Added
+- Adopted calendar-based versioning to track Venice API revisions.
+- Normalized all API key endpoint responses and requests to match production payloads.
+- Archived historical test analysis documents under `docs/archive/testing`.
+
+### Changed
+- Cleaned up workflow and integration tests to gracefully handle optional API features.
+- Refreshed repository documentation with SEO-friendly structure and up-to-date quick starts.
+- Updated package metadata and README guidance for the 2025.11.5 release.
 
 ## [1.8.2] - 2025-03-02
 

@@ -48,43 +48,132 @@ export interface ListRateLimitLogsResponse {
 }
 
 /**
- * An API key object
+ * Consumption limits for an API key
+ */
+export interface ApiKeyConsumptionLimits {
+  /**
+   * USD consumption limit
+   */
+  usd: number | null;
+
+  /**
+   * VCU consumption limit
+   */
+  vcu: number | null;
+
+  /**
+   * DIEM consumption limit (if provided by API)
+   */
+  diem?: number | null;
+}
+
+/**
+ * Usage information for an API key
+ */
+export interface ApiKeyUsage {
+  /**
+   * Usage over the trailing seven days
+   */
+  trailingSevenDays?: {
+    /**
+     * USD usage as a string value
+     */
+    usd?: string;
+    /**
+     * VCU usage as a string value
+     */
+    vcu?: string;
+    /**
+     * DIEM usage as a string value (if provided)
+     */
+    diem?: string;
+  };
+}
+
+/**
+ * Represents an API key returned by the Venice API.
+ * Includes both the current response fields and backward-compatible aliases.
  */
 export interface ApiKey {
   /**
-   * The API key ID
+   * Unique identifier for the API key
    */
   id: string;
-  
+
   /**
-   * The API key value (only shown once on creation)
+   * Human-readable description for the key
    */
-  key?: string;
-  
+  description: string;
+
   /**
-   * The name of the API key
+   * API key type (ADMIN or INFERENCE)
    */
-  name: string;
-  
+  apiKeyType: 'ADMIN' | 'INFERENCE';
+
   /**
-   * The timestamp when the key was created
+   * Timestamp when the key was created (ISO 8601) or null when unavailable
    */
-  created_at: string;
-  
+  createdAt: string | null;
+
   /**
-   * The timestamp when the key was last used
+   * Timestamp when the key expires (ISO 8601) or null if it never expires
    */
-  last_used_at?: string;
-  
+  expiresAt: string | null;
+
   /**
-   * The expiration date of the key (if any)
+   * Timestamp when the key was last used (ISO 8601) or null if unused
    */
-  expires_at?: string;
-  
+  lastUsedAt?: string | null;
+
   /**
-   * Whether the key has been revoked
+   * Last six characters of the API key for display purposes
+   */
+  last6Chars?: string;
+
+  /**
+   * Consumption limits configured for the key
+   */
+  consumptionLimits?: ApiKeyConsumptionLimits | null;
+
+  /**
+   * Usage information for the key
+   */
+  usage?: ApiKeyUsage;
+
+  /**
+   * The raw API key value (only provided on creation responses)
+   */
+  apiKey?: string;
+
+  /**
+   * @deprecated Alias for `description`
+   */
+  name?: string;
+
+  /**
+   * @deprecated Alias for `createdAt`
+   */
+  created_at?: string | null;
+
+  /**
+   * @deprecated Alias for `expiresAt`
+   */
+  expires_at?: string | null;
+
+  /**
+   * @deprecated Alias for `lastUsedAt`
+   */
+  last_used_at?: string | null;
+
+  /**
+   * @deprecated Alias retained for compatibility (not provided by the API)
    */
   is_revoked?: boolean;
+
+  /**
+   * @deprecated Alias for `apiKey`
+   */
+  key?: string;
 }
 
 /**
@@ -92,12 +181,32 @@ export interface ApiKey {
  */
 export interface CreateApiKeyRequest {
   /**
-   * The name to assign to the new API key
+   * Description for the new API key (alias: name)
    */
-  name: string;
-  
+  description?: string;
+
   /**
-   * Optional expiration date for the key (ISO 8601 format)
+   * API key type (defaults to INFERENCE)
+   */
+  apiKeyType?: 'ADMIN' | 'INFERENCE';
+
+  /**
+   * Expiration date (ISO 8601). Empty string removes expiration.
+   */
+  expiresAt?: string;
+
+  /**
+   * Consumption limits for the key
+   */
+  consumptionLimit?: ApiKeyConsumptionLimits;
+
+  /**
+   * @deprecated Alias for `description`
+   */
+  name?: string;
+
+  /**
+   * @deprecated Alias for `expiresAt`
    */
   expires_at?: string;
 }
@@ -106,6 +215,11 @@ export interface CreateApiKeyRequest {
  * Response from creating a new API key
  */
 export interface CreateApiKeyResponse {
+  /**
+   * Indicates whether the operation succeeded
+   */
+  success: boolean;
+
   /**
    * The created API key object
    */
@@ -117,7 +231,17 @@ export interface CreateApiKeyResponse {
  */
 export interface ListApiKeysResponse {
   /**
-   * Array of API keys
+   * Object type (always "list")
+   */
+  object: string;
+
+  /**
+   * Array of API keys (modern field)
+   */
+  data: ApiKey[];
+
+  /**
+   * @deprecated Legacy alias for the API key list
    */
   api_keys: ApiKey[];
 }
@@ -127,18 +251,40 @@ export interface ListApiKeysResponse {
  */
 export interface UpdateApiKeyRequest {
   /**
-   * New name for the API key (optional)
+   * Updated description for the key
+   */
+  description?: string;
+
+  /**
+   * Updated API key type
+   */
+  apiKeyType?: 'ADMIN' | 'INFERENCE';
+
+  /**
+   * Updated expiration date (ISO 8601). Empty string removes expiration.
+   */
+  expiresAt?: string;
+
+  /**
+   * Updated consumption limits for the key
+   */
+  consumptionLimit?: ApiKeyConsumptionLimits;
+
+  /**
+   * @deprecated Alias for `description`
    */
   name?: string;
-  
+
   /**
-   * New expiration date for the key (ISO 8601 format, optional)
+   * @deprecated Alias for `expiresAt`
    */
   expires_at?: string;
 }
 
 /**
  * Response from updating an API key
+ * (Currently the Venice API does not support updates,
+ * but the type is retained for forward compatibility.)
  */
 export interface UpdateApiKeyResponse {
   /**
