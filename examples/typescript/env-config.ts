@@ -3,9 +3,23 @@
 
 import { config } from 'dotenv';
 import { resolve } from 'path';
+import { existsSync } from 'fs';
 
-// Load .env from examples directory (one level up from typescript/)
-config({ path: resolve(__dirname, '../.env') });
+// Load .env files from most-specific to least-specific locations.
+const envCandidates = [
+  // examples/.env (legacy location mentioned in docs)
+  resolve(__dirname, '../.env'),
+  // repository root .env (so tests share the same config as the main app)
+  resolve(__dirname, '../../.env'),
+  // Current working directory (for ad-hoc runs)
+  resolve(process.cwd(), '.env')
+];
+
+envCandidates.forEach((envPath) => {
+  if (existsSync(envPath)) {
+    config({ path: envPath, override: false });
+  }
+});
 
 /**
  * Get required environment variable or exit with helpful message

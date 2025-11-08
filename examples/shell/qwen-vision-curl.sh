@@ -1,7 +1,13 @@
 #!/bin/bash
 
-# Simple curl command for using Qwen Vision API
-# This script demonstrates how to use the API with proper handling for follow-up questions
+##############################################################################
+# LEGACY: Simple Qwen Vision Example
+#
+# ⚠️  This is a legacy example. For new projects, use:
+#    ./11-vision-multimodal.sh
+#
+# Simple curl command for using Qwen Vision API.
+##############################################################################
 
 # Check if an image file was provided
 if [ $# -lt 1 ]; then
@@ -22,8 +28,14 @@ if [ ! -f "$IMAGE_FILE" ]; then
   exit 1
 fi
 
-# Your API key (replace with your actual key)
-API_KEY="6EX7ki7GZAtzxnn0D9kkR4KpMpJ_rL9UuSalpfvznl"
+# Check for API key in environment
+if [ -z "$VENICE_API_KEY" ]; then
+  echo "❌ Error: VENICE_API_KEY environment variable is not set"
+  echo "   💡 Tip: Set it with: export VENICE_API_KEY='your-key-here'"
+  exit 1
+fi
+
+API_KEY="$VENICE_API_KEY"
 
 # Convert image to base64
 IMAGE_BASE64=$(base64 -w 0 "$IMAGE_FILE")

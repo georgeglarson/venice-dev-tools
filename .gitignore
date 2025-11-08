@@ -13,6 +13,8 @@ build/
 coverage/
 .nyc_output/
 *.lcov
+generated-image-*.png
+*.mp3
 
 # Environment variables
 .env

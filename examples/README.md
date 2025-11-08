@@ -42,13 +42,10 @@ cat README.md
 ```bash
 # All TypeScript examples automatically load examples/.env
 
-# Using tsx (recommended)
+# Using tsx (recommended - works out of the box)
 npx tsx examples/typescript/01-hello-world.ts
 
-# Using ts-node
-npx ts-node examples/typescript/01-hello-world.ts
-
-# Using Bun
+# Using Bun (alternative TypeScript runtime)
 bun run examples/typescript/01-hello-world.ts
 ```
 
@@ -172,7 +169,7 @@ VENICE_LOG_LEVEL=1
 ### Text Generation
 
 ```typescript
-import { VeniceClient } from '@venice/ai';
+import { VeniceClient } from '@venice-dev-tools/core';
 
 const client = new VeniceClient({ apiKey: process.env.VENICE_API_KEY });
 
@@ -273,7 +270,7 @@ import {
   VeniceRateLimitError,
   VeniceValidationError,
   VeniceNetworkError,
-} from '@venice/core/errors';
+} from '@venice-dev-tools/core';
 
 try {
   const response = await client.chat.completions.create({ /* ... */ });
@@ -383,7 +380,7 @@ const client = new VeniceClient({
 
 ### Import Errors
 
-**Problem:** `Cannot find module '@venice/ai'`
+**Problem:** `Cannot find module '@venice-dev-tools/core'`
 
 **Solution:**
 ```bash
@@ -504,14 +501,14 @@ const client = new VeniceClient({
 
 - [API Documentation](https://docs.venice.ai)
 - [SDK Documentation](../docs/)
-- [GitHub Repository](https://github.com/your-org/venice-ai-sdk)
+- [GitHub Repository](https://github.com/georgeglarson/venice-dev-tools)
 - [Discord Community](https://discord.gg/venice-ai)
 - [API Status](https://status.venice.ai)
 
 ## Support
 
-- **Issues:** [GitHub Issues](https://github.com/your-org/venice-ai-sdk/issues)
-- **Questions:** [GitHub Discussions](https://github.com/your-org/venice-ai-sdk/discussions)
+- **Issues:** [GitHub Issues](https://github.com/georgeglarson/venice-dev-tools/issues)
+- **Questions:** [GitHub Discussions](https://github.com/georgeglarson/venice-dev-tools/discussions)
 - **Email:** support@venice.ai
 
 ## License

@@ -13,6 +13,7 @@
 
 import { VeniceAI } from '@venice-dev-tools/core';
 import { requireEnv } from './env-config';
+import { ensureChatCompletionResponse } from './utils';
 
 async function main() {
   // Get API key from environment
@@ -24,12 +25,13 @@ async function main() {
   console.log('🤖 Sending your first message to Venice AI...\n');
 
   // Create a simple chat completion
-  const response = await venice.chat.completions.create({
+  const result = await venice.chat.completions.create({
     model: 'llama-3.3-70b',
     messages: [
       { role: 'user', content: 'Say hello and introduce yourself in one sentence!' }
     ]
   });
+  const response = ensureChatCompletionResponse(result, 'Hello World example');
 
   // Print the response
   console.log('✨ Response:');

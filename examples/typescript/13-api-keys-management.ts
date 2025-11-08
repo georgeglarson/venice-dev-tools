@@ -14,15 +14,25 @@
  */
 
 import { VeniceAI } from '@venice-dev-tools/core';
+import { requireEnv } from './env-config';
+
+function formatDate(value?: string | null): string {
+  return value ? new Date(value).toLocaleString() : 'Unknown';
+}
 
 async function main() {
-  const apiKey = process.env.VENICE_API_KEY;
-  if (!apiKey) {
-    console.error('❌ VENICE_API_KEY not set');
+  const adminApiKey = process.env.VENICE_ADMIN_API_KEY ?? process.env.VENICE_API_KEY;
+  if (!adminApiKey) {
+    requireEnv('VENICE_API_KEY');
     process.exit(1);
   }
 
-  const venice = new VeniceAI({ apiKey });
+  if (!process.env.VENICE_ADMIN_API_KEY) {
+    console.warn('⚠️  VENICE_ADMIN_API_KEY not set; using VENICE_API_KEY instead. Admin endpoints may fail if this key lacks permissions.');
+    console.log('');
+  }
+
+  const venice = new VeniceAI({ apiKey: adminApiKey });
 
   console.log('🔑 API Keys Management Demo\n');
 
@@ -36,17 +46,22 @@ async function main() {
 
     // Display keys
     listResponse.data.forEach((key, index) => {
+      const description = key.description ?? key.name ?? '(unnamed)';
+      const createdAt = key.createdAt ?? key.created_at;
+      const lastUsedAt = key.lastUsedAt ?? key.last_used_at;
+      const consumptionLimits = key.consumptionLimits;
+
       console.log(`${index + 1}. Key: ${key.id}`);
-      console.log(`   Name: ${key.name || '(unnamed)'}`);
-      console.log(`   Created: ${new Date(key.created_at).toLocaleString()}`);
-      console.log(`   Status: ${key.status || 'active'}`);
+      console.log(`   Description: ${description}`);
+      console.log(`   Type: ${key.apiKeyType}`);
+      console.log(`   Created: ${formatDate(createdAt)}`);
       
-      if (key.last_used_at) {
-        console.log(`   Last used: ${new Date(key.last_used_at).toLocaleString()}`);
+      if (lastUsedAt) {
+        console.log(`   Last used: ${formatDate(lastUsedAt)}`);
       }
       
-      if (key.rate_limit) {
-        console.log(`   Rate limit: ${JSON.stringify(key.rate_limit)}`);
+      if (consumptionLimits) {
+        console.log(`   Consumption limits: ${JSON.stringify(consumptionLimits)}`);
       }
       
       console.log('');

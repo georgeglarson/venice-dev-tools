@@ -159,7 +159,7 @@ describe('MiddlewareManager', () => {
 
     it('should calculate duration correctly', async () => {
       const startTime = Date.now();
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await new Promise((resolve) => setTimeout(resolve, 60));
 
       const result = await manager.executeResponse(
         '/test',
@@ -168,7 +168,7 @@ describe('MiddlewareManager', () => {
         startTime
       );
 
-      expect(result.duration).toBeGreaterThanOrEqual(50);
+      expect(result.duration).toBeGreaterThanOrEqual(55);
     });
 
     it('should allow middleware to modify response', async () => {

@@ -21,7 +21,31 @@ export class VeniceApiError extends VeniceError {
    * @param details - Additional error details.
    */
   constructor(message: string, status: number, details?: Record<string, any>) {
-    super(message);
+    super(message, {
+      code: `API_ERROR_${status}`,
+      context: {
+        status,
+        details,
+        timestamp: new Date().toISOString()
+      },
+      recoveryHints: [
+        {
+          action: 'check_api_status',
+          description: `Check if the Venice API is operational (HTTP ${status})`,
+          automated: false
+        },
+        {
+          action: 'verify_credentials',
+          description: 'Verify your API key and permissions are valid',
+          automated: false
+        },
+        ...(status >= 500 ? [{
+          action: 'retry_request',
+          description: 'Server error detected - retry the request after a short delay',
+          automated: true
+        }] : [])
+      ]
+    });
     this.name = 'VeniceApiError';
     this.status = status;
     this.details = details;

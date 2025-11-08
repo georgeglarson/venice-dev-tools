@@ -35,9 +35,18 @@ export class VeniceError extends Error {
   constructor(message: string, options?: ErrorOptions) {
     super(message, options?.cause ? { cause: options.cause } : undefined);
     this.name = 'VeniceError';
-    this.code = options?.code;
+    this.code = options?.code || 'VENICE_ERROR';
     this.recoveryHints = options?.recoveryHints || [];
     this.context = options?.context;
+    
+    // Add default recovery hints if none provided
+    if (this.recoveryHints.length === 0) {
+      this.recoveryHints.push({
+        action: 'check_logs',
+        description: 'Check the error logs for more detailed information',
+        automated: false
+      });
+    }
     
     Object.setPrototypeOf(this, VeniceError.prototype);
   }

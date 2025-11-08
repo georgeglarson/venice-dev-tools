@@ -16,6 +16,32 @@ import { VeniceAI } from '@venice-dev-tools/core';
 import fs from 'fs';
 import path from 'path';
 
+async function getAudioBuffer(payload: unknown): Promise<Buffer> {
+  if (payload instanceof ArrayBuffer) {
+    return Buffer.from(payload);
+  }
+
+  if (ArrayBuffer.isView(payload)) {
+    return Buffer.from(payload.buffer, payload.byteOffset, payload.byteLength);
+  }
+
+  if (typeof Blob !== 'undefined' && payload instanceof Blob) {
+    const arrayBuffer = await payload.arrayBuffer();
+    return Buffer.from(arrayBuffer);
+  }
+
+  if (typeof payload === 'string') {
+    // Assume base64-encoded audio
+    return Buffer.from(payload, 'base64');
+  }
+
+  if (payload instanceof Buffer) {
+    return payload;
+  }
+
+  throw new Error('Unsupported audio payload type.');
+}
+
 async function main() {
   const apiKey = process.env.VENICE_API_KEY;
   if (!apiKey) {
@@ -33,9 +59,9 @@ async function main() {
   try {
     // Generate speech from text
     const response = await venice.audio.speech.create({
-      model: 'tts-1',  // or 'tts-1-hd' for higher quality
+      model: 'tts-kokoro',
       input: text,
-      voice: 'alloy',  // Options: alloy, echo, fable, onyx, nova, shimmer
+      voice: 'af_alloy',  // See VOICES constants for full list
       // speed: 1.0,   // Optional: 0.25 to 4.0
     });
 
@@ -45,8 +71,8 @@ async function main() {
     const filename = `speech-${Date.now()}.mp3`;
     const filepath = path.join(process.cwd(), filename);
 
-    // Response is audio data
-    fs.writeFileSync(filepath, response);
+    const audioBuffer = await getAudioBuffer(response);
+    fs.writeFileSync(filepath, audioBuffer);
 
     console.log('💾 Audio saved:');
     console.log(`   ${filename}`);
@@ -69,11 +95,19 @@ async function main() {
 
   } catch (error: any) {
     console.error('❌ Error generating speech:', error.message);
-    
-    if (error.statusCode === 400) {
-      console.error('   💡 Check that your text is under 4096 characters');
+
+    if (error.status || error.statusCode) {
+      console.error(`   HTTP status: ${error.status ?? error.statusCode}`);
     }
-    
+
+    if (error.details) {
+      console.error('   Details:', error.details);
+    }
+
+    if ((error.statusCode ?? error.status) === 400) {
+      console.error('   💡 Check that your text is under 4096 characters and that the model/voice pair is valid.');
+    }
+
     process.exit(1);
   }
 }

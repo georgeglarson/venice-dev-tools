@@ -22,6 +22,7 @@ import {
   VeniceApiError,
   VeniceNetworkError
 } from '@venice-dev-tools/core';
+import { ensureChatCompletionResponse } from './utils';
 
 async function main() {
   const apiKey = process.env.VENICE_API_KEY;
@@ -45,16 +46,16 @@ async function main() {
 
   try {
     // Make a request (this might fail for demonstration)
-    const response = await venice.chat.completions.create({
+    const result = await venice.chat.completions.create({
       model: 'llama-3.3-70b',
       messages: [
         { role: 'user', content: 'Hello!' }
       ]
     });
-    
+    const response = ensureChatCompletionResponse(result, 'Error handling example');
     console.log('✅ Response:', response.choices[0].message.content);
-    
-  } catch (error) {
+
+  } catch (error: unknown) {
     // Handle specific error types
     if (error instanceof VeniceAuthError) {
       console.error('🔐 Authentication failed!');
@@ -68,7 +69,7 @@ async function main() {
       
     } else if (error instanceof VeniceValidationError) {
       console.error('❌ Invalid request parameters:');
-      console.error('   Field errors:', error.fieldErrors);
+      console.error('   Details:', error.details ?? error.context ?? 'No additional details provided');
       console.error('   💡 Fix the parameters and try again');
       
     } else if (error instanceof VeniceNetworkError) {
@@ -77,7 +78,10 @@ async function main() {
       console.error('   💡 Check your internet connection and try again');
       
     } else if (error instanceof VeniceApiError) {
-      console.error(`🔴 API error (${error.statusCode}):`, error.message);
+      console.error(`🔴 API error (${error.status}):`, error.message);
+      if (error.details) {
+        console.error('   Details:', error.details);
+      }
       
     } else {
       console.error('❓ Unexpected error:', error);

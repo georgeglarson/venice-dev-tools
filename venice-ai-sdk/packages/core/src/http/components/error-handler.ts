@@ -9,7 +9,8 @@ import { Logger } from '../../utils/logger';
 import { 
   VeniceApiError, 
   VeniceNetworkError, 
-  VeniceTimeoutError 
+  VeniceTimeoutError,
+  VeniceError
 } from '../../errors';
 
 /**
@@ -52,7 +53,7 @@ export function handleRequestError(
   } else {
     // Something happened in setting up the request that triggered an Error
     logger.error('Request setup error', { message: error.message });
-    throw new Error(error.message || 'Request setup error');
+    throw new VeniceError(error.message || 'Request setup error');
   }
 }
 
@@ -74,7 +75,7 @@ export function handleStreamError(
 
   if ((error as Error).name === 'AbortError') {
     logger.warn(`Stream request ${requestId} aborted`);
-    throw new Error('Request was aborted');
+    throw new VeniceError('Request was aborted');
   }
 
   logger.error(`Stream request ${requestId} failed`, {

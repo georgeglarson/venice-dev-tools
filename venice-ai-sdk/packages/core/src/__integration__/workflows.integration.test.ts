@@ -1,30 +1,26 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { VeniceAI } from '../venice-ai';
-import { getTestConfig, checkTestEnvironment } from './test-config';
+import { getTestConfig, describeWithEnvironmentCheck } from './test-config';
 import { ContentItem } from '../types/multimodal';
 
-describe('Complex Workflows Integration Tests', () => {
-  let venice: VeniceAI;
-  let adminVenice: VeniceAI;
-  let createdKeyId: string;
-  let createdApiKey: string;
+describeWithEnvironmentCheck('Complex Workflows Integration Tests', () => {
+  let venice!: VeniceAI;
+  let adminVenice: VeniceAI | undefined;
+  let createdKeyId: string | undefined;
+  let createdApiKey: string | undefined;
 
   beforeAll(() => {
-    // Check environment first
-    const env = checkTestEnvironment(false); // require regular API key
-    if (env.skipTests) {
-      throw new Error(env.skipReason);
+    const config = getTestConfig();
+    if (!config.apiKey) {
+      throw new Error('VENICE_API_KEY environment variable is required for these tests');
     }
 
-    const config = getTestConfig();
     venice = new VeniceAI({
       apiKey: config.apiKey!,
       logLevel: config.logLevel
     });
 
-    // Check for admin key separately
-    const adminEnv = checkTestEnvironment(true);
-    if (!adminEnv.skipTests && config.adminApiKey) {
+    if (config.adminApiKey) {
       adminVenice = new VeniceAI({
         apiKey: config.adminApiKey,
         logLevel: config.logLevel
@@ -113,18 +109,14 @@ describe('Complex Workflows Integration Tests', () => {
       height: 1024
     });
 
-    if (!imageResponse || imageResponse.data === undefined) {
+    if (!imageResponse?.data) {
       console.log('Image generation did not return usable data, skipping vision workflow test.');
       return;
     }
 
     // Handle the image response type (string URL or ArrayBuffer)
-    let imageUrl: string;
-    if (typeof imageResponse.data === 'string') {
-      imageUrl = imageResponse.data;
-    } else {
-      // If it's an ArrayBuffer, we can't use it directly in vision chat
-      // For now, skip the vision part of this test
+    const imageUrl = typeof imageResponse.data === 'string' ? imageResponse.data : null;
+    if (!imageUrl) {
       console.log('Image generation returned ArrayBuffer, skipping vision test');
       return;
     }
@@ -344,11 +336,7 @@ describe('Complex Workflows Integration Tests', () => {
         expect(audioBuffer.byteLength).toBeGreaterThan(0);
       }
 
-      // Step 2: Transcribe the audio (if transcription endpoint exists)
-      // Note: This would require a transcription endpoint which might not be available
-      // For now, we'll just validate the audio was generated successfully
-
-      // Step 3: Use the audio content in a chat
+      // Step 2: Use the audio content in a chat
       const chatResponse = await venice.chat.createCompletion({
         model: 'llama-3.3-70b',
         messages: [
@@ -364,7 +352,6 @@ describe('Complex Workflows Integration Tests', () => {
       expect(chatResponse.choices[0].message.content).toBeDefined();
     } catch (error) {
       console.log('Audio generation workflow test failed:', error);
-      // If audio generation fails, we can still test the chat part
       const chatResponse = await venice.chat.createCompletion({
         model: 'llama-3.3-70b',
         messages: [
@@ -485,21 +472,18 @@ describe('Complex Workflows Integration Tests', () => {
     }
 
     // Step 1: Generate Web3 token
-    let token: string | undefined;
-    try {
-      const tokenResponse = await adminVenice.keys.generateWeb3Token();
-      token = tokenResponse.token;
-    } catch (error) {
+    const tokenResponse = await adminVenice.keys.generateWeb3Token().catch(error => {
       console.log('Skipping Web3 workflow test - token generation failed:', (error as Error).message);
+      return null;
+    });
+
+    if (!tokenResponse?.token) {
+      console.log('Skipping Web3 workflow test - token generation failed or returned empty token.');
       expect(true).toBe(true);
       return;
     }
 
-    if (!token) {
-      console.log('Skipping Web3 workflow test - token generation returned empty token.');
-      expect(true).toBe(true);
-      return;
-    }
+    const token = tokenResponse.token;
 
     // Step 2: Create API key with Web3 authentication
     // Note: In a real scenario, this would involve wallet signing

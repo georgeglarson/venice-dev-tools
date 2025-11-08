@@ -1,11 +1,22 @@
-import { VeniceClient } from '@venice/core';
 import {
+  VeniceAI,
   VeniceAuthError,
   VeniceRateLimitError,
   VeniceValidationError,
   VeniceNetworkError,
-  VeniceAPIError,
-} from '@venice/core/errors';
+  VeniceError,
+  RecoveryHint
+} from '@venice-dev-tools/core';
+
+function logRecoveryHints(hints: RecoveryHint[], indent: string = '   '): void {
+  hints.forEach((hint, index) => {
+    console.log(`${indent}${index + 1}. ${hint.description}`);
+    if (hint.code) {
+      console.log(`${indent}   Code: ${hint.code}`);
+    }
+    console.log(`${indent}   Automated: ${hint.automated ? 'Yes' : 'No'}`);
+  });
+}
 
 async function errorRecoveryDemo() {
   console.log('🔧 Venice AI SDK - Error Recovery Hints Demo\n');
@@ -13,25 +24,19 @@ async function errorRecoveryDemo() {
   console.log('1️⃣  Authentication Error with Recovery Hints\n');
 
   try {
-    const client = new VeniceClient({
+    const client = new VeniceAI({
       apiKey: 'invalid_key_12345',
     });
 
     await client.getStandardHttpClient().get('/models');
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof VeniceAuthError) {
       console.log('   ❌ Authentication Error Caught');
       console.log(`   📝 Message: ${error.message}`);
       console.log(`   🏷️  Code: ${error.code}`);
       console.log('\n   💡 Recovery Hints:');
-      
-      error.recoveryHints.forEach((hint, index) => {
-        console.log(`\n   ${index + 1}. ${hint.description}`);
-        if (hint.code) {
-          console.log(`      Code: ${hint.code}`);
-        }
-        console.log(`      Automated: ${hint.automated ? 'Yes' : 'No'}`);
-      });
+
+      logRecoveryHints(error.recoveryHints, '   ');
     }
   }
 
@@ -48,7 +53,7 @@ async function errorRecoveryDemo() {
   rateLimitError.recoveryHints.forEach((hint, index) => {
     console.log(`\n   ${index + 1}. ${hint.description}`);
     if (hint.automated) {
-      console.log(`      ✅ Can be automated`);
+      console.log('      ✅ Can be automated');
     }
     if (hint.code && index === 0) {
       console.log(`      Code: ${hint.code}`);
@@ -78,9 +83,7 @@ async function errorRecoveryDemo() {
   }
 
   console.log('\n   💡 Recovery Hints:');
-  validationError.recoveryHints.forEach((hint, index) => {
-    console.log(`   ${index + 1}. ${hint.description}`);
-  });
+  logRecoveryHints(validationError.recoveryHints, '   ');
 
   console.log('\n4️⃣  Network Error with Retry Strategy\n');
 
@@ -94,7 +97,7 @@ async function errorRecoveryDemo() {
   networkError.recoveryHints.forEach((hint, index) => {
     console.log(`\n   ${index + 1}. ${hint.description}`);
     if (hint.automated) {
-      console.log(`      ✅ Can be automated`);
+      console.log('      ✅ Can be automated');
     }
   });
 
@@ -108,7 +111,7 @@ async function errorRecoveryDemo() {
   async function autoRecoverFromRateLimit(error: VeniceRateLimitError) {
     console.log('   🤖 Attempting automated recovery...');
     
-    const automatedHints = error.recoveryHints.filter(h => h.automated);
+    const automatedHints = error.recoveryHints.filter((h): h is RecoveryHint => h.automated === true);
     
     if (automatedHints.length > 0) {
       const hint = automatedHints[0];
@@ -128,23 +131,23 @@ async function errorRecoveryDemo() {
 
   console.log('\n7️⃣  AI Agent-Friendly Error Processing\n');
 
-  function processErrorForAI(error: any) {
+  function processErrorForAI(error: VeniceError) {
     if (error.code && error.recoveryHints) {
-      const automatedHints = error.recoveryHints.filter((h: any) => h.automated);
+      const automatedHints = error.recoveryHints.filter((h): h is RecoveryHint => h.automated === true);
       
       return {
         errorType: error.name,
         errorCode: error.code,
         message: error.message,
         canAutoRecover: automatedHints.length > 0,
-        automatedActions: automatedHints.map((h: any) => ({
+        automatedActions: automatedHints.map((h) => ({
           action: h.action,
           description: h.description,
           code: h.code,
         })),
         manualActions: error.recoveryHints
-          .filter((h: any) => !h.automated)
-          .map((h: any) => ({
+          .filter((h): h is RecoveryHint => h.automated !== true)
+          .map((h) => ({
             action: h.action,
             description: h.description,
           })),
@@ -164,7 +167,7 @@ async function errorRecoveryDemo() {
 
   console.log('\n8️⃣  Recovery Hint Code Execution (Simulated)\n');
 
-  function executeRecoveryCode(hint: any) {
+  function executeRecoveryCode(hint: RecoveryHint) {
     console.log(`   ⚙️  Action: ${hint.action}`);
     console.log(`   📝 Description: ${hint.description}`);
     
@@ -178,7 +181,7 @@ async function errorRecoveryDemo() {
   executeRecoveryCode(rateLimitError.recoveryHints[1]);
 
   console.log('\n   Example 2: Auth Error Recovery');
-  executeRecoveryCode(new VeniceAuthError().recoveryHints[0]);
+  executeRecoveryCode(new VeniceAuthError('Authentication failed').recoveryHints[0]);
 
   console.log('\n9️⃣  Error Context Access\n');
 
@@ -190,14 +193,14 @@ async function errorRecoveryDemo() {
 
   console.log('\n🔟 Complete Error Recovery Workflow\n');
 
-  async function handleErrorWithRecovery(error: any): Promise<void> {
+  async function handleErrorWithRecovery(error: VeniceError): Promise<void> {
     console.log(`   🔍 Analyzing ${error.name}...`);
     
     if (error.recoveryHints && error.recoveryHints.length > 0) {
       console.log(`   💡 Found ${error.recoveryHints.length} recovery hints`);
       
-      const automated = error.recoveryHints.filter((h: any) => h.automated);
-      const manual = error.recoveryHints.filter((h: any) => !h.automated);
+      const automated = error.recoveryHints.filter((h): h is RecoveryHint => h.automated === true);
+      const manual = error.recoveryHints.filter((h): h is RecoveryHint => h.automated !== true);
       
       if (automated.length > 0) {
         console.log(`   ✅ ${automated.length} automated recovery options`);

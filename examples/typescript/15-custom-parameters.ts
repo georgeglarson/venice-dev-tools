@@ -14,13 +14,29 @@
  */
 
 import { VeniceAI } from '@venice-dev-tools/core';
+import { ensureChatCompletionResponse } from './utils';
+import { requireEnv } from './env-config';
+
+function toText(content: string | { type: string }[]): string {
+  if (typeof content === 'string') {
+    return content;
+  }
+  return content
+    .map((item) => {
+      if (item.type === 'text' && 'text' in item) {
+        return (item as { type: 'text'; text: string }).text;
+      }
+      if (item.type === 'image_url' && 'image_url' in item) {
+        return `[Image: ${(item as { type: 'image_url'; image_url: { url: string } }).image_url.url}]`;
+      }
+      return '';
+    })
+    .join('\n')
+    .trim();
+}
 
 async function main() {
-  const apiKey = process.env.VENICE_API_KEY;
-  if (!apiKey) {
-    console.error('❌ VENICE_API_KEY not set');
-    process.exit(1);
-  }
+  const apiKey = requireEnv('VENICE_API_KEY');
 
   const venice = new VeniceAI({ apiKey });
 
@@ -31,7 +47,7 @@ async function main() {
   console.log('═'.repeat(50));
 
   try {
-    const webSearchResponse = await venice.chat.completions.create({
+    const rawWebSearchResponse = await venice.chat.completions.create({
       model: 'llama-3.3-70b',
       messages: [
         { 
@@ -41,11 +57,12 @@ async function main() {
       ],
       venice_parameters: {
         enable_web_search: 'on',  // 'on', 'off', or 'auto'
-      }
+      } as any
     });
+    const webSearchResponse = ensureChatCompletionResponse(rawWebSearchResponse, 'Web search example');
 
     console.log('✅ Response with web search:');
-    console.log(webSearchResponse.choices[0].message.content);
+    console.log(toText(webSearchResponse.choices[0].message.content));
     console.log('');
 
   } catch (error: any) {
@@ -57,7 +74,19 @@ async function main() {
   console.log('═'.repeat(50));
 
   try {
-    const characterResponse = await venice.chat.completions.create({
+    let characterSlug = 'historian';
+    try {
+      const characters = await venice.characters.list();
+      if (characters.data.length) {
+        characterSlug = characters.data[0].slug;
+      } else {
+        console.warn('⚠️  No characters returned by API; falling back to default slug "historian".');
+      }
+    } catch (characterError) {
+      console.warn('⚠️  Unable to fetch characters list; continuing with "historian" slug.');
+    }
+
+    const rawCharacterResponse = await venice.chat.completions.create({
       model: 'llama-3.3-70b',
       messages: [
         { 
@@ -66,13 +95,14 @@ async function main() {
         }
       ],
       venice_parameters: {
-        character_slug: 'historian',  // Use a character persona
+        character_slug: characterSlug,  // Use a character persona
         include_venice_system_prompt: true,
-      }
+      } as any
     });
+    const characterResponse = ensureChatCompletionResponse(rawCharacterResponse, 'Character persona example');
 
     console.log('✅ Response with character persona:');
-    console.log(characterResponse.choices[0].message.content);
+    console.log(toText(characterResponse.choices[0].message.content));
     console.log('');
 
   } catch (error: any) {
@@ -88,34 +118,36 @@ async function main() {
   console.log(`Prompt: "${prompt}"\n`);
 
   // Low creativity (temperature = 0.3)
-  const conservativeResponse = await venice.chat.completions.create({
+  const rawConservativeResponse = await venice.chat.completions.create({
     model: 'llama-3.3-70b',
     messages: [{ role: 'user', content: prompt }],
     temperature: 0.3,
     max_tokens: 50,
   });
+  const conservativeResponse = ensureChatCompletionResponse(rawConservativeResponse, 'Conservative creativity example');
 
   console.log('📊 Conservative (temperature=0.3):');
-  console.log(conservativeResponse.choices[0].message.content);
+  console.log(toText(conservativeResponse.choices[0].message.content));
   console.log('');
 
   // High creativity (temperature = 1.5)
-  const creativeResponse = await venice.chat.completions.create({
+  const rawCreativeResponse = await venice.chat.completions.create({
     model: 'llama-3.3-70b',
     messages: [{ role: 'user', content: prompt }],
     temperature: 1.5,
     max_tokens: 50,
   });
+  const creativeResponse = ensureChatCompletionResponse(rawCreativeResponse, 'Creative creativity example');
 
   console.log('🎭 Creative (temperature=1.5):');
-  console.log(creativeResponse.choices[0].message.content);
+  console.log(toText(creativeResponse.choices[0].message.content));
   console.log('');
 
   // Example 4: Response Format Control
   console.log('\n📋 Example 4: Response Format Control');
   console.log('═'.repeat(50));
 
-  const formatResponse = await venice.chat.completions.create({
+  const rawFormatResponse = await venice.chat.completions.create({
     model: 'llama-3.3-70b',
     messages: [
       { 
@@ -126,9 +158,10 @@ async function main() {
     temperature: 0.7,
     // response_format: { type: 'json_object' }, // If supported
   });
+  const formatResponse = ensureChatCompletionResponse(rawFormatResponse, 'Response format example');
 
   console.log('✅ Structured response:');
-  console.log(formatResponse.choices[0].message.content);
+  console.log(toText(formatResponse.choices[0].message.content));
   console.log('');
 
   // Summary

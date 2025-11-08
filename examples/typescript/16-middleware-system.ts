@@ -1,15 +1,19 @@
-import { VeniceClient } from '@venice/core';
 import {
+  VeniceClient,
   loggingMiddleware,
   timingMiddleware,
   headersMiddleware,
   requestIdMiddleware,
   Middleware,
-} from '@venice/core/middleware';
+  MiddlewareResponseContext,
+  MiddlewareErrorContext,
+  MiddlewareRequestContext
+} from '@venice-dev-tools/core';
+import { requireEnv } from './env-config';
 
 async function middlewareDemo() {
   const client = new VeniceClient({
-    apiKey: process.env.VENICE_API_KEY,
+    apiKey: requireEnv('VENICE_API_KEY'),
   });
 
   const logger = client.getLogger();
@@ -42,7 +46,7 @@ async function middlewareDemo() {
   const rateLimitTrackerMiddleware: Middleware = {
     name: 'rate-limit-tracker',
     
-    onResponse: (context) => {
+    onResponse: (context: MiddlewareResponseContext) => {
       const remaining = context.response.headers?.['x-ratelimit-remaining'];
       const limit = context.response.headers?.['x-ratelimit-limit'];
       
@@ -53,7 +57,7 @@ async function middlewareDemo() {
       return context;
     },
     
-    onError: (context) => {
+    onError: (context: MiddlewareErrorContext) => {
       console.error(`   ❌ Request failed after ${context.duration}ms: ${context.error.message}`);
     },
   };
@@ -74,7 +78,7 @@ async function middlewareDemo() {
   const requestTransformMiddleware: Middleware = {
     name: 'request-transform',
     
-    onRequest: (context) => {
+    onRequest: (context: MiddlewareRequestContext) => {
       console.log(`   🔄 Transforming request to ${context.path}`);
       
       context.options.headers = context.options.headers || {};
@@ -95,7 +99,7 @@ async function middlewareDemo() {
   const responseEnrichmentMiddleware: Middleware = {
     name: 'response-enrichment',
     
-    onResponse: (context) => {
+    onResponse: (context: MiddlewareResponseContext) => {
       console.log(`   💎 Enriching response from ${context.path}`);
       
       if (context.response.data && typeof context.response.data === 'object') {
@@ -142,7 +146,7 @@ async function middlewareDemo() {
   const simpleCacheMiddleware: Middleware = {
     name: 'simple-cache',
     
-    onRequest: (context) => {
+    onRequest: (context: MiddlewareRequestContext) => {
       const cacheKey = `${context.path}:${JSON.stringify(context.options.query || {})}`;
       const cached = cache.get(cacheKey);
       
@@ -160,7 +164,7 @@ async function middlewareDemo() {
       return context;
     },
     
-    onResponse: (context) => {
+    onResponse: (context: MiddlewareResponseContext) => {
       if (!context.metadata?.cacheHit) {
         const cacheKey = `${context.path}:${JSON.stringify(context.options.query || {})}`;
         cache.set(cacheKey, {

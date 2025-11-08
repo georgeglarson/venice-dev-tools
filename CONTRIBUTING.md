@@ -52,8 +52,8 @@ Thank you for your interest in contributing to the Venice AI SDK! This document 
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/your-org/venice-ai-sdk.git
-cd venice-ai-sdk
+git clone https://github.com/georgeglarson/venice-dev-tools.git
+cd venice-dev-tools
 ```
 
 2. Install dependencies:

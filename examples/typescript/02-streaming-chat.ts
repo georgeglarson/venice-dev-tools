@@ -14,6 +14,7 @@
 
 import { VeniceAI } from '@venice-dev-tools/core';
 import { requireEnv } from './env-config';
+import { isAsyncIterable, isChatCompletionResponse } from './utils';
 
 async function main() {
   const apiKey = requireEnv('VENICE_API_KEY');
@@ -32,6 +33,16 @@ async function main() {
       ],
       stream: true  // Enable streaming mode
     });
+
+    if (!isAsyncIterable<any>(stream)) {
+      if (isChatCompletionResponse(stream)) {
+        console.warn('Received a non-streaming response; falling back to full message.');
+        console.log(stream.choices[0].message.content);
+      } else {
+        console.warn('Received unexpected response type; nothing to display.');
+      }
+      return;
+    }
 
     // Process each chunk as it arrives
     for await (const chunk of stream) {

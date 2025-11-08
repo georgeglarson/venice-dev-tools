@@ -49,7 +49,7 @@ We follow responsible disclosure practices:
 - We request **90 days** to develop, test, and release a fix before public disclosure
 - We will keep you updated throughout the fix development process
 - We coordinate public disclosure with you to ensure users can upgrade before exploit details are published
-- We publish security advisories via [GitHub Security Advisories](https://github.com/your-org/mgx-veniceai-sdk/security/advisories)
+- We publish security advisories via [GitHub Security Advisories](https://github.com/georgeglarson/venice-dev-tools/security/advisories)
 
 ## Security Best Practices for Users
 
@@ -202,13 +202,13 @@ try {
 ## Security Advisories
 
 Published security advisories are available at:
-- GitHub Security Advisories: https://github.com/your-org/mgx-veniceai-sdk/security/advisories
+- GitHub Security Advisories: https://github.com/georgeglarson/venice-dev-tools/security/advisories
 - npm Security Advisories: https://www.npmjs.com/package/@venice-dev-tools/core?activeTab=security
 
 Subscribe to security notifications:
 ```bash
 # Watch repository for security updates
-gh repo subscribe your-org/mgx-veniceai-sdk
+gh repo subscribe georgeglarson/venice-dev-tools
 
 # Enable npm security notifications
 npm config set audit true
@@ -233,10 +233,10 @@ We welcome security audits from qualified third parties. Contact security@venice
 ## Questions?
 
 For security-related questions that are **not** vulnerability reports, you can:
-- Open a [GitHub Discussion](https://github.com/your-org/mgx-veniceai-sdk/discussions) (for general security questions)
+- Open a [GitHub Discussion](https://github.com/georgeglarson/venice-dev-tools/discussions) (for general security questions)
 - Email: security@venice.ai (for private security inquiries)
 
-For non-security issues, please use [GitHub Issues](https://github.com/your-org/mgx-veniceai-sdk/issues).
+For non-security issues, please use [GitHub Issues](https://github.com/georgeglarson/venice-dev-tools/issues).
 
 ## Acknowledgments
 

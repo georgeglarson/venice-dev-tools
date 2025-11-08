@@ -14,11 +14,14 @@
 
 import { VeniceAI } from '@venice-dev-tools/core';
 import * as readline from 'readline';
+import { ensureChatCompletionResponse } from './utils';
 
 // Conversation state
+type ConversationContent = string | Array<{ type: 'text'; text: string } | { type: 'image_url'; image_url: { url: string } }>;
+
 interface ConversationMessage {
   role: 'system' | 'user' | 'assistant';
-  content: string;
+  content: ConversationContent;
 }
 
 async function main() {
@@ -97,13 +100,17 @@ async function main() {
 
       try {
         // Get AI response with full conversation context
-        const response = await venice.chat.completions.create({
+        const rawResponse = await venice.chat.completions.create({
           model: 'llama-3.3-70b',
           messages: conversation,
           temperature: 0.7, // Slight creativity
         });
+        const response = ensureChatCompletionResponse(rawResponse, 'Multi-turn conversation');
 
         const assistantMessage = response.choices[0].message.content;
+        const assistantText = Array.isArray(assistantMessage)
+          ? assistantMessage.map((item) => ('text' in item ? item.text : '')).join('')
+          : assistantMessage;
 
         // Add assistant response to conversation
         conversation.push({
@@ -111,7 +118,7 @@ async function main() {
           content: assistantMessage,
         });
 
-        console.log(`\n🤖 Assistant: ${assistantMessage}\n`);
+        console.log(`\n🤖 Assistant: ${assistantText}\n`);
 
         // Show conversation stats
         const messageCount = conversation.length - 1; // Exclude system message

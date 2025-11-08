@@ -32,6 +32,16 @@ export interface VeniceParameters {
    * The character slug to use for the chat completion
    */
   character_slug?: string;
+
+  /**
+   * Control Venice web search integration behavior
+   */
+  enable_web_search?: 'on' | 'off' | 'auto';
+
+  /**
+   * Include Venice's default system prompt
+   */
+  include_venice_system_prompt?: boolean;
 }
 
 /**

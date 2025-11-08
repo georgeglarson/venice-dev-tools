@@ -1,7 +1,14 @@
 #!/bin/bash
 
+##############################################################################
+# LEGACY: Qwen Vision Example
+#
+# ⚠️  This is a legacy example. For new projects, use:
+#    ./11-vision-multimodal.sh
+#
 # This script demonstrates how to use curl to call the Qwen Vision API
-# It includes proper handling for follow-up messages
+# with proper handling for follow-up messages.
+##############################################################################
 
 # Check if an image file was provided
 if [ $# -lt 1 ]; then

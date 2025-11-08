@@ -1,4 +1,4 @@
-import { VeniceClient } from '@venice/core';
+import { VeniceAI } from '@venice-dev-tools/core';
 import {
   collectStream,
   mapStream,
@@ -8,28 +8,45 @@ import {
   bufferStream,
   textOnlyStream,
   streamToArray,
-} from '@venice/core/utils';
+} from '../../venice-ai-sdk/packages/core/src/utils/stream-helpers';
+import { requireEnv } from './env-config';
+
+function isAsyncIterable<T = any>(value: unknown): value is AsyncIterable<T> {
+  return typeof value === 'object' &&
+    value !== null &&
+    typeof (value as any)[Symbol.asyncIterator] === 'function';
+}
+
+async function createStreamingCompletion(
+  client: VeniceAI,
+  prompt: string
+): Promise<AsyncIterable<any>> {
+  const result = await client.chat.completions.create({
+    model: 'llama-3.3-70b',
+    messages: [{ role: 'user', content: prompt }],
+    stream: true,
+  });
+
+  if (!isAsyncIterable(result)) {
+    throw new Error('Streaming response not supported for this client.');
+  }
+
+  return result;
+}
 
 async function streamingUtilitiesDemo() {
-  const client = new VeniceClient({
-    apiKey: process.env.VENICE_API_KEY,
+  const client = new VeniceAI({
+    apiKey: requireEnv('VENICE_API_KEY'),
   });
 
   console.log('🌊 Venice AI SDK - Enhanced Streaming Utilities Demo\n');
 
   console.log('1️⃣  Basic Stream Collection\n');
 
-  const stream1 = await client.getStandardHttpClient().request('/chat/completions', {
-    method: 'POST',
-    body: {
-      model: 'llama-3.3-70b',
-      messages: [{ role: 'user', content: 'Count from 1 to 5' }],
-      stream: true,
-    },
-  });
+  const stream1 = await createStreamingCompletion(client, 'Count from 1 to 5');
 
   const fullResponse = await collectStream(stream1 as any, {
-    onChunk: (chunk, index) => {
+    onChunk: (chunk: any, index: number) => {
       if (index % 5 === 0) {
         process.stdout.write('.');
       }
@@ -40,14 +57,7 @@ async function streamingUtilitiesDemo() {
 
   console.log('\n2️⃣  Text-Only Stream Extraction\n');
 
-  const stream2 = await client.getStandardHttpClient().request('/chat/completions', {
-    method: 'POST',
-    body: {
-      model: 'llama-3.3-70b',
-      messages: [{ role: 'user', content: 'Say "Hello, World!" three times' }],
-      stream: true,
-    },
-  });
+  const stream2 = await createStreamingCompletion(client, 'Say "Hello, World!" three times');
 
   console.log('   📝 Streaming text only:');
   process.stdout.write('   ');
@@ -60,16 +70,9 @@ async function streamingUtilitiesDemo() {
 
   console.log('3️⃣  Stream Mapping\n');
 
-  const stream3 = await client.getStandardHttpClient().request('/chat/completions', {
-    method: 'POST',
-    body: {
-      model: 'llama-3.3-70b',
-      messages: [{ role: 'user', content: 'List 3 colors' }],
-      stream: true,
-    },
-  });
+  const stream3 = await createStreamingCompletion(client, 'List 3 colors');
 
-  const mappedStream = mapStream(textOnlyStream(stream3 as any), (text) => text.toUpperCase());
+  const mappedStream = mapStream(textOnlyStream(stream3 as any), (text: string) => text.toUpperCase());
 
   console.log('   🔠 Streaming with uppercase mapping:');
   process.stdout.write('   ');
@@ -82,30 +85,16 @@ async function streamingUtilitiesDemo() {
 
   console.log('4️⃣  Stream Filtering\n');
 
-  const stream4 = await client.getStandardHttpClient().request('/chat/completions', {
-    method: 'POST',
-    body: {
-      model: 'llama-3.3-70b',
-      messages: [{ role: 'user', content: 'Write: one two three four five' }],
-      stream: true,
-    },
-  });
+  const stream4 = await createStreamingCompletion(client, 'Write: one two three four five');
 
-  const filteredStream = filterStream(textOnlyStream(stream4 as any), (text) => text.trim().length > 0);
+  const filteredStream = filterStream(textOnlyStream(stream4 as any), (text: string) => text.trim().length > 0);
 
   const filteredChunks = await streamToArray(filteredStream);
   console.log(`   ✅ Filtered out empty chunks: ${filteredChunks.length} non-empty chunks`);
 
   console.log('\n5️⃣  Taking Limited Chunks\n');
 
-  const stream5 = await client.getStandardHttpClient().request('/chat/completions', {
-    method: 'POST',
-    body: {
-      model: 'llama-3.3-70b',
-      messages: [{ role: 'user', content: 'Count from 1 to 100' }],
-      stream: true,
-    },
-  });
+  const stream5 = await createStreamingCompletion(client, 'Count from 1 to 100');
 
   const limitedStream = takeStream(textOnlyStream(stream5 as any), 10);
 
@@ -123,16 +112,9 @@ async function streamingUtilitiesDemo() {
   let chunkCount = 0;
   let totalChars = 0;
 
-  const stream6 = await client.getStandardHttpClient().request('/chat/completions', {
-    method: 'POST',
-    body: {
-      model: 'llama-3.3-70b',
-      messages: [{ role: 'user', content: 'Write a haiku about code' }],
-      stream: true,
-    },
-  });
+  const stream6 = await createStreamingCompletion(client, 'Write a haiku about code');
 
-  const tappedStream = tapStream(textOnlyStream(stream6 as any), (text) => {
+  const tappedStream = tapStream(textOnlyStream(stream6 as any), (text: string) => {
     chunkCount++;
     totalChars += text.length;
   });
@@ -148,14 +130,7 @@ async function streamingUtilitiesDemo() {
 
   console.log('\n7️⃣  Stream Buffering\n');
 
-  const stream7 = await client.getStandardHttpClient().request('/chat/completions', {
-    method: 'POST',
-    body: {
-      model: 'llama-3.3-70b',
-      messages: [{ role: 'user', content: 'List 5 animals' }],
-      stream: true,
-    },
-  });
+  const stream7 = await createStreamingCompletion(client, 'List 5 animals');
 
   const bufferedStream = bufferStream(textOnlyStream(stream7 as any), 3);
 
@@ -170,17 +145,10 @@ async function streamingUtilitiesDemo() {
 
   let tokenCount = 0;
 
-  const stream8 = await client.getStandardHttpClient().request('/chat/completions', {
-    method: 'POST',
-    body: {
-      model: 'llama-3.3-70b',
-      messages: [{ role: 'user', content: 'Explain TypeScript in one sentence' }],
-      stream: true,
-    },
-  });
+  const stream8 = await createStreamingCompletion(client, 'Explain TypeScript in one sentence');
 
-  const countingStream = tapStream(textOnlyStream(stream8 as any), (text) => {
-    const words = text.trim().split(/\s+/).filter(w => w.length > 0);
+  const countingStream = tapStream(textOnlyStream(stream8 as any), (text: string) => {
+    const words = text.trim().split(/\s+/).filter((w: string) => w.length > 0);
     tokenCount += words.length;
   });
 
@@ -195,14 +163,7 @@ async function streamingUtilitiesDemo() {
 
   console.log('\n9️⃣  Stream to Array Conversion\n');
 
-  const stream9 = await client.getStandardHttpClient().request('/chat/completions', {
-    method: 'POST',
-    body: {
-      model: 'llama-3.3-70b',
-      messages: [{ role: 'user', content: 'Say: A B C D E' }],
-      stream: true,
-    },
-  });
+  const stream9 = await createStreamingCompletion(client, 'Say: A B C D E');
 
   const allChunks = await streamToArray(textOnlyStream(stream9 as any));
   console.log(`   ✅ Converted stream to array: ${allChunks.length} chunks`);
@@ -210,19 +171,12 @@ async function streamingUtilitiesDemo() {
 
   console.log('\n🔟 Complex Pipeline: Map → Filter → Take\n');
 
-  const stream10 = await client.getStandardHttpClient().request('/chat/completions', {
-    method: 'POST',
-    body: {
-      model: 'llama-3.3-70b',
-      messages: [{ role: 'user', content: 'Write numbers: 1 2 3 4 5 6 7 8 9 10' }],
-      stream: true,
-    },
-  });
+  const stream10 = await createStreamingCompletion(client, 'Write numbers: 1 2 3 4 5 6 7 8 9 10');
 
   const pipeline = takeStream(
     filterStream(
-      mapStream(textOnlyStream(stream10 as any), (text) => text.trim()),
-      (text) => text.length > 0
+      mapStream(textOnlyStream(stream10 as any), (text: string) => text.trim()),
+      (text: string) => text.length > 0
     ),
     15
   );

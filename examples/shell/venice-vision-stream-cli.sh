@@ -1,7 +1,13 @@
 #!/bin/bash
 
-# This script demonstrates how to use curl to directly call the Venice AI API with Qwen Vision model
-# It takes an image file as input and sends it to the API for analysis with streaming enabled
+##############################################################################
+# LEGACY: Vision Streaming Example
+#
+# ⚠️  This is a legacy example. For new projects, use:
+#    STREAMING_MODE=true ./11-vision-multimodal.sh
+#
+# This script demonstrates streaming responses with the Qwen Vision model.
+##############################################################################
 
 # Check if an image file was provided
 if [ $# -lt 1 ]; then

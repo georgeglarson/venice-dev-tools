@@ -13,13 +13,11 @@
  */
 
 import { VeniceAI } from '@venice-dev-tools/core';
+import { isAsyncIterable } from './utils';
+import { requireEnv } from './env-config';
 
 async function streamWithTimeout(timeoutMs: number = 3000) {
-  const apiKey = process.env.VENICE_API_KEY;
-  if (!apiKey) {
-    console.error('❌ VENICE_API_KEY not set');
-    process.exit(1);
-  }
+  const apiKey = requireEnv('VENICE_API_KEY');
 
   const venice = new VeniceAI({ apiKey });
 
@@ -48,8 +46,12 @@ async function streamWithTimeout(timeoutMs: number = 3000) {
       // Note: AbortSignal support would be added to SDK
       // signal: abortController.signal,
       stream: true
-          stream: true
     });
+
+    if (!isAsyncIterable(stream)) {
+      console.warn('Expected streaming result but received full response. Aborting example.');
+      return;
+    }
 
     let chunkCount = 0;
     let totalContent = '';
@@ -87,11 +89,7 @@ async function streamWithTimeout(timeoutMs: number = 3000) {
 }
 
 async function manualAbort() {
-  const apiKey = process.env.VENICE_API_KEY;
-  if (!apiKey) {
-    console.error('❌ VENICE_API_KEY not set');
-    process.exit(1);
-  }
+  const apiKey = requireEnv('VENICE_API_KEY');
 
   const venice = new VeniceAI({ apiKey });
 
@@ -121,6 +119,11 @@ async function manualAbort() {
       ],
       stream: true
     });
+
+    if (!isAsyncIterable(stream)) {
+      console.warn('Expected streaming result but received full response. Aborting example.');
+      return;
+    }
 
     for await (const chunk of stream) {
       if (abortController.signal.aborted) {

@@ -1,107 +1,98 @@
-export interface GenerateImageRequest {
+export interface GenerateImageRequest extends ImageRequest {
   /**
-   * The model to use for image generation.
-   */
-  model: string;
-
-  /**
-   * The description for the image. Character limit is model specific
-   * and is listed in the promptCharacterLimit setting in the model list endpoint.
+   * Prompt describing the desired image. Required for generation.
    */
   prompt: string;
 
   /**
-   * A description of what should not be in the image. Character limit
-   * is model specific and is listed in the promptCharacterLimit
-   * constraint in the model list endpoint.
+   * Optional negative prompt to steer generation away from content.
    */
   negative_prompt?: string;
 
   /**
-   * An image style to apply to the image. Visit
-   * https://docs.venice.ai/api-reference/endpoint/image/styles for more
-   * details.
+   * Venice style preset identifier.
    */
   style_preset?: string;
 
   /**
-   * Height of the generated image. Each model has a specific height and
-   * width divisor listed in the widthHeightDivisor constraint in the
-   * model list endpoint.
+   * Optional explicit height for generated image.
    */
   height?: number;
 
   /**
-   * Width of the generated image. Each model has a specific height and
-   * width divisor listed in the widthHeightDivisor constraint in the
-   * model list endpoint.
+   * Optional explicit width for generated image.
    */
   width?: number;
 
   /**
-   * Number of inference steps. The following models have reduced max
-   * steps from the global max: venice-sd35: 30 max steps, hidream: 50
-   * max steps, lustify-sdxl: 50 max steps, lustify-v7: 50 max steps,
-   * qwen-image: 8 max steps, wai-Illustrious: 30 max steps. These
-   * constraints are exposed in the model list endpoint for each model.
+   * Number of inference steps to run.
    */
   steps?: number;
 
   /**
-   * CFG scale parameter. Higher values lead to more adherence to the
-   * prompt.
+   * CFG scale parameter controlling adherence to the prompt.
    */
   cfg_scale?: number;
 
   /**
-   * Random seed for generation. If not provided, a random seed will be
-   * used.
+   * Random seed for deterministic outputs.
    */
   seed?: number;
 
   /**
-   * Lora strength for the model. Only applies if the model uses
-   * additional Loras.
+   * LoRA strength, if applicable to the chosen model.
    */
   lora_strength?: number;
 
   /**
-   * Whether to use safe mode. If enabled, this will blur images that
-   * are classified as having adult content.
+   * Enable safe-mode blurring for adult content.
    */
   safe_mode?: boolean;
 
   /**
-   * Whether to return binary image data instead of base64.
+   * Return binary data instead of base64 strings or data URLs.
    */
   return_binary?: boolean;
 
   /**
-   * Whether to hide the Venice watermark. Venice may ignore this
-   * parameter for certain generated content.
+   * Hide the Venice watermark when supported by the model.
    */
   hide_watermark?: boolean;
 
   /**
-   * Embed prompt generation information into the image's EXIF metadata.
+   * Embed prompt metadata into the resulting image EXIF data.
    */
   embed_exif_metadata?: boolean;
 
   /**
-   * The image format to return. WebP are smaller and optimized for web
-   * use. PNG are higher quality but larger in file size.
+   * Output format for generated image data.
    */
   format?: 'webp' | 'png' | 'jpeg';
 
   /**
-   * Number of images to generate (1–4). Only supported when
-   * return_binary is false.
+   * Number of image variants to generate (typically 1).
    */
   variants?: number;
 }
 
+export type GeneratedImageData =
+  | string
+  | ArrayBuffer
+  | {
+      url?: string;
+      b64_json?: string;
+      revised_prompt?: string;
+      prompt?: string;
+      negative_prompt?: string;
+      model?: string;
+      [key: string]: unknown;
+    };
+
 export interface GenerateImageResponse {
-  data: string | ArrayBuffer;
+  /**
+   * Generated image payload. May be a single item or an array depending on API version.
+   */
+  data: GeneratedImageData | GeneratedImageData[];
 }
 
 export interface GenerateImageResponseHeaders {

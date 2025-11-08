@@ -1,5 +1,18 @@
-// Example of using the Qwen Vision API with curl
-// This demonstrates how to properly format a follow-up message with an image
+/**
+ * LEGACY: Raw HTTP Vision Example
+ * 
+ * ⚠️  This is an educational example showing raw HTTP/curl usage.
+ *     For production code, use the modern SDK-based example:
+ *     → node 11-vision-multimodal.js
+ * 
+ * This example demonstrates:
+ * - Direct HTTP API calls via curl (bypassing SDK)
+ * - Manual JSON payload construction
+ * - Understanding the raw API contract
+ * - Follow-up message patterns with vision models
+ * 
+ * Use this to understand what happens "under the hood" when using the SDK.
+ */
 
 const fs = require('fs');
 const { exec } = require('child_process');

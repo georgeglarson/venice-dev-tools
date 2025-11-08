@@ -4,6 +4,7 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "declaration": true,
+    "declarationMap": true,
     "sourceMap": true,
     "lib": ["ESNext", "DOM"],
     "types": ["node", "jest"]

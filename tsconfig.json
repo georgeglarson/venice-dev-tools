@@ -1,14 +1,18 @@
 {
   "compilerOptions": {
-    "target": "es6",
-    "module": "commonjs",
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "node",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "outDir": "./dist",
-    "rootDir": "./venice-ai-sdk"
+    "rootDir": "./venice-ai-sdk",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true
   },
   "include": ["venice-ai-sdk/**/*.ts"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "dist"]
 }

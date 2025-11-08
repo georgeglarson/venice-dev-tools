@@ -40,9 +40,11 @@ describe('Error Recovery Hints', () => {
       expect(json).toHaveProperty('stack');
     });
 
-    it('should have empty recovery hints by default', () => {
+    it('should have default recovery hints', () => {
       const error = new VeniceError('Test error');
-      expect(error.recoveryHints).toEqual([]);
+      expect(error.recoveryHints).toHaveLength(1);
+      expect(error.recoveryHints[0].action).toBe('check_logs');
+      expect(error.recoveryHints[0].description).toContain('error logs');
     });
 
     it('should support error cause', () => {

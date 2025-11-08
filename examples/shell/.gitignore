@@ -1,0 +1,20 @@
+# Environment files with secrets
+.env
+.env.local
+
+# Generated files from examples
+generated-*.png
+generated-*.jpg
+*.json
+request*.json
+*_request.json
+
+# macOS
+.DS_Store
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/

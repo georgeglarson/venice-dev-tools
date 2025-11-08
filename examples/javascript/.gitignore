@@ -1,0 +1,27 @@
+# Environment files with secrets
+.env
+.env.local
+
+# Generated files from examples
+generated-*.png
+generated-*.jpg
+generated-*.jpeg
+generated-*.webp
+*.png
+*.jpg
+*.jpeg
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# macOS
+.DS_Store
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/

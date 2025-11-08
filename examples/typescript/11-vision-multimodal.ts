@@ -16,13 +16,63 @@
 import { VeniceAI } from '@venice-dev-tools/core';
 import fs from 'fs';
 import path from 'path';
+import { ensureChatCompletionResponse } from './utils';
+import { requireEnv } from './env-config';
+
+async function resolveVisionModel(venice: VeniceAI, fallbackModel = 'qwen-2.5-vl'): Promise<string> {
+  try {
+    const [imageModels, textModels] = await Promise.all([
+      venice.models.list({ type: 'image' }),
+      venice.models.list({ type: 'text' })
+    ]);
+
+    const combined = [...imageModels.data, ...textModels.data];
+    if (!combined.length) {
+      throw new Error('No models returned by API.');
+    }
+
+    const supportsVision = combined.filter((model) => {
+      const capabilities = model.model_spec?.capabilities as Record<string, unknown> | undefined;
+      return Boolean(capabilities && 'supportsVision' in capabilities && capabilities.supportsVision);
+    });
+
+    if (supportsVision.length) {
+      const preferredVision = supportsVision.find((model) => model.id === fallbackModel);
+      if (preferredVision) {
+        return preferredVision.id;
+      }
+
+      const defaultVision = supportsVision.find((model) => {
+        const traits = model.model_spec?.traits as string[] | undefined;
+        return traits?.includes?.('default_vision');
+      });
+      if (defaultVision) {
+        return defaultVision.id;
+      }
+
+      return supportsVision[0].id;
+    }
+
+    const preferred = combined.find((model) => model.id === fallbackModel);
+    if (preferred) {
+      return preferred.id;
+    }
+
+    const visionTraitModel = combined.find((model) =>
+      model.model_spec?.traits?.includes?.('vision')
+    );
+    if (visionTraitModel) {
+      return visionTraitModel.id;
+    }
+
+    return combined[0].id;
+  } catch (error: any) {
+    throw new Error(`Unable to determine a vision model: ${error.message}`);
+  }
+}
 
 async function main() {
-  const apiKey = process.env.VENICE_API_KEY;
-  if (!apiKey) {
-    console.error('❌ VENICE_API_KEY not set');
-    process.exit(1);
-  }
+  const apiKey = requireEnv('VENICE_API_KEY');
 
   const imagePath = process.argv[2];
   if (!imagePath) {
@@ -37,6 +87,7 @@ async function main() {
   }
 
   const venice = new VeniceAI({ apiKey });
+  const visionModel = await resolveVisionModel(venice, 'qwen-2.5-vl');
 
   console.log('👁️  Analyzing image with vision model...');
   console.log(`   Image: ${imagePath}\n`);
@@ -50,8 +101,10 @@ async function main() {
     const dataUrl = `data:${mimeType};base64,${base64Image}`;
 
     // Analyze image
-    const response = await venice.chat.completions.create({
-      model: 'qwen-2.5-vl', // Vision-enabled model
+    console.log(`   Using model: ${visionModel}\n`);
+
+    const rawResponse = await venice.chat.completions.create({
+      model: visionModel,
       messages: [
         {
           role: 'user',
@@ -70,6 +123,7 @@ async function main() {
         }
       ]
     });
+    const response = ensureChatCompletionResponse(rawResponse, 'Vision analysis response');
 
     console.log('✅ Analysis complete!\n');
     console.log('📝 Description:');
@@ -79,8 +133,8 @@ async function main() {
     // Follow-up question
     console.log('🔍 Asking follow-up question...\n');
 
-    const followUp = await venice.chat.completions.create({
-      model: 'qwen-2.5-vl',
+    const rawFollowUp = await venice.chat.completions.create({
+      model: visionModel,
       messages: [
         {
           role: 'user',
@@ -99,6 +153,7 @@ async function main() {
         }
       ]
     });
+    const followUp = ensureChatCompletionResponse(rawFollowUp, 'Vision follow-up response');
 
     console.log('🎨 Color analysis:');
     console.log(followUp.choices[0].message.content);

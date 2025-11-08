@@ -11,13 +11,30 @@
  */
 
 import { VeniceAI, VeniceRateLimitError } from '@venice-dev-tools/core';
+import { ensureChatCompletionResponse } from './utils';
+import { requireEnv } from './env-config';
+
+function normalizeAssistantContent(content: string | { type: string }[]): string {
+  if (typeof content === 'string') {
+    return content;
+  }
+
+  return content
+    .map((item) => {
+      if (item.type === 'text' && 'text' in item) {
+        return (item as { type: 'text'; text: string }).text;
+      }
+      if (item.type === 'image_url' && 'image_url' in item) {
+        return `[Image: ${(item as { type: 'image_url'; image_url: { url: string } }).image_url.url}]`;
+      }
+      return '';
+    })
+    .join('\n')
+    .trim();
+}
 
 async function main() {
-  const apiKey = process.env.VENICE_API_KEY;
-  if (!apiKey) {
-    console.error('❌ VENICE_API_KEY not set');
-    process.exit(1);
-  }
+  const apiKey = requireEnv('VENICE_API_KEY');
 
   console.log('⏱️  Rate Limit Handling Demo\n');
 
@@ -59,11 +76,12 @@ async function main() {
         const reqStart = Date.now();
         
         try {
-          const response = await venice.chat.completions.create({
+          const rawResponse = await venice.chat.completions.create({
             model: 'llama-3.3-70b',
             messages: [{ role: 'user', content: req.prompt }],
             max_tokens: 50,
           });
+          const response = ensureChatCompletionResponse(rawResponse, `Rate limit demo request ${req.id}`);
 
           const duration = Date.now() - reqStart;
           console.log(`✅ Request ${req.id} completed in ${duration}ms`);
@@ -72,7 +90,7 @@ async function main() {
             id: req.id,
             success: true,
             duration,
-            result: response.choices[0].message.content
+            result: normalizeAssistantContent(response.choices[0].message.content)
           };
 
         } catch (error: any) {
@@ -120,13 +138,14 @@ async function main() {
 
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
-        const response = await venice.chat.completions.create({
+        const rawResponse = await venice.chat.completions.create({
           model: 'llama-3.3-70b',
           messages: [{ role: 'user', content: prompt }],
           max_tokens: 50,
         });
+        const response = ensureChatCompletionResponse(rawResponse, 'Manual retry request');
 
-        return response.choices[0].message.content;
+        return normalizeAssistantContent(response.choices[0].message.content);
 
       } catch (error: any) {
         lastError = error;

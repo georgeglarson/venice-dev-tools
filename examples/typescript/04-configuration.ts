@@ -15,6 +15,7 @@
  */
 
 import { VeniceAI, LogLevel } from '@venice-dev-tools/core';
+import { ensureChatCompletionResponse } from './utils';
 
 async function main() {
   const apiKey = process.env.VENICE_API_KEY;
@@ -68,12 +69,13 @@ async function main() {
   // Make a test request
   console.log('🧪 Testing configuration...\n');
 
-  const response = await venice.chat.completions.create({
+  const result = await venice.chat.completions.create({
     model: 'llama-3.3-70b',
     messages: [
       { role: 'user', content: 'Say "Configuration works!" and nothing else.' }
     ]
   });
+  const response = ensureChatCompletionResponse(result, 'Configuration example');
 
   console.log('✨ Response:', response.choices[0].message.content);
   console.log('');

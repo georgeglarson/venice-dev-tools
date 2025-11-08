@@ -2,6 +2,7 @@ import { ApiEndpoint } from '../../../registry/endpoint';
 import { ChatCompletionRequest } from '../../../../types';
 import { ChatValidator } from '../../../../utils/validators/chat-validator';
 import { parseSSEStream } from '../../../../utils/stream-parser';
+import { VeniceStreamError } from '../../../../errors';
 
 /**
  * API endpoint for streaming chat completions.
@@ -95,7 +96,7 @@ export class ChatStreamEndpoint extends ApiEndpoint {
     try {
       const reader = response.body?.getReader();
       if (!reader) {
-        throw new Error('Stream response body is null');
+        throw new VeniceStreamError('Stream response body is null');
       }
 
       for await (const chunk of parseSSEStream(reader, this.logger)) {
