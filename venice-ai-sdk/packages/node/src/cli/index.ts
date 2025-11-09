@@ -157,7 +157,7 @@ program
     console.log('  List available image styles');
     console.log('\nExamples:');
     console.log('  venice images generate "A sunset over mountains"');
-    console.log('  venice images generate --prompt "A sunset over mountains" --model fluently-xl');
+    console.log('  venice images generate --prompt "A sunset over mountains"');
     console.log('  venice images upscale image.jpg --scale 4');
     console.log('  venice images styles');
     

@@ -9,6 +9,30 @@ import { VeniceNode } from '../../venice-node';
 import { GenerateImageRequest, ListImageStylesResponse } from '@venice-dev-tools/core';
 
 /**
+ * Resolve an available image generation model
+ */
+async function resolveImageModel(venice: VeniceNode, preferredModel?: string): Promise<string> {
+  try {
+    const models = await venice.models.list({ type: 'image' });
+    if (!models.data.length) {
+      throw new Error('No image-capable models currently available from the API.');
+    }
+
+    if (preferredModel) {
+      const preferred = models.data.find((model) => model.id === preferredModel);
+      if (preferred) {
+        return preferred.id;
+      }
+    }
+
+    // Fall back to the first available model
+    return models.data[0].id;
+  } catch (error: any) {
+    throw new Error(`Unable to determine an image model: ${error.message}`);
+  }
+}
+
+/**
  * Register image-related commands with the CLI
  */
 export function registerImagesCommands(program: Command, venice: VeniceNode): void {
@@ -20,7 +44,7 @@ export function registerImagesCommands(program: Command, venice: VeniceNode): vo
   images
     .command('generate [prompt]')
     .description('Generate an image with AI')
-    .option('-m, --model <model>', 'Model to use', 'fluently-xl')
+    .option('-m, --model <model>', 'Model to use (auto-selects if not specified)')
     .option('-p, --prompt <prompt>', 'Image generation prompt (alternative to positional argument)')
     .option('-n, --negative-prompt <prompt>', 'Negative prompt')
     .option('-s, --style <style>', 'Style preset to apply')
@@ -49,9 +73,20 @@ export function registerImagesCommands(program: Command, venice: VeniceNode): vo
       // Store the prompt in options for consistent usage in the rest of the function
       options.prompt = promptToUse;
 
+      // Resolve the model to use
+      let modelToUse: string;
+      try {
+        modelToUse = await resolveImageModel(venice, options.model);
+      } catch (error) {
+        console.error(chalk.red(`Error: ${(error as Error).message}`));
+        console.log(chalk.yellow('\nNote: Image models may not be available at this time.'));
+        console.log(chalk.yellow('Check https://venice.ai/models for current availability.'));
+        process.exit(1);
+      }
+
       // Create request
       const request: GenerateImageRequest = {
-        model: options.model,
+        model: modelToUse,
         prompt: options.prompt,
         size: parseInt(options.width, 10), // Using size instead of width/height
         negative_prompt: options.negativePrompt,
@@ -60,7 +95,7 @@ export function registerImagesCommands(program: Command, venice: VeniceNode): vo
       };
 
       // Start generation
-      const spinner = ora('Generating image...').start();
+      const spinner = ora(`Generating image with ${modelToUse}...`).start();
 
       try {
         // Generate the image
