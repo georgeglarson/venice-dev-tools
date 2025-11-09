@@ -161,7 +161,7 @@ For deeper coverage read the technical notes in `docs/technical/` or the API res
 
 ## 8. Ship it
 
-1. Pin the calendar version that matches the Venice API behaviour you tested (`package.json` → `2025.11.82`).
+1. Pin the calendar version that matches the Venice API behaviour you tested (`package.json` → `2025.11.83`).
 2. Capture any non-default environment variables in your deployment configuration.
 3. Monitor rate-limit headers (`x-ratelimit-limit-requests`, `x-ratelimit-remaining-requests`) to adapt concurrency.
 4. Follow Venice.ai’s published changelog and upgrade only when ready—each SDK release documents the API surface it was validated against.

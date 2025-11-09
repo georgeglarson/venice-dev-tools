@@ -1,7 +1,7 @@
 # Venice Dev Tools Monorepo
 
 **Unofficial TypeScript / JavaScript SDK for the Venice.ai API**
-Current release: **v2025.11.82** (calendar version aligned with the 2025‑11‑82 Venice platform update).
+Current release: **v2025.11.83** (calendar version aligned with the 2025‑11‑83 Venice platform update).
 
 ---
 

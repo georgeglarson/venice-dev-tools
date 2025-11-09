@@ -1,7 +1,7 @@
 # Venice AI SDK Monorepo
 
 **Calendar-versioned TypeScript & JavaScript tooling for the Venice.ai platform.**
-Release `v2025.11.82` aligns with the Venice API updates published on **2025‑11‑82**.
+Release `v2025.11.83` aligns with the Venice API updates published on **2025‑11‑83**.
 
 [![npm version](https://img.shields.io/npm/v/@venice-dev-tools/core?style=flat-square)](https://www.npmjs.com/package/@venice-dev-tools/core)
 [![Node.js Version](https://img.shields.io/node/v/@venice-dev-tools/core?style=flat-square)](https://nodejs.org)
@@ -19,7 +19,7 @@ Release `v2025.11.82` aligns with the Venice API updates published on **2025‑1
 - **Battle-tested** – 170+ automated unit, integration, and workflow tests executed against the live Venice API.
 - **Docs that convert** – task-oriented guides, API references, and archived research for audits.
 
-> **New:** Calendar versioning (`YYYY.MM.D`) keeps releases in step with Venice's platform cadence. The `2025.11.82` tag represents the 2025‑11‑82 drop.
+> **New:** Calendar versioning (`YYYY.MM.D`) keeps releases in step with Venice's platform cadence. The `2025.11.83` tag represents the 2025‑11‑83 drop.
 
 ---
 
