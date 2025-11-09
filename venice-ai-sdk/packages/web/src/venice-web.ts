@@ -77,9 +77,9 @@ export class VeniceWeb extends VeniceAI {
     const response = await this.images.generate(options);
     
     // Convert the image to a blob URL
-    if (response.data && response.data.url) {
+    if (response.data && typeof response.data === 'object' && 'url' in response.data && response.data.url) {
       // If the response contains a URL, use it directly
-      if (response.data.response_format === 'url') {
+      if ('response_format' in response.data && response.data.response_format === 'url') {
         return { url: response.data.url, response };
       }
       

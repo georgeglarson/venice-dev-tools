@@ -65,7 +65,7 @@ describe('Chat Integration Tests', () => {
   }, 30000);
 
   it('should handle streaming', async () => {
-    const stream = venice.chatStream.streamCompletion({
+    const stream = venice.chat.createCompletionStream({
       model: 'llama-3.3-70b',
       messages: [{ role: 'user', content: 'Count to 3' }],
     });

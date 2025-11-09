@@ -178,6 +178,15 @@ export class VeniceAI extends VeniceClient {
   }
 
   /**
+   * Alias for {@link keys} to match documentation that references `apiKeys`.
+   *
+   * @returns The keys endpoint.
+   */
+  public get apiKeys(): KeysEndpoint {
+    return this.keys;
+  }
+
+  /**
    * Get the characters API endpoint.
    *
    * @returns The characters endpoint.

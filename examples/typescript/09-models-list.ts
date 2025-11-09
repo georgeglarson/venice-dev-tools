@@ -13,13 +13,10 @@
  */
 
 import { VeniceAI } from '@venice-dev-tools/core';
+import { requireEnv } from './env-config';
 
 async function main() {
-  const apiKey = process.env.VENICE_API_KEY;
-  if (!apiKey) {
-    console.error('❌ VENICE_API_KEY not set');
-    process.exit(1);
-  }
+  const apiKey = requireEnv('VENICE_API_KEY');
 
   const venice = new VeniceAI({ apiKey });
 

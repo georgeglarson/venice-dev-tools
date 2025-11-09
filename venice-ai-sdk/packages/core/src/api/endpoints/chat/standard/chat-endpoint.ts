@@ -148,6 +148,16 @@ export class ChatEndpoint extends ApiEndpoint {
     this.logger.warn('[DEPRECATED] chat.createCompletion() is deprecated. Use chat.completions.create() instead.');
     return this._create(request);
   }
+
+  /**
+   * Streams chat completion chunks for the given request.
+   *
+   * @param request - The chat completion request parameters
+   * @returns Async generator yielding stream payloads.
+   */
+  public createCompletionStream(request: ChatCompletionRequest): AsyncGenerator<any, void, unknown> {
+    return this._stream(request);
+  }
 }
 
 export default ChatEndpoint;

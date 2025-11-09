@@ -384,15 +384,16 @@ const client = new VeniceClient({
 
 **Solution:**
 ```bash
-# Make sure you're in the SDK root directory
-cd /home/venice/mgx-veniceai-sdk
-
-# Install dependencies
+# Reinstall to trigger the postinstall symlink fix
+rm -rf node_modules package-lock.json
 npm install
 
-# Build the SDK
-npm run build
+# Or with pnpm
+pnpm install
 ```
+
+> v2025.11.5+ automatically links the internal `@venice-dev-tools/*`
+> packages during `npm install`, so a clean reinstall resolves the error.
 
 ### AbortController Not Working
 

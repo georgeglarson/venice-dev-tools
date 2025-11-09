@@ -10,7 +10,8 @@
   },
   "files": [
     "packages",
-    "bin"
+    "bin",
+    "scripts"
   ],
   "scripts": {
     "build": "PNPM_CONFIG_AUTO_INSTALL_PEERS=true pnpm install && cd packages/core && pnpm install && pnpm run build && cd ../node && pnpm install && pnpm run build && cd ../web && pnpm install && pnpm run build && cd ../../",
@@ -23,7 +24,7 @@
     "test:watch": "pnpm -r run test:watch",
     "test:coverage": "pnpm -r run test:coverage",
     "typecheck": "pnpm -r run typecheck",
-    "postinstall": "node -e \"try { const fs = require('fs'); const path = require('path'); const binPath = path.join(__dirname, 'bin', 'venice-cli.js'); fs.chmodSync(binPath, '755'); console.log('Made CLI executable: ' + binPath); const nodeModulesPath = path.join(__dirname, 'packages', 'node', 'node_modules'); if (!fs.existsSync(nodeModulesPath)) { console.log('Installing node package dependencies...'); require('child_process').execSync('cd ' + path.join(__dirname, 'packages', 'node') + ' && npm install --no-save', {stdio: 'inherit'}); } } catch (e) { console.error('Error in postinstall script:', e); }\"",
+    "postinstall": "node ./scripts/postinstall.js",
     "install-cli": "node bin/install-cli.js",
     "fix-cli": "node -e \"try { const fs = require('fs'); const path = require('path'); const binPath = path.join(__dirname, 'bin', 'venice-cli.js'); fs.chmodSync(binPath, '755'); console.log('Made CLI executable: ' + binPath); const nodeModulesPath = path.join(__dirname, 'packages', 'node', 'node_modules'); if (!fs.existsSync(nodeModulesPath)) { console.log('Installing node package dependencies...'); require('child_process').execSync('cd ' + path.join(__dirname, 'packages', 'node') + ' && npm install --no-save', {stdio: 'inherit'}); } } catch (e) { console.error('Error in fix-cli script:', e); }\""
   },

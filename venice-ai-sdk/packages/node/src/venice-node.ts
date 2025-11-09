@@ -106,7 +106,7 @@ export class VeniceNode extends VeniceAI {
     const response = await this.images.generate(options);
     
     // Save the image to the file
-    if (response.data && response.data.url) {
+    if (response.data && typeof response.data === 'object' && 'url' in response.data && response.data.url) {
       // If it's a URL or base64 data, save it to file
       const filePath = this.saveImageToFile(response.data.url, outputPath);
       return { response, filePath };

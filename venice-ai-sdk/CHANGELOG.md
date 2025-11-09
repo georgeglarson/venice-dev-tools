@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and releases now follow a calendar versioning scheme `YYYY.MM.D` aligned with Venice API drop dates.
 
+## [Unreleased]
+
+### Added
+- Automatic postinstall symlink creation so `@venice-dev-tools/*` modules resolve after a standard `npm install`.
+- `chat.createCompletionStream()` helper for parity with documented streaming API and CLI usage.
+
+### Fixed
+- CLI streaming commands now call the typed streaming helper instead of casting to `any`, so TypeScript users regain autocompletion and documentation.
+- Troubleshooting docs updated to reflect the automatic installation flow (no more manual symlinks).
+
 ## [2025.11.6] - 2025-11-06
 
 ### Added

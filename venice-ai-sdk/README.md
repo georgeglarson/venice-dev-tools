@@ -45,6 +45,10 @@ Need a key? Visit [venice.ai/settings/api](https://venice.ai/settings/api) and e
 export VENICE_API_KEY="sk-..."
 ```
 
+> Installation tip: `npm install venice-dev-tools` now creates the internal
+> `@venice-dev-tools/*` links automatically. If you previously worked around this
+> manually, delete `node_modules` and reinstall to pick up the fix.
+>
 > Looking for web bundler or CLI usage? Start with the [Getting Started guide](../docs/guides/getting-started.md).
 
 ---

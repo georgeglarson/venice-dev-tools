@@ -464,12 +464,16 @@ const result = await retryWithBackoff(() =>
 
 **Solution:**
 ```bash
-# From SDK root directory
+# Clean install to re-run the postinstall linker
+rm -rf node_modules package-lock.json
 npm install
 
-# Or rebuild
-npm run build
+# pnpm users
+pnpm install
 ```
+
+> The installer now wires up the scoped `@venice-dev-tools/*` packages
+> automatically. Reinstalling ensures those links are created.
 
 ### "VENICE_API_KEY environment variable is not set"
 

@@ -274,7 +274,7 @@ async function handleStreamingResponse(
   
   try {
     // Get the stream generator
-    const streamGenerator = (venice.chat as any).createCompletionStream({
+    const streamGenerator = venice.chat.createCompletionStream({
       ...request,
       stream: true
     });

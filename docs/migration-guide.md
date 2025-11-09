@@ -80,6 +80,7 @@ const stream = await venice.chat.completions.create({
 - Replace `chatStream.streamCompletion()` with `chat.completions.create({ stream: true })`
 - Add `stream: true` to request options
 - Stream iteration remains the same
+- Prefer `venice.chat.createCompletionStream()` if you want a dedicated helper that always returns an async generator.
 
 #### 3. Image Endpoint Access
 

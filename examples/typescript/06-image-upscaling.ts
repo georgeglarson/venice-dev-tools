@@ -15,6 +15,7 @@
 import { VeniceAI } from '@venice-dev-tools/core';
 import fs from 'fs';
 import path from 'path';
+import { requireEnv } from './env-config';
 
 async function toBufferFromUpscalePayload(payload: unknown): Promise<Buffer | null> {
   if (payload instanceof ArrayBuffer) {
@@ -104,11 +105,7 @@ function describeValue(value: unknown): string {
 }
 
 async function main() {
-  const apiKey = process.env.VENICE_API_KEY;
-  if (!apiKey) {
-    console.error('❌ VENICE_API_KEY not set');
-    process.exit(1);
-  }
+  const apiKey = requireEnv('VENICE_API_KEY');
 
   // Path to image you want to upscale
   const imagePath = process.argv[2];

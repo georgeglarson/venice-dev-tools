@@ -16,20 +16,17 @@
 
 import { VeniceAI, LogLevel } from '@venice-dev-tools/core';
 import { ensureChatCompletionResponse } from './utils';
+import { requireEnv } from './env-config';
 
 async function main() {
-  const apiKey = process.env.VENICE_API_KEY;
-  if (!apiKey) {
-    console.error('❌ VENICE_API_KEY not set');
-    process.exit(1);
-  }
+  const apiKey = requireEnv('VENICE_API_KEY');
 
   console.log('⚙️  Configuring Venice AI SDK...\n');
 
   // Create a client with custom configuration
   const venice = new VeniceAI({
     // Authentication
-    apiKey: apiKey,
+    apiKey,
     
     // Base URL (usually default is fine)
     // baseUrl: 'https://api.venice.ai/api/v1',

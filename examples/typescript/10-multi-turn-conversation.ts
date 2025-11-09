@@ -15,6 +15,7 @@
 import { VeniceAI } from '@venice-dev-tools/core';
 import * as readline from 'readline';
 import { ensureChatCompletionResponse } from './utils';
+import { requireEnv } from './env-config';
 
 // Conversation state
 type ConversationContent = string | Array<{ type: 'text'; text: string } | { type: 'image_url'; image_url: { url: string } }>;
@@ -25,11 +26,7 @@ interface ConversationMessage {
 }
 
 async function main() {
-  const apiKey = process.env.VENICE_API_KEY;
-  if (!apiKey) {
-    console.error('❌ VENICE_API_KEY not set');
-    process.exit(1);
-  }
+  const apiKey = requireEnv('VENICE_API_KEY');
 
   const venice = new VeniceAI({ apiKey });
 

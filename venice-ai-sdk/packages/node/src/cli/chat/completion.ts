@@ -233,10 +233,7 @@ async function handleStreamingCompletion(
       console.log(chalk.green('Venice AI: '));
     }
     
-    // Get the stream generator
-    // Note: Using any type assertion because the SDK might have different method names
-    // in different versions
-    const streamGenerator = (venice.chat as any).createCompletionStream({
+    const streamGenerator = venice.chat.createCompletionStream({
       ...request,
       stream: true
     });
