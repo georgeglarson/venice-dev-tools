@@ -21,6 +21,10 @@ export * from './types';
 // Export errors
 export * from './errors';
 
+// Export commonly used error types as convenient aliases
+export { VeniceRateLimitError as RateLimitError } from './errors/types/rate-limit-error';
+export { VeniceAuthError as AuthenticationError } from './errors/types/auth-error';
+
 // Export HTTP utilities
 export * from './http';
 

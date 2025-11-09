@@ -1,6 +1,6 @@
 {
   "name": "venice-dev-tools",
-  "version": "2025.11.5",
+  "version": "2025.11.8",
   "description": "unOfficial SDK for the Venice AI API",
   "workspaces": [
     "packages/*"
@@ -55,11 +55,11 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.1",
-    "@types/node": "^22.13.10",
+    "@types/node": "^22.19.0",
     "@vitest/coverage-v8": "^1.6.1",
     "pdfkit": "^0.16.0",
     "prettier": "^3.5.3",
-    "typescript": "^5.8.2",
+    "typescript": "^5.9.3",
     "vitest": "^1.6.1"
   },
   "packageManager": "pnpm"

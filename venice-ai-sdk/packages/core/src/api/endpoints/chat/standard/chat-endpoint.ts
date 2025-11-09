@@ -59,6 +59,16 @@ export class ChatEndpoint extends ApiEndpoint {
           return this._stream(request);
         }
         return this._create(request);
+      },
+
+      /**
+       * Creates a streaming chat completion using the specified model.
+       *
+       * @param request - The chat completion request parameters
+       * @returns An async generator that yields completion chunks
+       */
+      createStream: (request: ChatCompletionRequest): AsyncGenerator<any, void, unknown> => {
+        return this._stream(request);
       }
     };
   }

@@ -58,11 +58,11 @@ export class VeniceClient {
     
     // Initialize logger
     this.logger = new Logger({
-      level: config.logLevel !== undefined ? config.logLevel : 1  // LogLevel.INFO = 1
+      level: config.logLevel !== undefined ? config.logLevel : LogLevel.INFO
     });
     
     // Only log initialization info if log level is not NONE
-    if (config.logLevel !== 4) {  // LogLevel.NONE = 4
+    if (config.logLevel !== LogLevel.NONE) {
       this.logger.info('Initializing Venice AI client', {
         baseUrl: config.baseUrl || 'https://api.venice.ai/api/v1',
         timeout: config.timeout || 30000

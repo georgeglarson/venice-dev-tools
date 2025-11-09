@@ -1,0 +1,134 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+jobs:
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8.14.1
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      
+      - name: Install dependencies
+        run: |
+          cd venice-ai-sdk
+          pnpm install
+      
+      - name: Run unit tests
+        run: |
+          cd venice-ai-sdk/packages/core
+          pnpm test
+      
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          files: ./venice-ai-sdk/packages/core/coverage/coverage-final.json
+          flags: unittests
+          name: unit-tests
+        continue-on-error: true
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    # Only run integration tests if API key is available
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8.14.1
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      
+      - name: Install dependencies
+        run: |
+          cd venice-ai-sdk
+          pnpm install
+      
+      - name: Run integration tests
+        env:
+          VENICE_API_KEY: ${{ secrets.VENICE_API_KEY }}
+        run: |
+          cd venice-ai-sdk/packages/core
+          if [ -z "$VENICE_API_KEY" ]; then
+            echo "⚠️ VENICE_API_KEY not set - skipping integration tests"
+            exit 0
+          fi
+          pnpm test:integration
+      
+      - name: Upload integration test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: integration-test-results
+          path: venice-ai-sdk/packages/core/test-results/
+        continue-on-error: true
+
+  build-test:
+    name: Build & Type Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8.14.1
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      
+      - name: Install dependencies
+        run: |
+          cd venice-ai-sdk
+          pnpm install
+      
+      - name: Type check
+        run: |
+          cd venice-ai-sdk
+          pnpm typecheck
+      
+      - name: Build all packages
+        run: |
+          cd venice-ai-sdk
+          pnpm build
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: |
+            venice-ai-sdk/packages/*/dist
+          retention-days: 7
