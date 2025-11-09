@@ -46,14 +46,16 @@ pnpm add -D @venice-dev-tools/web
 
 ```ts
 // src/venice.ts
-import { VeniceClient } from '@venice-dev-tools/core';
+import { VeniceAI } from '@venice-dev-tools/core';
 
-export const venice = new VeniceClient({
+export const venice = new VeniceAI({
   apiKey: process.env.VENICE_API_KEY!,
   timeout: 30_000,
   logLevel: 1 // INFO
 });
 ```
+
+> **Note:** `VeniceAI` is the recommended high-level client that provides full access to all endpoints. For lower-level HTTP control, use `VeniceClient`.
 
 The client exposes namespaces for chat, images, embeddings, audio, billing, models, keys, and more. Each namespace mirrors Venice.ai endpoint names (for example `venice.chat.completions.create`, `venice.billing.getUsage`).
 
@@ -112,9 +114,9 @@ The live API may respond with either URLs or ArrayBuffers for media; plan to sup
 ## 5. Configure logging & retries
 
 ```ts
-import { VeniceClient, LogLevel } from '@venice-dev-tools/core';
+import { VeniceAI, LogLevel } from '@venice-dev-tools/core';
 
-const venice = new VeniceClient({
+const venice = new VeniceAI({
   apiKey: process.env.VENICE_API_KEY!,
   logLevel: LogLevel.DEBUG,
   maxConcurrent: 5,
@@ -159,7 +161,7 @@ For deeper coverage read the technical notes in `docs/technical/` or the API res
 
 ## 8. Ship it
 
-1. Pin the calendar version that matches the Venice API behaviour you tested (`package.json` → `2025.11.5`).
+1. Pin the calendar version that matches the Venice API behaviour you tested (`package.json` → `2025.11.82`).
 2. Capture any non-default environment variables in your deployment configuration.
 3. Monitor rate-limit headers (`x-ratelimit-limit-requests`, `x-ratelimit-remaining-requests`) to adapt concurrency.
 4. Follow Venice.ai’s published changelog and upgrade only when ready—each SDK release documents the API surface it was validated against.

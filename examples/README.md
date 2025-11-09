@@ -392,7 +392,7 @@ npm install
 pnpm install
 ```
 
-> v2025.11.5+ automatically links the internal `@venice-dev-tools/*`
+> v2025.11.82+ automatically links the internal `@venice-dev-tools/*`
 > packages during `npm install`, so a clean reinstall resolves the error.
 
 ### AbortController Not Working

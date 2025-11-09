@@ -1,6 +1,6 @@
 {
   "name": "venice-ai-sdk-monorepo",
-  "version": "2025.11.81",
+  "version": "2025.11.82",
   "description": "Venice AI SDK Monorepo",
   "repository": {
     "type": "git",
@@ -39,7 +39,6 @@
   "packageManager": "pnpm@8.14.1",
   "dependencies": {
     "@venice-dev-tools/core": "^2025.11.6",
-    "pdf-parse": "^1.1.1",
-    "venice-dev-tools": "^2.1.10"
+    "pdf-parse": "^1.1.1"
   }
 }

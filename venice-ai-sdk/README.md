@@ -1,7 +1,7 @@
 # Venice Dev Tools Monorepo
 
-**Unofficial TypeScript / JavaScript SDK for the Venice.ai API**  
-Current release: **v2025.11.5** (calendar version aligned with the 2025‑11‑05 Venice platform update).
+**Unofficial TypeScript / JavaScript SDK for the Venice.ai API**
+Current release: **v2025.11.82** (calendar version aligned with the 2025‑11‑82 Venice platform update).
 
 ---
 
@@ -24,9 +24,9 @@ pnpm add @venice-dev-tools/core
 ```
 
 ```ts
-import { VeniceClient } from '@venice-dev-tools/core';
+import { VeniceAI } from '@venice-dev-tools/core';
 
-const venice = new VeniceClient({
+const venice = new VeniceAI({
   apiKey: process.env.VENICE_API_KEY!,
   logLevel: 1 // INFO
 });
@@ -39,13 +39,15 @@ const completion = await venice.chat.completions.create({
 console.log(completion.choices[0].message.content);
 ```
 
+> **Note:** `VeniceAI` is the recommended high-level client. For lower-level access, use `VeniceClient`.
+
 Need a key? Visit [venice.ai/settings/api](https://venice.ai/settings/api) and export it:
 
 ```bash
 export VENICE_API_KEY="sk-..."
 ```
 
-> Installation tip: `npm install venice-dev-tools` now creates the internal
+> **Installation tip:** `npm install venice-dev-tools` now creates the internal
 > `@venice-dev-tools/*` links automatically. If you previously worked around this
 > manually, delete `node_modules` and reinstall to pick up the fix.
 >

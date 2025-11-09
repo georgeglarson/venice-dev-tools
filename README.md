@@ -1,7 +1,7 @@
 # Venice AI SDK Monorepo
 
-**Calendar-versioned TypeScript & JavaScript tooling for the Venice.ai platform.**  
-Release `v2025.11.5` aligns with the Venice API updates published on **2025‑11‑05**.
+**Calendar-versioned TypeScript & JavaScript tooling for the Venice.ai platform.**
+Release `v2025.11.82` aligns with the Venice API updates published on **2025‑11‑82**.
 
 [![npm version](https://img.shields.io/npm/v/@venice-dev-tools/core?style=flat-square)](https://www.npmjs.com/package/@venice-dev-tools/core)
 [![Node.js Version](https://img.shields.io/node/v/@venice-dev-tools/core?style=flat-square)](https://nodejs.org)
@@ -19,7 +19,7 @@ Release `v2025.11.5` aligns with the Venice API updates published on **2025‑11
 - **Battle-tested** – 170+ automated unit, integration, and workflow tests executed against the live Venice API.
 - **Docs that convert** – task-oriented guides, API references, and archived research for audits.
 
-> **New:** Calendar versioning (`YYYY.MM.D`) keeps releases in step with Venice’s platform cadence. The `2025.11.5` tag represents the 2025‑11‑05 drop.
+> **New:** Calendar versioning (`YYYY.MM.D`) keeps releases in step with Venice's platform cadence. The `2025.11.82` tag represents the 2025‑11‑82 drop.
 
 ---
 
@@ -36,12 +36,24 @@ pnpm add -D @venice-dev-tools/node
 pnpm add -D @venice-dev-tools/web
 ```
 
+> **Installation tip:** `npm install venice-dev-tools` now auto-links the scoped `@venice-dev-tools/*` packages. If you previously installed manually, delete `node_modules` and reinstall.
+
+### CLI Installation
+
+To use the `venice` CLI globally:
+
+```bash
+pnpm add -g venice-dev-tools
+```
+
+The CLI is automatically linked during installation. For troubleshooting, see [`bin/venice-cli.js`](venice-ai-sdk/bin/venice-cli.js:12).
+
 Minimal initialisation:
 
 ```typescript
-import { VeniceClient } from '@venice-dev-tools/core';
+import { VeniceAI } from '@venice-dev-tools/core';
 
-const venice = new VeniceClient({
+const venice = new VeniceAI({
   apiKey: process.env.VENICE_API_KEY!,
   logLevel: 1 // INFO
 });
@@ -53,6 +65,8 @@ const completion = await venice.chat.completions.create({
 
 console.log(completion.choices[0].message.content);
 ```
+
+> **Note:** `VeniceAI` is the recommended high-level client. For lower-level access, use `VeniceClient`.
 
 Need an API key? Visit [venice.ai/settings/api](https://venice.ai/settings/api), generate a token, and export it:  
 `export VENICE_API_KEY="your-key"`
