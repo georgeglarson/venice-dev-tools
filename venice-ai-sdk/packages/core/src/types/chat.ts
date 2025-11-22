@@ -74,6 +74,48 @@ export interface ChatCompletionRequest {
   top_p?: number;
   
   /**
+   * Number between -2.0 and 2.0. Positive values penalize new tokens based on their
+   * existing frequency in the text so far.
+   */
+  frequency_penalty?: number;
+  
+  /**
+   * Number between -2.0 and 2.0. Positive values penalize new tokens based on whether
+   * they appear in the text so far.
+   */
+  presence_penalty?: number;
+  
+  /**
+   * Whether to include log probabilities in the response.
+   * Not supported by all models.
+   */
+  logprobs?: boolean;
+  
+  /**
+   * The number of highest probability tokens to return for each token position.
+   * Requires logprobs to be true.
+   */
+  top_logprobs?: number;
+  
+  /**
+   * An upper bound for the number of tokens that can be generated for a completion,
+   * including visible output tokens and reasoning tokens.
+   * Replaces the deprecated max_tokens parameter.
+   */
+  max_completion_tokens?: number;
+  
+  /**
+   * Maximum temperature value for dynamic temperature scaling.
+   * Must be between 0 and 2.
+   */
+  max_temp?: number;
+  
+  /**
+   * Up to 4 sequences where the API will stop generating further tokens.
+   */
+  stop?: string | string[];
+  
+  /**
    * Whether to stream the response
    */
   stream?: boolean;

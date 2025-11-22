@@ -9,4 +9,6 @@ export * from './types/rate-limit-error';
 export * from './types/payment-required-error';
 export * from './types/capacity-error';
 export * from './types/stream-error';
+export * from './types/model-not-found-error';
+export * from './types/permission-error';
 export * from './factory/error-factory';

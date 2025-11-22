@@ -110,6 +110,97 @@ export class ModelsEndpoint extends ApiEndpoint {
     return response.data;
   }
   /**
+   * List chat/LLM models only.
+   * Convenience method to filter models suitable for chat completions.
+   * @returns The list of chat models.
+   */
+  public async listChat(): Promise<ListModelsResponse> {
+    const allModels = await this.list();
+    
+    // Filter for chat/LLM models (exclude image and embedding models)
+    const chatModels = allModels.data?.filter(model => {
+      const id = model.id.toLowerCase();
+      return !id.includes('embedding') && 
+             !id.includes('sd') && 
+             !id.includes('fluently') &&
+             !id.includes('dall-e');
+    }) || [];
+    
+    return {
+      ...allModels,
+      data: chatModels
+    };
+  }
+
+  /**
+   * List image generation models only.
+   * Convenience method to filter models suitable for image generation.
+   * @returns The list of image models.
+   */
+  public async listImage(): Promise<ListModelsResponse> {
+    const allModels = await this.list();
+    
+    // Filter for image models
+    const imageModels = allModels.data?.filter(model => {
+      const id = model.id.toLowerCase();
+      return id.includes('sd') || 
+             id.includes('fluently') || 
+             id.includes('dall-e') ||
+             id.includes('image');
+    }) || [];
+    
+    return {
+      ...allModels,
+      data: imageModels
+    };
+  }
+
+  /**
+   * List embedding models only.
+   * Convenience method to filter models suitable for embeddings.
+   * @returns The list of embedding models.
+   */
+  public async listEmbedding(): Promise<ListModelsResponse> {
+    const allModels = await this.list();
+    
+    // Filter for embedding models
+    const embeddingModels = allModels.data?.filter(model => {
+      const id = model.id.toLowerCase();
+      return id.includes('embedding');
+    }) || [];
+    
+    return {
+      ...allModels,
+      data: embeddingModels
+    };
+  }
+
+  /**
+   * Retrieve a specific model by ID.
+   * @param modelId - The ID of the model to retrieve.
+   * @returns The model details.
+   */
+  public async retrieve(modelId: string): Promise<any> {
+    // Validate model ID
+    if (!modelId || typeof modelId !== 'string') {
+      throw new Error('Model ID must be a non-empty string');
+    }
+
+    // Emit a request event
+    this.emit('request', { type: 'models.retrieve', data: { modelId } });
+
+    // Make the API request
+    const response = await this.http.get<any>(
+      this.getPath(`/${modelId}`)
+    );
+
+    // Emit a response event
+    this.emit('response', { type: 'models.retrieve', data: response.data });
+
+    return response.data;
+  }
+
+  /**
    * Generate a model response.
    * @param request - The model generation request.
    * @returns The generated model response.

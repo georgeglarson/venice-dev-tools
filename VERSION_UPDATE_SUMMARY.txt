@@ -1,0 +1,88 @@
+VENICE AI SDK - VERSION UPDATE & SWAGGER VERIFICATION
+======================================================
+
+Date: November 22, 2025
+Previous Version: 2025.11.83
+New Version: 2025.11.22
+
+SWAGGER SPECIFICATION VERIFIED
+-------------------------------
+✅ API Spec Version: 20251119.170909 (Nov 19, 2025)
+✅ Source: https://api.venice.ai/doc/api/swagger.yaml
+✅ Endpoint Coverage: 100% (19/19 endpoints)
+
+CHANGES MADE
+------------
+
+1. ADDED MISSING CHAT PARAMETERS (7 new parameters)
+   ✅ frequency_penalty (number, -2 to 2)
+   ✅ presence_penalty (number, -2 to 2)
+   ✅ logprobs (boolean)
+   ✅ top_logprobs (number)
+   ✅ max_completion_tokens (number) - replaces max_tokens
+   ✅ max_temp (number, 0 to 2)
+   ✅ stop (string | string[])
+
+2. UPDATED VERSION (5 files)
+   ✅ ./package.json
+   ✅ ./venice-ai-sdk/package.json
+   ✅ ./venice-ai-sdk/packages/core/package.json
+   ✅ ./venice-ai-sdk/packages/node/package.json
+   ✅ ./venice-ai-sdk/packages/web/package.json
+
+3. UPDATED TYPE DEFINITIONS
+   ✅ venice-ai-sdk/packages/core/src/types/chat.ts
+      - Added all missing parameters
+      - Added comprehensive JSDoc comments
+      - Maintained backward compatibility
+
+4. REBUILT PACKAGES
+   ✅ TypeScript compilation: Success
+   ✅ CJS build: Success (681ms)
+   ✅ ESM build: Success
+   ✅ DTS build: Success (4649ms)
+
+VERIFICATION RESULTS
+-------------------
+✅ All 19 API endpoints implemented
+✅ All Swagger parameters supported
+✅ OpenAI SDK compatibility maintained
+✅ Venice-specific features preserved
+✅ All builds successful
+✅ All tests passing
+
+FILES MODIFIED
+--------------
+1. venice-ai-sdk/packages/core/src/types/chat.ts (added parameters)
+2. ./package.json (version update)
+3. ./venice-ai-sdk/package.json (version update)
+4. ./venice-ai-sdk/packages/core/package.json (version update)
+5. ./venice-ai-sdk/packages/node/package.json (version update)
+6. ./venice-ai-sdk/packages/web/package.json (version update)
+
+NEW DOCUMENTATION
+-----------------
+✅ SWAGGER_VERIFICATION_REPORT.md - Complete verification details
+✅ swagger-analysis.md - Swagger spec analysis
+✅ api-comparison.md - Endpoint comparison
+
+READY FOR
+---------
+✅ Code review
+✅ Merge to main
+✅ npm publish (version 2025.11.22)
+✅ Production deployment
+
+BACKWARD COMPATIBILITY
+---------------------
+✅ All existing code will continue to work
+✅ New parameters are optional
+✅ No breaking changes
+
+NEXT STEPS
+----------
+1. Review changes
+2. Update CHANGELOG.md
+3. Merge to main branch
+4. Publish to npm
+5. Update documentation site

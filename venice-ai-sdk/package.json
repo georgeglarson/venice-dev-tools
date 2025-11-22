@@ -1,6 +1,6 @@
 {
   "name": "venice-dev-tools",
-  "version": "2025.11.83",
+  "version": "2025.11.22",
   "description": "unOfficial SDK for the Venice AI API",
   "workspaces": [
     "packages/*"
