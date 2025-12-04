@@ -7,13 +7,29 @@ and releases now follow a calendar versioning scheme `YYYY.MM.D` aligned with Ve
 
 ## [Unreleased]
 
-### Added
-- Automatic postinstall symlink creation so `@venice-dev-tools/*` modules resolve after a standard `npm install`.
-- `chat.createCompletionStream()` helper for parity with documented streaming API and CLI usage.
+## [2025.12.4] - 2025-12-04
 
 ### Fixed
-- CLI streaming commands now call the typed streaming helper instead of casting to `any`, so TypeScript users regain autocompletion and documentation.
-- Troubleshooting docs updated to reflect the automatic installation flow (no more manual symlinks).
+- **Image Generation API Compatibility**: Updated `GenerateImageResponse` interface to match current Venice.ai API format
+  - Added `id`, `images`, `timing`, and `request` fields to response type
+  - Maintained backward compatibility with legacy `data` field
+  - Fixed all image generation tests that were failing with undefined responses
+- **TypeScript Build Configuration**: Removed Jest types from tsconfig files (project uses Vitest)
+  - Fixed build errors: `Cannot find type definition file for 'jest'`
+  - Updated all three package tsconfig files (core, node, web)
+
+### Added
+- **npm Autopublish Workflow**: Added GitHub Actions workflow for automated publishing
+  - Triggers on GitHub release publication
+  - Runs tests before publishing to ensure quality
+  - Publishes all three packages (@venice-dev-tools/core, node, web)
+  - Matches the same standard as venice-mcp server
+- Automatic postinstall symlink creation so `@venice-dev-tools/*` modules resolve after a standard `npm install`
+- `chat.createCompletionStream()` helper for parity with documented streaming API and CLI usage
+
+### Changed
+- CLI streaming commands now call the typed streaming helper instead of casting to `any`, so TypeScript users regain autocompletion and documentation
+- Troubleshooting docs updated to reflect the automatic installation flow (no more manual symlinks)
 
 ## [2025.11.6] - 2025-11-06
 
