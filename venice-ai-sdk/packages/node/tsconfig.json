@@ -7,7 +7,7 @@
     "declarationMap": true,
     "sourceMap": true,
     "lib": ["ESNext", "DOM"],
-    "types": ["node", "jest"],
+    "types": ["node"],
     "resolveJsonModule": true
   },
   "include": ["src/**/*"],

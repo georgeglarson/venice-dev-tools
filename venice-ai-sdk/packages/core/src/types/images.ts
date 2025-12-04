@@ -90,9 +90,35 @@ export type GeneratedImageData =
 
 export interface GenerateImageResponse {
   /**
-   * Generated image payload. May be a single item or an array depending on API version.
+   * Request ID
    */
-  data: GeneratedImageData | GeneratedImageData[];
+  id: string;
+  
+  /**
+   * Array of generated images (base64 encoded strings)
+   */
+  images: string[];
+  
+  /**
+   * Original request data
+   */
+  request?: any;
+  
+  /**
+   * Timing information
+   */
+  timing?: {
+    inferenceDuration?: number;
+    inferencePreprocessingTime?: number;
+    inferenceQueueTime?: number;
+    total?: number;
+  };
+  
+  /**
+   * Legacy data field for backward compatibility
+   * @deprecated Use images field instead
+   */
+  data?: GeneratedImageData | GeneratedImageData[];
 }
 
 export interface GenerateImageResponseHeaders {

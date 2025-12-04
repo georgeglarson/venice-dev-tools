@@ -60,14 +60,22 @@ export class ImageGenerationEndpoint extends ApiEndpoint {
         response.headers['x-venice-is-blurred'] === 'true';
     }
 
+    // Add backward compatibility: map images to data field
+    const responseData = response.data;
+    if (responseData.images && !responseData.data) {
+      responseData.data = responseData.images.length === 1 
+        ? responseData.images[0] 
+        : responseData.images;
+    }
+
     // Emit a response event with headers
     this.emit('response', { 
       type: 'image.generate', 
-      data: response.data,
+      data: responseData,
       headers
     });
 
-    return response.data;
+    return responseData;
   }
 }
 
