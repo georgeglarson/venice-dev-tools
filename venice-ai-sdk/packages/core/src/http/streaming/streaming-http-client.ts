@@ -184,7 +184,11 @@ export class StreamingHttpClient extends BaseHttpClient {
         }
 
         // Decode the chunk and add it to our buffer
+        const MAX_BUFFER_SIZE = 10 * 1024 * 1024; // 10MB
         buffer += decoder.decode(value, { stream: true });
+        if (buffer.length > MAX_BUFFER_SIZE) {
+          throw new Error('Stream buffer exceeded maximum size');
+        }
 
         // Process complete JSON objects from the buffer
         let newlineIndex;

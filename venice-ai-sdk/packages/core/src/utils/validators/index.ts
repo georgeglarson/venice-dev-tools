@@ -17,61 +17,56 @@ import type { ChatCompletionRequest } from '../../types/chat';
 import type { ImageRequest } from '../../types/images';
 import type { ModelRequest } from '../../types/models';
 
+// Module-level singleton instances for backward-compat shims
+const baseValidator = new BaseValidator();
+const chatValidator = new ChatValidator();
+const imageValidator = new ImageValidator();
+const modelValidator = new ModelValidator();
+
 // Export validation functions from BaseValidator for backward compatibility
 export const validateRequired = (value: unknown, fieldName: string): void => {
-  const validator = new BaseValidator();
-  validator.validateRequired(value, fieldName);
+  baseValidator.validateRequired(value, fieldName);
 };
 
 export const validateString = (value: unknown, fieldName: string): void => {
-  const validator = new BaseValidator();
-  validator.validateString(value, fieldName);
+  baseValidator.validateString(value, fieldName);
 };
 
 export const validateNumber = (value: unknown, fieldName: string, min?: number, max?: number): void => {
-  const validator = new BaseValidator();
-  validator.validateNumber(value, fieldName, min, max);
+  baseValidator.validateNumber(value, fieldName, min, max);
 };
 
 export const validateEnum = (value: unknown, fieldName: string, allowedValues: unknown[]): void => {
-  const validator = new BaseValidator();
-  validator.validateEnum(value, fieldName, allowedValues);
+  baseValidator.validateEnum(value, fieldName, allowedValues);
 };
 
 export const validateNonEmptyArray = (value: unknown, fieldName: string): void => {
-  const validator = new BaseValidator();
-  validator.validateNonEmptyArray(value, fieldName);
+  baseValidator.validateNonEmptyArray(value, fieldName);
 };
 
 export const validateObject = (value: unknown, fieldName: string): void => {
-  const validator = new BaseValidator();
-  validator.validateObject(value, fieldName);
+  baseValidator.validateObject(value, fieldName);
 };
 
 export const validateBoolean = (value: unknown, fieldName: string): void => {
-  const validator = new BaseValidator();
-  validator.validateBoolean(value, fieldName);
+  baseValidator.validateBoolean(value, fieldName);
 };
 
 export const validateUrl = (value: unknown, fieldName: string): void => {
-  const validator = new BaseValidator();
-  validator.validateUrl(value, fieldName);
+  baseValidator.validateUrl(value, fieldName);
 };
 
 // Export validation functions from specific validators for backward compatibility
 export const validateChatCompletionRequest = (request: ChatCompletionRequest): void => {
-  const validator = new ChatValidator();
-  validator.validateChatCompletionRequest(request);
+  chatValidator.validateChatCompletionRequest(request);
 };
 
 export const validateImageRequest = (request: ImageRequest): void => {
-  const validator = new ImageValidator();
-  validator.validateImageRequest(request);
+  imageValidator.validateImageRequest(request);
 };
 
 export const validateModelRequest = (request: ModelRequest): void => {
-  const validator = new ModelValidator();
-  validator.validateModelRequest(request);
+  modelValidator.validateModelRequest(request);
 };
 
 // Default export

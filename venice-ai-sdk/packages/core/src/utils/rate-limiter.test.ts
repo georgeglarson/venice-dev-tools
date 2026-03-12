@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { RateLimiter } from './rate-limiter';
 import { VeniceRateLimitError } from '../errors';
 
@@ -6,7 +6,12 @@ describe('RateLimiter', () => {
   let rateLimiter: RateLimiter;
 
   beforeEach(() => {
+    vi.useFakeTimers();
     rateLimiter = new RateLimiter(2, 10);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   describe('constructor', () => {
@@ -36,6 +41,7 @@ describe('RateLimiter', () => {
       };
 
       const promises = [rateLimiter.add(fn1), rateLimiter.add(fn2)];
+      await vi.advanceTimersByTimeAsync(50);
       await Promise.all(promises);
 
       expect(results).toHaveLength(2);
@@ -58,6 +64,8 @@ describe('RateLimiter', () => {
         rateLimiter.add(createTask(3, 10)),
       ];
 
+      await vi.advanceTimersByTimeAsync(100);
+      await vi.advanceTimersByTimeAsync(10);
       await Promise.all(promises);
 
       expect(executionOrder[0]).toBe(1);
@@ -74,12 +82,16 @@ describe('RateLimiter', () => {
         return id;
       };
 
-      await Promise.all([
+      const promises = Promise.all([
         rateLimiter.add(createTask(1)),
         rateLimiter.add(createTask(2)),
         rateLimiter.add(createTask(3)),
         rateLimiter.add(createTask(4)),
       ]);
+
+      await vi.advanceTimersByTimeAsync(50);
+      await vi.advanceTimersByTimeAsync(50);
+      await promises;
 
       expect(results).toHaveLength(4);
       expect(results).toContain(1);
@@ -125,17 +137,13 @@ describe('RateLimiter', () => {
     it('should reset rate limit after 60 seconds', async () => {
       const limiter = new RateLimiter(10, 2);
 
-      vi.useFakeTimers();
-
       await limiter.add(async () => 1);
       await limiter.add(async () => 2);
 
-      vi.advanceTimersByTime(61000);
+      await vi.advanceTimersByTimeAsync(61000);
 
       const result = await limiter.add(async () => 3);
       expect(result).toBe(3);
-
-      vi.useRealTimers();
     });
 
     it('should count queued requests toward the rate limit window', async () => {
@@ -148,6 +156,7 @@ describe('RateLimiter', () => {
 
       const second = limiter.add(async () => 2);
 
+      await vi.advanceTimersByTimeAsync(20);
       await Promise.all([first, second]);
 
       await expect(

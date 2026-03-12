@@ -45,28 +45,29 @@ export function sanitizeData(data: unknown): unknown {
   if (typeof data === 'object' && data !== null) {
     const sanitized: Record<string, unknown> = { ...(data as Record<string, unknown>) };
 
-    // Redact API keys
-    if (sanitized.apiKey) {
-      sanitized.apiKey = '[REDACTED]';
-    }
+    // List of field names whose values must be redacted
+    const sensitiveFields = [
+      'apiKey',
+      'api_key',
+      'password',
+      'token',
+      'secret',
+      'accessToken',
+      'access_token',
+      'refreshToken',
+      'refresh_token',
+      'apiSecret',
+      'api_secret',
+      'client_secret',
+      'clientSecret',
+      'private_key',
+      'privateKey',
+    ];
 
-    if (sanitized.api_key) {
-      sanitized.api_key = '[REDACTED]';
-    }
-
-    // Redact passwords
-    if (sanitized.password) {
-      sanitized.password = '[REDACTED]';
-    }
-
-    // Redact tokens
-    if (sanitized.token) {
-      sanitized.token = '[REDACTED]';
-    }
-
-    // Redact secrets
-    if (sanitized.secret) {
-      sanitized.secret = '[REDACTED]';
+    for (const field of sensitiveFields) {
+      if (sanitized[field]) {
+        sanitized[field] = '[REDACTED]';
+      }
     }
 
     // Handle nested objects

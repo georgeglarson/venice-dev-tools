@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { MiddlewareManager } from '../middleware/middleware-manager';
 import type { Middleware, MiddlewareRequestContext, MiddlewareResponseContext } from '../middleware/types';
 
@@ -121,6 +121,8 @@ describe('MiddlewareManager', () => {
     });
 
     it('should support async middleware', async () => {
+      vi.useFakeTimers();
+
       manager.use({
         name: 'async-middleware',
         onRequest: async (ctx) => {
@@ -130,8 +132,12 @@ describe('MiddlewareManager', () => {
         },
       });
 
-      const result = await manager.executeRequest('/test', { method: 'GET' });
+      const promise = manager.executeRequest('/test', { method: 'GET' });
+      await vi.advanceTimersByTimeAsync(10);
+      const result = await promise;
       expect(result.metadata).toEqual({ async: true });
+
+      vi.useRealTimers();
     });
   });
 
@@ -158,8 +164,10 @@ describe('MiddlewareManager', () => {
     });
 
     it('should calculate duration correctly', async () => {
+      vi.useFakeTimers();
+
       const startTime = Date.now();
-      await new Promise((resolve) => setTimeout(resolve, 60));
+      vi.advanceTimersByTime(60);
 
       const result = await manager.executeResponse(
         '/test',
@@ -169,6 +177,8 @@ describe('MiddlewareManager', () => {
       );
 
       expect(result.duration).toBeGreaterThanOrEqual(55);
+
+      vi.useRealTimers();
     });
 
     it('should allow middleware to modify response', async () => {
@@ -252,6 +262,8 @@ describe('MiddlewareManager', () => {
     });
 
     it('should include error context', async () => {
+      vi.useFakeTimers();
+
       let capturedContext: any;
 
       manager.use({
@@ -264,12 +276,14 @@ describe('MiddlewareManager', () => {
       const error = new Error('Test error');
       const startTime = Date.now();
 
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      vi.advanceTimersByTime(10);
       await manager.executeError('/test', { method: 'GET' }, error, startTime);
 
       expect(capturedContext.error).toBe(error);
       expect(capturedContext.path).toBe('/test');
       expect(capturedContext.duration).toBeGreaterThanOrEqual(10);
+
+      vi.useRealTimers();
     });
   });
 

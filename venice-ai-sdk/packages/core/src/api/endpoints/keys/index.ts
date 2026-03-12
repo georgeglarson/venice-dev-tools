@@ -114,38 +114,6 @@ function buildCreatePayload(request: CreateApiKeyRequest): Record<string, unknow
 }
 
 /**
- * Prepare payload for update requests (when supported).
- */
-function _buildUpdatePayload(request: UpdateApiKeyRequest): Record<string, unknown> {
-  const payload: Record<string, unknown> = {};
-
-  const description = request.description ?? request.name;
-  if (description !== undefined) {
-    payload.description = description;
-  }
-
-  if (request.apiKeyType) {
-    payload.apiKeyType = request.apiKeyType;
-  }
-
-  const expiresAt = request.expiresAt ?? request.expires_at;
-  if (expiresAt !== undefined) {
-    payload.expiresAt = expiresAt;
-  }
-
-  const consumptionLimit = normalizeConsumptionLimit(request.consumptionLimit);
-  if (consumptionLimit) {
-    payload.consumptionLimit = consumptionLimit;
-  }
-
-  if (Object.keys(payload).length === 0) {
-    throw new VeniceValidationError('At least one field must be provided when updating an API key');
-  }
-
-  return payload;
-}
-
-/**
  * API endpoint for API key management operations
  */
 export class KeysEndpoint extends ApiEndpoint {

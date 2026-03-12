@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   collectStream,
   mapStream,
@@ -61,15 +61,15 @@ describe('Stream Helpers', () => {
 
     it('should abort on signal', async () => {
       const controller = new AbortController();
-      
+
+      // Pre-abort the signal before starting collection
       async function* slowStream() {
-        for (let i = 0; i < 10; i++) {
-          await new Promise((resolve) => setTimeout(resolve, 50));
-          yield { choices: [{ delta: { content: String(i) } }] };
-        }
+        yield { choices: [{ delta: { content: '0' } }] };
+        yield { choices: [{ delta: { content: '1' } }] };
       }
 
-      setTimeout(() => controller.abort(), 25);
+      // Abort immediately before collecting
+      controller.abort();
 
       await expect(
         collectStream(slowStream(), { signal: controller.signal })
@@ -77,15 +77,20 @@ describe('Stream Helpers', () => {
     });
 
     it('should timeout if specified', async () => {
+      vi.useFakeTimers();
+
       async function* slowStream() {
         yield { choices: [{ delta: { content: 'slow' } }] };
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise(() => {}); // never resolves
         yield { choices: [{ delta: { content: 'data' } }] };
       }
 
-      await expect(
-        collectStream(slowStream(), { timeout: 100 })
-      ).rejects.toThrow('Stream collection timeout');
+      const promise = collectStream(slowStream(), { timeout: 100 });
+      await vi.advanceTimersByTimeAsync(150);
+
+      await expect(promise).rejects.toThrow('Stream collection timeout');
+
+      vi.useRealTimers();
     });
 
     it('should skip empty content', async () => {
@@ -110,14 +115,20 @@ describe('Stream Helpers', () => {
     });
 
     it('should support async mapper', async () => {
+      vi.useFakeTimers();
+
       const stream = createTestStream([1, 2, 3]);
       const mapped = mapStream(stream, async (x) => {
         await new Promise((resolve) => setTimeout(resolve, 1));
         return x * 2;
       });
 
-      const result = await streamToArray(mapped);
+      const promise = streamToArray(mapped);
+      await vi.advanceTimersByTimeAsync(10);
+      const result = await promise;
       expect(result).toEqual([2, 4, 6]);
+
+      vi.useRealTimers();
     });
 
     it('should pass index to mapper', async () => {
@@ -147,14 +158,20 @@ describe('Stream Helpers', () => {
     });
 
     it('should support async predicate', async () => {
+      vi.useFakeTimers();
+
       const stream = createTestStream([1, 2, 3, 4, 5]);
       const filtered = filterStream(stream, async (x) => {
         await new Promise((resolve) => setTimeout(resolve, 1));
         return x > 3;
       });
 
-      const result = await streamToArray(filtered);
+      const promise = streamToArray(filtered);
+      await vi.advanceTimersByTimeAsync(10);
+      const result = await promise;
       expect(result).toEqual([4, 5]);
+
+      vi.useRealTimers();
     });
 
     it('should pass index to predicate', async () => {
@@ -230,6 +247,8 @@ describe('Stream Helpers', () => {
     });
 
     it('should support async callback', async () => {
+      vi.useFakeTimers();
+
       const sideEffects: number[] = [];
       const stream = createTestStream([1, 2, 3]);
       const tapped = tapStream(stream, async (x) => {
@@ -237,8 +256,12 @@ describe('Stream Helpers', () => {
         sideEffects.push(x);
       });
 
-      await streamToArray(tapped);
+      const promise = streamToArray(tapped);
+      await vi.advanceTimersByTimeAsync(10);
+      await promise;
       expect(sideEffects).toEqual([1, 2, 3]);
+
+      vi.useRealTimers();
     });
 
     it('should pass index to callback', async () => {
