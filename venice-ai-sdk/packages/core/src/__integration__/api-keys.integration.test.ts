@@ -1,20 +1,14 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { it, expect, beforeAll, afterAll } from 'vitest';
 import { VeniceAI } from '../venice-ai';
-import { getTestConfig, checkTestEnvironment } from './test-config';
+import { getTestConfig, describeWithEnvironmentCheck } from './test-config';
 
-describe('API Keys Integration Tests', () => {
+describeWithEnvironmentCheck('API Keys Integration Tests', () => {
   let venice: VeniceAI;
   let createdKeyId: string;
   let testApiKey: string;
   let hasAdminPermissions = false;
 
   beforeAll(async () => {
-    // Check environment first
-    const env = checkTestEnvironment(true); // require admin key
-    if (env.skipTests) {
-      throw new Error(env.skipReason);
-    }
-
     const config = getTestConfig();
     venice = new VeniceAI({
       apiKey: config.adminApiKey!,
@@ -310,4 +304,4 @@ describe('API Keys Integration Tests', () => {
       console.error('Error during cleanup:', error);
     }
   });
-});
+}, true);

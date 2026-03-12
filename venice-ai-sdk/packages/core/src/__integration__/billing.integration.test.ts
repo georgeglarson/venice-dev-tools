@@ -1,18 +1,12 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { it, expect, beforeAll } from 'vitest';
 import { VeniceAI } from '../venice-ai';
-import { getTestConfig, checkTestEnvironment } from './test-config';
+import { getTestConfig, describeWithEnvironmentCheck } from './test-config';
 
-describe('Billing Integration Tests', () => {
+describeWithEnvironmentCheck('Billing Integration Tests', () => {
   let venice: VeniceAI;
   let hasAdminPermissions = false;
 
   beforeAll(async () => {
-    // Check environment first
-    const env = checkTestEnvironment(true); // require admin key
-    if (env.skipTests) {
-      throw new Error(env.skipReason);
-    }
-
     const config = getTestConfig();
     venice = new VeniceAI({
       apiKey: config.adminApiKey!,
@@ -372,4 +366,4 @@ describe('Billing Integration Tests', () => {
       venice.billing.getUsage({ limit: 1000 }) // Exceeds max limit
     ).rejects.toThrow();
   }, 30000);
-});
+}, true);

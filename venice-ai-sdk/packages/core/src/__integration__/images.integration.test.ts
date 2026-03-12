@@ -1,20 +1,14 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { it, expect, beforeAll } from 'vitest';
 import { VeniceAI } from '../venice-ai';
-import { getTestConfig, checkTestEnvironment } from './test-config';
+import { getTestConfig, describeWithEnvironmentCheck } from './test-config';
 import fs from 'fs';
 import path from 'path';
 
-describe('Images Integration Tests', () => {
+describeWithEnvironmentCheck('Images Integration Tests', () => {
   let venice: VeniceAI;
   let testImageBuffer: Buffer;
 
   beforeAll(async () => {
-    // Check environment first
-    const env = checkTestEnvironment(false); // require regular API key
-    if (env.skipTests) {
-      throw new Error(env.skipReason);
-    }
-
     const config = getTestConfig();
     venice = new VeniceAI({
       apiKey: config.apiKey!,

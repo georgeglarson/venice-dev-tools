@@ -28,6 +28,14 @@ export default [
     }
   },
   {
+    files: ['**/*.test.ts', '**/__integration__/**'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+    },
+  },
+  {
     ignores: ['dist/**', 'node_modules/**', '*.config.js', '*.config.ts']
   }
 ];

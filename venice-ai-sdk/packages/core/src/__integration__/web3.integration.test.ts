@@ -1,18 +1,12 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { it, expect, beforeAll } from 'vitest';
 import { VeniceAI } from '../venice-ai';
-import { getTestConfig, checkTestEnvironment } from './test-config';
+import { getTestConfig, describeWithEnvironmentCheck } from './test-config';
 
-describe('Web3 Integration Tests', () => {
+describeWithEnvironmentCheck('Web3 Integration Tests', () => {
   let venice: VeniceAI;
   let hasAdminPermissions = false;
 
   beforeAll(async () => {
-    // Check environment first
-    const env = checkTestEnvironment(true); // require admin key
-    if (env.skipTests) {
-      throw new Error(env.skipReason);
-    }
-
     const config = getTestConfig();
     venice = new VeniceAI({
       apiKey: config.adminApiKey!,
@@ -427,4 +421,4 @@ describe('Web3 Integration Tests', () => {
       expect(error).toBeDefined();
     }
   }, 30000);
-});
+}, true);

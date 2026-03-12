@@ -26,10 +26,11 @@ export async function collectStream(
   const chunks: string[] = [];
   let index = 0;
 
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
   const timeoutPromise = timeout
-    ? new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error('Stream collection timeout')), timeout)
-      )
+    ? new Promise<never>((_, reject) => {
+        timeoutId = setTimeout(() => reject(new Error('Stream collection timeout')), timeout);
+      })
     : null;
 
   const collectPromise = async () => {
@@ -50,6 +51,7 @@ export async function collectStream(
         index++;
       }
     }
+    if (timeoutId) clearTimeout(timeoutId);
     return chunks.join('');
   };
 
