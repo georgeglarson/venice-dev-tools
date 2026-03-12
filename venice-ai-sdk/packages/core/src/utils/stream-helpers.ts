@@ -26,40 +26,29 @@ export async function collectStream(
   const chunks: string[] = [];
   let index = 0;
 
-  let timeoutId: ReturnType<typeof setTimeout> | undefined;
-  const timeoutPromise = timeout
-    ? new Promise<never>((_, reject) => {
-        timeoutId = setTimeout(() => reject(new Error('Stream collection timeout')), timeout);
-      })
-    : null;
+  const deadline = timeout ? Date.now() + timeout : 0;
 
-  const collectPromise = async () => {
-    for await (const chunk of stream) {
-      if (signal?.aborted) {
-        throw new Error('Stream collection aborted');
-      }
-
-      const chunkObj = chunk as Record<string, unknown>;
-      const choices = chunkObj.choices as Array<Record<string, unknown>> | undefined;
-      const delta = choices?.[0]?.delta as Record<string, unknown> | undefined;
-      const content = (delta?.content as string) || '';
-      if (content) {
-        chunks.push(content);
-        if (onChunk) {
-          onChunk(chunk, index);
-        }
-        index++;
-      }
+  for await (const chunk of stream) {
+    if (timeout && Date.now() >= deadline) {
+      throw new Error('Stream collection timeout');
     }
-    if (timeoutId) clearTimeout(timeoutId);
-    return chunks.join('');
-  };
+    if (signal?.aborted) {
+      throw new Error('Stream collection aborted');
+    }
 
-  if (timeoutPromise) {
-    return Promise.race([collectPromise(), timeoutPromise]);
+    const chunkObj = chunk as Record<string, unknown>;
+    const choices = chunkObj.choices as Array<Record<string, unknown>> | undefined;
+    const delta = choices?.[0]?.delta as Record<string, unknown> | undefined;
+    const content = (delta?.content as string) || '';
+    if (content) {
+      chunks.push(content);
+      if (onChunk) {
+        onChunk(chunk, index);
+      }
+      index++;
+    }
   }
-
-  return collectPromise();
+  return chunks.join('');
 }
 
 /**

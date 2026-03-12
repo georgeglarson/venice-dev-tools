@@ -80,15 +80,15 @@ describe('Stream Helpers', () => {
       vi.useFakeTimers();
 
       async function* slowStream() {
-        yield { choices: [{ delta: { content: 'slow' } }] };
-        await new Promise(() => {}); // never resolves
-        yield { choices: [{ delta: { content: 'data' } }] };
+        yield { choices: [{ delta: { content: 'first' } }] };
+        // Advance fake clock past the deadline between chunks
+        vi.advanceTimersByTime(200);
+        yield { choices: [{ delta: { content: 'second' } }] };
       }
 
-      const promise = collectStream(slowStream(), { timeout: 100 });
-      await vi.advanceTimersByTimeAsync(150);
-
-      await expect(promise).rejects.toThrow('Stream collection timeout');
+      await expect(
+        collectStream(slowStream(), { timeout: 100 })
+      ).rejects.toThrow('Stream collection timeout');
 
       vi.useRealTimers();
     });
