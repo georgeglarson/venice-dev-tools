@@ -164,7 +164,7 @@ export class VeniceClient {
    * @param listener - The event listener.
    * @returns This client instance.
    */
-  public on(event: string, listener: (...args: any[]) => void): this {
+  public on(event: string, listener: (...args: unknown[]) => void): this {
     this.eventManager.on(event, listener);
     return this;
   }
@@ -175,7 +175,7 @@ export class VeniceClient {
    * @param listener - The event listener.
    * @returns This client instance.
    */
-  public off(event: string, listener: (...args: any[]) => void): this {
+  public off(event: string, listener: (...args: unknown[]) => void): this {
     this.eventManager.off(event, listener);
     return this;
   }
@@ -186,7 +186,7 @@ export class VeniceClient {
    * @param args - The event arguments.
    * @returns Whether the event had listeners.
    */
-  protected emit(event: string, ...args: any[]): boolean {
+  protected emit(event: string, ...args: unknown[]): boolean {
     return this.eventManager.emit(event, ...args);
   }
 

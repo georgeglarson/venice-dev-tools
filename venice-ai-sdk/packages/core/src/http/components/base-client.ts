@@ -3,14 +3,14 @@
  * 
  * This module provides the core HTTP client functionality.
  */
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from 'axios';
 import { LogLevel } from '../../types';
 import { Logger } from '../../utils/logger';
 import { HttpClientConfig, IHttpClient } from './types';
 import { createRequestInterceptor, createResponseInterceptor } from './interceptors';
 import { handleRequestError } from './error-handler';
 import { createStreamRequest } from './streaming';
-import { HttpMethod, HttpRequestOptions, HttpResponse } from '../../types';
+import { HttpRequestOptions, HttpResponse } from '../../types';
 
 /**
  * HTTP client for making requests to the Venice AI API
@@ -108,7 +108,7 @@ export class BaseHttpClient implements IHttpClient {
    * @param options - Request options
    * @returns The response data
    */
-  public async request<T = any>(path: string, options: HttpRequestOptions = {}): Promise<HttpResponse<T>> {
+  public async request<T = unknown>(path: string, options: HttpRequestOptions = {}): Promise<HttpResponse<T>> {
     try {
       const {
         method = 'GET',
@@ -143,7 +143,7 @@ export class BaseHttpClient implements IHttpClient {
         headers: response.headers as Record<string, string>,
       };
     } catch (error) {
-      return handleRequestError(error as any, this.logger, this.timeout);
+      return handleRequestError(error as AxiosError, this.logger, this.timeout);
     }
   }
 
@@ -153,7 +153,7 @@ export class BaseHttpClient implements IHttpClient {
    * @param options - Request options
    * @returns The response data
    */
-  public async get<T = any>(
+  public async get<T = unknown>(
     path: string, 
     options: Omit<HttpRequestOptions, 'method'> = {}
   ): Promise<HttpResponse<T>> {
@@ -167,9 +167,9 @@ export class BaseHttpClient implements IHttpClient {
    * @param options - Additional request options
    * @returns The response data
    */
-  public async post<T = any>(
+  public async post<T = unknown>(
     path: string,
-    body?: any,
+    body?: unknown,
     options: Omit<HttpRequestOptions, 'method' | 'body'> = {}
   ): Promise<HttpResponse<T>> {
     return this.request<T>(path, { ...options, method: 'POST', body });
@@ -181,7 +181,7 @@ export class BaseHttpClient implements IHttpClient {
    * @param options - Request options
    * @returns The response data
    */
-  public async delete<T = any>(
+  public async delete<T = unknown>(
     path: string,
     options: Omit<HttpRequestOptions, 'method'> = {}
   ): Promise<HttpResponse<T>> {
@@ -197,7 +197,7 @@ export class BaseHttpClient implements IHttpClient {
    */
   public async stream(
     path: string,
-    body?: any,
+    body?: unknown,
     options: Omit<HttpRequestOptions, 'method' | 'body'> = {}
   ): Promise<Response> {
     const authHeader = this.client.defaults.headers.common['Authorization'];

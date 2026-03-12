@@ -1,4 +1,4 @@
-import { Middleware } from './types';
+import { Middleware, MiddlewareRequestContext, MiddlewareResponseContext } from './types';
 import { Logger } from '../utils/logger';
 
 /**
@@ -22,7 +22,7 @@ export function loggingMiddleware(
     name: 'logging',
     
     onRequest: (context) => {
-      const logData: any = {
+      const logData: Record<string, unknown> = {
         path: context.path,
         method: context.options.method || 'GET',
       };
@@ -40,7 +40,7 @@ export function loggingMiddleware(
     },
 
     onResponse: (context) => {
-      const logData: any = {
+      const logData: Record<string, unknown> = {
         path: context.path,
         status: context.response.status,
         duration: `${context.duration}ms`,
@@ -124,13 +124,14 @@ export function retryMetadataMiddleware(): Middleware {
     
     onRequest: (context) => {
       context.metadata = context.metadata || {};
-      context.metadata.attemptNumber = (context.metadata.attemptNumber || 0) + 1;
-      
-      if (context.metadata.attemptNumber > 1) {
+      const prevAttempt = (context.metadata.attemptNumber as number) || 0;
+      context.metadata.attemptNumber = prevAttempt + 1;
+
+      if (prevAttempt + 1 > 1) {
         context.options.headers = context.options.headers || {};
         context.options.headers['X-Retry-Attempt'] = String(context.metadata.attemptNumber);
       }
-      
+
       return context;
     },
   };
@@ -180,16 +181,16 @@ export function cachingMiddleware(
   options: {
     ttl?: number;
     maxSize?: number;
-    shouldCache?: (context: any) => boolean;
+    shouldCache?: (context: MiddlewareRequestContext | MiddlewareResponseContext) => boolean;
   } = {}
 ): Middleware {
-  const { 
+  const {
     ttl = 60000, // 1 minute default
     maxSize = 100,
     shouldCache = (ctx) => ctx.options.method === 'GET'
   } = options;
 
-  const cache = new Map<string, { data: any; timestamp: number }>();
+  const cache = new Map<string, { data: unknown; timestamp: number }>();
 
   return {
     name: 'caching',

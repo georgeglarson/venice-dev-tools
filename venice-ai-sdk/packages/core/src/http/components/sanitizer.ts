@@ -10,7 +10,7 @@
  * @param headers - The headers to sanitize
  * @returns The sanitized headers
  */
-export function sanitizeHeaders(headers: any): any {
+export function sanitizeHeaders(headers: Record<string, unknown>): Record<string, unknown> {
   if (!headers) return headers;
   
   const sanitized = { ...headers };
@@ -39,43 +39,43 @@ export function sanitizeHeaders(headers: any): any {
  * @param data - The data to sanitize
  * @returns The sanitized data
  */
-export function sanitizeData(data: any): any {
+export function sanitizeData(data: unknown): unknown {
   if (!data) return data;
   
   if (typeof data === 'object' && data !== null) {
-    const sanitized = { ...data };
-    
+    const sanitized: Record<string, unknown> = { ...(data as Record<string, unknown>) };
+
     // Redact API keys
     if (sanitized.apiKey) {
       sanitized.apiKey = '[REDACTED]';
     }
-    
+
     if (sanitized.api_key) {
       sanitized.api_key = '[REDACTED]';
     }
-    
+
     // Redact passwords
     if (sanitized.password) {
       sanitized.password = '[REDACTED]';
     }
-    
+
     // Redact tokens
     if (sanitized.token) {
       sanitized.token = '[REDACTED]';
     }
-    
+
     // Redact secrets
     if (sanitized.secret) {
       sanitized.secret = '[REDACTED]';
     }
-    
+
     // Handle nested objects
     Object.keys(sanitized).forEach(key => {
       if (typeof sanitized[key] === 'object' && sanitized[key] !== null) {
         sanitized[key] = sanitizeData(sanitized[key]);
       }
     });
-    
+
     return sanitized;
   }
   

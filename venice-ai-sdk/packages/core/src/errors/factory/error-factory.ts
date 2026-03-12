@@ -21,7 +21,7 @@ export class ErrorFactory {
    * @param details - Additional error details.
    * @returns A Venice SDK error.
    */
-  public createFromResponse(status: number, message: string, details?: Record<string, any>): VeniceError {
+  public createFromResponse(status: number, message: string, details?: Record<string, unknown>): VeniceError {
     switch (status) {
       case 401:
         return new VeniceAuthError(message);
@@ -44,9 +44,9 @@ export class ErrorFactory {
   public createFromAxiosError(error: AxiosError): VeniceError {
     if (error.response) {
       // The request was made and the server responded with a status code outside the range of 2xx
-      const responseData = error.response.data as Record<string, any> || {};
-      const errorMessage = responseData.error || 'API request failed';
-      const details = responseData.details;
+      const responseData = (error.response.data as Record<string, unknown>) || {};
+      const errorMessage = (responseData.error as string) || 'API request failed';
+      const details = responseData.details as Record<string, unknown> | undefined;
       return this.createFromResponse(error.response.status, errorMessage, details);
     } else if (error.request) {
       // The request was made but no response was received
@@ -73,7 +73,7 @@ export class ErrorFactory {
         errorData.error || 'API request failed',
         errorData.details
       );
-    } catch (error) {
+    } catch {
       return new VeniceApiError(`HTTP error ${response.status}`, response.status);
     }
   }
@@ -101,7 +101,7 @@ export class ErrorFactory {
    * @param details - Additional validation details.
    * @returns A Venice validation error.
    */
-  public createValidationError(message: string, details?: Record<string, any>): VeniceValidationError {
+  public createValidationError(message: string, details?: Record<string, unknown>): VeniceValidationError {
     return new VeniceValidationError(message, details);
   }
 

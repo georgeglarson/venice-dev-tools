@@ -1,4 +1,3 @@
-import { BaseHttpClient } from '../base/base-http-client';
 import { StandardHttpClient } from '../standard/standard-http-client';
 import { StreamingHttpClient } from '../streaming/streaming-http-client';
 import { ErrorHandler } from '../error/error-handler';

@@ -117,7 +117,7 @@ export interface GenerateImageResponse {
   /**
    * Original request data
    */
-  request?: any;
+  request?: Record<string, unknown>;
   
   /**
    * Timing information
@@ -249,9 +249,7 @@ export interface ImageRequest {
   metadata?: { key: string; value: string }[];
 }
 
-export interface GenerateImageRequestLegacy extends ImageRequest {
-  // Additional properties specific to legacy GenerateImageRequest can be added here
-}
+export type GenerateImageRequestLegacy = ImageRequest;
 
 export interface GenerateImageResponseLegacy {
   data: {

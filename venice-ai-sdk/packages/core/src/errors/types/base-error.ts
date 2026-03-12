@@ -25,7 +25,7 @@ export class VeniceError extends Error {
   /**
    * Additional context about the error.
    */
-  public context?: Record<string, any>;
+  public context?: Record<string, unknown>;
 
   /**
    * Create a new Venice SDK error.
@@ -75,5 +75,5 @@ export interface ErrorOptions {
   cause?: unknown;
   code?: string;
   recoveryHints?: RecoveryHint[];
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
 }

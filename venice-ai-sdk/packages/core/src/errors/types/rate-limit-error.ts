@@ -1,5 +1,4 @@
 import { VeniceApiError } from './api-error';
-import { RecoveryHint } from './base-error';
 
 /**
  * Error for rate limit issues.

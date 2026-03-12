@@ -23,7 +23,7 @@ export class EventManager {
    * @param listener - The event listener.
    * @returns This event manager instance.
    */
-  public on(event: string, listener: (...args: any[]) => void): this {
+  public on(event: string, listener: (...args: unknown[]) => void): this {
     this.events.on(event, listener);
     return this;
   }
@@ -34,7 +34,7 @@ export class EventManager {
    * @param listener - The event listener.
    * @returns This event manager instance.
    */
-  public once(event: string, listener: (...args: any[]) => void): this {
+  public once(event: string, listener: (...args: unknown[]) => void): this {
     this.events.once(event, listener);
     return this;
   }
@@ -45,7 +45,7 @@ export class EventManager {
    * @param listener - The event listener.
    * @returns This event manager instance.
    */
-  public off(event: string, listener: (...args: any[]) => void): this {
+  public off(event: string, listener: (...args: unknown[]) => void): this {
     this.events.off(event, listener);
     return this;
   }
@@ -56,7 +56,7 @@ export class EventManager {
    * @param args - The event arguments.
    * @returns Whether the event had listeners.
    */
-  public emit(event: string, ...args: any[]): boolean {
+  public emit(event: string, ...args: unknown[]): boolean {
     return this.events.emit(event, ...args);
   }
 

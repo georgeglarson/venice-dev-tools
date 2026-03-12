@@ -5,7 +5,7 @@ export interface StreamParserOptions {
 }
 
 export interface ParsedLine {
-  data: any;
+  data: unknown;
   isDone: boolean;
 }
 
@@ -116,7 +116,7 @@ export class StreamParser {
 export async function* parseSSEStream(
   reader: ReadableStreamDefaultReader<Uint8Array>,
   logger?: Logger
-): AsyncGenerator<any, void, unknown> {
+): AsyncGenerator<unknown, void, unknown> {
   const parser = new StreamParser({ logger });
 
   try {

@@ -7,19 +7,19 @@ export interface MiddlewareRequestContext {
   path: string;
   options: HttpRequestOptions;
   timestamp: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
  * Context for middleware response processing.
  */
-export interface MiddlewareResponseContext<T = any> {
+export interface MiddlewareResponseContext<T = unknown> {
   path: string;
   options: HttpRequestOptions;
   response: HttpResponse<T>;
   timestamp: number;
   duration: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -31,7 +31,7 @@ export interface MiddlewareErrorContext {
   error: Error;
   timestamp: number;
   duration: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -45,7 +45,7 @@ export interface RequestMiddleware {
  * Middleware function that can intercept and modify responses.
  */
 export interface ResponseMiddleware {
-  <T = any>(context: MiddlewareResponseContext<T>): Promise<MiddlewareResponseContext<T>> | MiddlewareResponseContext<T>;
+  <T = unknown>(context: MiddlewareResponseContext<T>): Promise<MiddlewareResponseContext<T>> | MiddlewareResponseContext<T>;
 }
 
 /**

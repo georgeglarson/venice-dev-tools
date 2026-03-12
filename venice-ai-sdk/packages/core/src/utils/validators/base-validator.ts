@@ -10,7 +10,7 @@ export class BaseValidator {
    * @param fieldName - The name of the field being validated.
    * @throws VeniceValidationError if the value is undefined or null.
    */
-  public validateRequired(value: any, fieldName: string): void {
+  public validateRequired(value: unknown, fieldName: string): void {
     if (value === undefined || value === null) {
       throw new VeniceValidationError(`${fieldName} is required`);
     }
@@ -22,7 +22,7 @@ export class BaseValidator {
    * @param fieldName - The name of the field being validated.
    * @throws VeniceValidationError if the value is not a non-empty string.
    */
-  public validateString(value: any, fieldName: string): void {
+  public validateString(value: unknown, fieldName: string): void {
     this.validateRequired(value, fieldName);
     if (typeof value !== 'string' || value.trim().length === 0) {
       throw new VeniceValidationError(`${fieldName} must be a non-empty string`);
@@ -37,16 +37,16 @@ export class BaseValidator {
    * @param max - The maximum allowed value (optional).
    * @throws VeniceValidationError if the value is not a number or is outside the specified range.
    */
-  public validateNumber(value: any, fieldName: string, min?: number, max?: number): void {
+  public validateNumber(value: unknown, fieldName: string, min?: number, max?: number): void {
     this.validateRequired(value, fieldName);
     if (typeof value !== 'number' || isNaN(value)) {
       throw new VeniceValidationError(`${fieldName} must be a number`);
     }
-    
+
     if (min !== undefined && value < min) {
       throw new VeniceValidationError(`${fieldName} must be at least ${min}`);
     }
-    
+
     if (max !== undefined && value > max) {
       throw new VeniceValidationError(`${fieldName} must be at most ${max}`);
     }
@@ -59,7 +59,7 @@ export class BaseValidator {
    * @param allowedValues - The allowed values.
    * @throws VeniceValidationError if the value is not one of the allowed values.
    */
-  public validateEnum(value: any, fieldName: string, allowedValues: any[]): void {
+  public validateEnum(value: unknown, fieldName: string, allowedValues: unknown[]): void {
     this.validateRequired(value, fieldName);
     if (!allowedValues.includes(value)) {
       throw new VeniceValidationError(`${fieldName} must be one of: ${allowedValues.join(', ')}`);
@@ -72,7 +72,7 @@ export class BaseValidator {
    * @param fieldName - The name of the field being validated.
    * @throws VeniceValidationError if the value is not a non-empty array.
    */
-  public validateNonEmptyArray(value: any, fieldName: string): void {
+  public validateNonEmptyArray(value: unknown, fieldName: string): void {
     this.validateRequired(value, fieldName);
     if (!Array.isArray(value)) {
       throw new VeniceValidationError(`${fieldName} must be an array`);
@@ -88,7 +88,7 @@ export class BaseValidator {
    * @param fieldName - The name of the field being validated.
    * @throws VeniceValidationError if the value is not an object.
    */
-  public validateObject(value: any, fieldName: string): void {
+  public validateObject(value: unknown, fieldName: string): void {
     this.validateRequired(value, fieldName);
     if (typeof value !== 'object' || value === null || Array.isArray(value)) {
       throw new VeniceValidationError(`${fieldName} must be an object`);
@@ -101,7 +101,7 @@ export class BaseValidator {
    * @param fieldName - The name of the field being validated.
    * @throws VeniceValidationError if the value is not a boolean.
    */
-  public validateBoolean(value: any, fieldName: string): void {
+  public validateBoolean(value: unknown, fieldName: string): void {
     this.validateRequired(value, fieldName);
     if (typeof value !== 'boolean') {
       throw new VeniceValidationError(`${fieldName} must be a boolean`);
@@ -114,11 +114,11 @@ export class BaseValidator {
    * @param fieldName - The name of the field being validated.
    * @throws VeniceValidationError if the value is not a valid URL.
    */
-  public validateUrl(value: any, fieldName: string): void {
+  public validateUrl(value: unknown, fieldName: string): void {
     this.validateString(value, fieldName);
     try {
-      new URL(value);
-    } catch (error) {
+      new URL(value as string);
+    } catch {
       throw new VeniceValidationError(`${fieldName} must be a valid URL`);
     }
   }

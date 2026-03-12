@@ -98,15 +98,16 @@ export class RetryHandler {
     }
 
     // This should never happen due to the loop logic, but TypeScript needs it
-    throw lastError!;
+    throw lastError ?? new Error('Retry failed with no error captured');
   }
 
   /**
    * Determine if an error is retryable based on policy
    */
-  private isRetryable(error: any): boolean {
+  private isRetryable(error: Error): boolean {
+    const errorRecord = error as unknown as Record<string, unknown>;
     // Check HTTP status code
-    if (error.statusCode && this.policy.retryableStatusCodes.includes(error.statusCode)) {
+    if (typeof errorRecord.statusCode === 'number' && this.policy.retryableStatusCodes.includes(errorRecord.statusCode)) {
       return true;
     }
 
@@ -117,7 +118,7 @@ export class RetryHandler {
     }
 
     // Check if error has retryable property
-    if (error.retryable === true) {
+    if (errorRecord.retryable === true) {
       return true;
     }
 

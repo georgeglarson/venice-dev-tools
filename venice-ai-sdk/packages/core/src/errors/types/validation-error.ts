@@ -7,14 +7,14 @@ export class VeniceValidationError extends VeniceError {
   /**
    * Additional validation details.
    */
-  readonly details?: Record<string, any>;
+  readonly details?: Record<string, unknown>;
 
   /**
    * Create a new validation error.
    * @param message - The error message.
    * @param details - Additional validation details.
    */
-  constructor(message: string, details?: Record<string, any>) {
+  constructor(message: string, details?: Record<string, unknown>) {
     super(message);
     this.name = 'VeniceValidationError';
     this.code = 'VALIDATION_ERROR';

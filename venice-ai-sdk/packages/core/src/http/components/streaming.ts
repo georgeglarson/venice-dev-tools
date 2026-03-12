@@ -35,7 +35,7 @@ export interface StreamRequestOptions {
 export async function createStreamRequest(
   baseUrl: string,
   path: string,
-  body: any,
+  body: unknown,
   options: StreamRequestOptions = {},
   logger: Logger
 ): Promise<Response> {

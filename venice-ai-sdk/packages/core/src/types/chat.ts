@@ -212,6 +212,24 @@ export interface ChatCompletionUsage {
 }
 
 /**
+ * A single chunk from a streaming chat completion response
+ */
+export interface ChatCompletionChunk {
+  id: string;
+  object: string;
+  created: number;
+  model: string;
+  choices: {
+    index: number;
+    delta: {
+      role?: string;
+      content?: string;
+    };
+    finish_reason: string | null;
+  }[];
+}
+
+/**
  * Response from a chat completion request
  */
 export interface ChatCompletionResponse {

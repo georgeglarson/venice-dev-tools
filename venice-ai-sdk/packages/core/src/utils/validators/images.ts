@@ -6,7 +6,7 @@ import {
   validateNonEmptyArray,
   validateEnum
 } from '../validation';
-import { VeniceValidationError } from '../../errors';
+
 
 /**
  * Validates an image request

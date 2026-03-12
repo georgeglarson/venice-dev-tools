@@ -3,7 +3,7 @@
  */
 export interface ApiErrorResponse {
   error: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
 }
 
 /**
@@ -87,8 +87,8 @@ export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 export interface HttpRequestOptions {
   method?: HttpMethod;
   headers?: Record<string, string>;
-  body?: any;
-  query?: Record<string, any>;
+  body?: unknown;
+  query?: Record<string, unknown> | object;
   timeout?: number;
   responseType?: 'json' | 'text' | 'arraybuffer' | 'blob' | 'stream';
   signal?: AbortSignal;
@@ -97,7 +97,7 @@ export interface HttpRequestOptions {
 /**
  * Interface for HTTP response.
  */
-export interface HttpResponse<T = any> {
+export interface HttpResponse<T = unknown> {
   data: T;
   status: number;
   statusText: string;

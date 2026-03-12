@@ -16,7 +16,7 @@ export interface SDKCapability {
     type: string;
     required: boolean;
     description: string;
-    default?: any;
+    default?: unknown;
   }>;
 }
 

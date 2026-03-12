@@ -4,8 +4,8 @@
  * This module provides the main HTTP client implementation that applications
  * will use to communicate with the Venice AI API.
  */
-import { HttpRequestOptions, HttpResponse } from '../types';
-import { BaseHttpClient, HttpClientConfig } from './components';
+import { BaseHttpClient } from './components';
+import { Logger } from '../utils/logger';
 
 /**
  * HTTP client for making requests to the Venice AI API
@@ -22,7 +22,7 @@ export class HttpClient extends BaseHttpClient {
     baseUrl: string = 'https://api.venice.ai/api/v1',
     headers: Record<string, string> = {},
     timeout: number = 30000,
-    logger?: any
+    logger?: Logger
   ) {
     super({
       baseUrl,

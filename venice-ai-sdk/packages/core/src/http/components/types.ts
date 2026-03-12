@@ -1,8 +1,7 @@
 /**
  * HTTP module type definitions
  */
-import { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
-import { HttpMethod, HttpRequestOptions, HttpResponse } from '../../types';
+import { HttpRequestOptions, HttpResponse } from '../../types';
 import { Logger } from '../../utils/logger';
 
 /**
@@ -53,7 +52,7 @@ export interface IHttpClient {
    * @param options - Request options
    * @returns The response data
    */
-  request<T = any>(path: string, options?: HttpRequestOptions): Promise<HttpResponse<T>>;
+  request<T = unknown>(path: string, options?: HttpRequestOptions): Promise<HttpResponse<T>>;
   
   /**
    * Make a GET request
@@ -61,7 +60,7 @@ export interface IHttpClient {
    * @param options - Request options
    * @returns The response data
    */
-  get<T = any>(path: string, options?: Omit<HttpRequestOptions, 'method'>): Promise<HttpResponse<T>>;
+  get<T = unknown>(path: string, options?: Omit<HttpRequestOptions, 'method'>): Promise<HttpResponse<T>>;
   
   /**
    * Make a POST request
@@ -70,9 +69,9 @@ export interface IHttpClient {
    * @param options - Additional request options
    * @returns The response data
    */
-  post<T = any>(
+  post<T = unknown>(
     path: string,
-    body?: any,
+    body?: unknown,
     options?: Omit<HttpRequestOptions, 'method' | 'body'>
   ): Promise<HttpResponse<T>>;
   
@@ -82,7 +81,7 @@ export interface IHttpClient {
    * @param options - Request options
    * @returns The response data
    */
-  delete<T = any>(
+  delete<T = unknown>(
     path: string,
     options?: Omit<HttpRequestOptions, 'method'>
   ): Promise<HttpResponse<T>>;
@@ -96,7 +95,7 @@ export interface IHttpClient {
    */
   stream(
     path: string,
-    body?: any,
+    body?: unknown,
     options?: Omit<HttpRequestOptions, 'method' | 'body'>
   ): Promise<Response>;
 }

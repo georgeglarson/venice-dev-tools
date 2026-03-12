@@ -1,6 +1,6 @@
 import { ApiEndpoint } from '../../../registry/endpoint';
 import type { VeniceClient } from '../../../../client';
-import { ChatCompletionRequest } from '../../../../types';
+import { ChatCompletionChunk, ChatCompletionRequest } from '../../../../types';
 import { ChatValidator } from '../../../../utils/validators/chat-validator';
 import { parseSSEStream } from '../../../../utils/stream-parser';
 import { VeniceStreamError } from '../../../../errors';
@@ -78,7 +78,7 @@ export class ChatStreamEndpoint extends ApiEndpoint {
    * @throws {VeniceTimeoutError} If the request times out
    * @throws {VeniceStreamError} If there's an error processing the stream
    */
-  public async *streamCompletion(request: ChatCompletionRequest): AsyncGenerator<any, void, unknown> {
+  public async *streamCompletion(request: ChatCompletionRequest): AsyncGenerator<ChatCompletionChunk, void, unknown> {
     // Set stream to true
     const streamingRequest = { ...request, stream: true };
 
@@ -101,7 +101,7 @@ export class ChatStreamEndpoint extends ApiEndpoint {
       }
 
       for await (const chunk of parseSSEStream(reader, this.logger)) {
-        yield chunk;
+        yield chunk as ChatCompletionChunk;
       }
     } finally {
       // Emit a response event when the stream ends

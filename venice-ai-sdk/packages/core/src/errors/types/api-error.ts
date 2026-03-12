@@ -12,7 +12,7 @@ export class VeniceApiError extends VeniceError {
   /**
    * Additional details about the error.
    */
-  readonly details?: Record<string, any>;
+  readonly details?: Record<string, unknown>;
 
   /**
    * Create a new API error.
@@ -20,7 +20,7 @@ export class VeniceApiError extends VeniceError {
    * @param status - The HTTP status code.
    * @param details - Additional error details.
    */
-  constructor(message: string, status: number, details?: Record<string, any>) {
+  constructor(message: string, status: number, details?: Record<string, unknown>) {
     super(message, {
       code: `API_ERROR_${status}`,
       context: {

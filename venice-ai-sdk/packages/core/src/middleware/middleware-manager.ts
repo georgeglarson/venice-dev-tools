@@ -91,12 +91,12 @@ export class MiddlewareManager {
    * @param metadata - Request metadata
    * @returns Modified response context
    */
-  public async executeResponse<T = any>(
+  public async executeResponse<T = unknown>(
     path: string,
     options: HttpRequestOptions,
     response: HttpResponse<T>,
     startTime: number,
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   ): Promise<MiddlewareResponseContext<T>> {
     let context: MiddlewareResponseContext<T> = {
       path,
@@ -130,7 +130,7 @@ export class MiddlewareManager {
     options: HttpRequestOptions,
     error: Error,
     startTime: number,
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   ): Promise<void> {
     const context: MiddlewareErrorContext = {
       path,

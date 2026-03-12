@@ -1,6 +1,7 @@
 import { ApiEndpoint } from '../../../registry/endpoint';
 import type { VeniceClient } from '../../../../client';
 import {
+  ChatCompletionChunk,
   ChatCompletionRequest,
   ChatCompletionResponse
 } from '../../../../types';
@@ -55,7 +56,7 @@ export class ChatEndpoint extends ApiEndpoint {
        * @param request - The chat completion request parameters
        * @returns A promise resolving to the chat completion response, or an async generator if stream=true
        */
-      create: (request: ChatCompletionRequest): Promise<ChatCompletionResponse> | AsyncGenerator<any, void, unknown> => {
+      create: (request: ChatCompletionRequest): Promise<ChatCompletionResponse> | AsyncGenerator<ChatCompletionChunk, void, unknown> => {
         if (request.stream) {
           return this._stream(request);
         }
@@ -68,7 +69,7 @@ export class ChatEndpoint extends ApiEndpoint {
        * @param request - The chat completion request parameters
        * @returns An async generator that yields completion chunks
        */
-      createStream: (request: ChatCompletionRequest): AsyncGenerator<any, void, unknown> => {
+      createStream: (request: ChatCompletionRequest): AsyncGenerator<ChatCompletionChunk, void, unknown> => {
         return this._stream(request);
       }
     };
@@ -110,7 +111,7 @@ export class ChatEndpoint extends ApiEndpoint {
    * @returns An async generator that yields completion chunks
    * @private
    */
-  private async *_stream(request: ChatCompletionRequest): AsyncGenerator<any, void, unknown> {
+  private async *_stream(request: ChatCompletionRequest): AsyncGenerator<ChatCompletionChunk, void, unknown> {
     const streamingRequest = { ...request, stream: true };
     this.validator.validateChatCompletionRequest(streamingRequest);
     this.emit('request', { type: 'chat.completion.stream', data: streamingRequest });
@@ -127,7 +128,7 @@ export class ChatEndpoint extends ApiEndpoint {
       }
 
       for await (const chunk of parseSSEStream(reader, this.logger)) {
-        yield chunk;
+        yield chunk as ChatCompletionChunk;
       }
     } finally {
       this.emit('response', { type: 'chat.completion.stream', data: { status: 'completed' } });
@@ -166,7 +167,7 @@ export class ChatEndpoint extends ApiEndpoint {
    * @param request - The chat completion request parameters
    * @returns Async generator yielding stream payloads.
    */
-  public createCompletionStream(request: ChatCompletionRequest): AsyncGenerator<any, void, unknown> {
+  public createCompletionStream(request: ChatCompletionRequest): AsyncGenerator<ChatCompletionChunk, void, unknown> {
     return this._stream(request);
   }
 }

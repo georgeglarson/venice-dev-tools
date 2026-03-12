@@ -26,33 +26,33 @@ import { VeniceValidationError } from '../../../errors/types/validation-error';
  * Normalize API key payloads returned by the Venice API to the SDK shape.
  * Adds backwards-compatible aliases so legacy consumers continue working.
  */
-function normalizeApiKeyPayload(raw: any, keyValue?: string): ApiKey {
+function normalizeApiKeyPayload(raw: Record<string, unknown>, keyValue?: string): ApiKey {
   if (!raw || !raw.id) {
     throw new VeniceValidationError('Malformed API key response from Venice API');
   }
 
   const consumption: ApiKeyConsumptionLimits | null =
-    raw.consumptionLimits ??
-    raw.consumptionLimit ??
+    (raw.consumptionLimits as ApiKeyConsumptionLimits) ??
+    (raw.consumptionLimit as ApiKeyConsumptionLimits) ??
     (raw.consumpionLimits as ApiKeyConsumptionLimits) ??
     null;
 
-  const usage = raw.usage;
-  const apiKeyValue = keyValue ?? raw.apiKey ?? raw.key;
+  const usage = raw.usage as ApiKey['usage'];
+  const apiKeyValue = keyValue ?? (raw.apiKey as string | undefined) ?? (raw.key as string | undefined);
 
-  const description = raw.description ?? raw.name ?? '';
-  const createdAt = raw.createdAt ?? raw.created_at ?? null;
-  const expiresAt = raw.expiresAt ?? raw.expires_at ?? null;
-  const lastUsedAt = raw.lastUsedAt ?? raw.last_used_at ?? null;
+  const description = ((raw.description ?? raw.name ?? '') as string);
+  const createdAt = ((raw.createdAt ?? raw.created_at ?? null) as string | null);
+  const expiresAt = ((raw.expiresAt ?? raw.expires_at ?? null) as string | null);
+  const lastUsedAt = ((raw.lastUsedAt ?? raw.last_used_at ?? null) as string | null | undefined);
 
   return {
-    id: raw.id,
+    id: raw.id as string,
     description,
-    apiKeyType: raw.apiKeyType ?? raw.api_key_type ?? 'INFERENCE',
+    apiKeyType: ((raw.apiKeyType ?? raw.api_key_type ?? 'INFERENCE') as ApiKey['apiKeyType']),
     createdAt,
     expiresAt,
     lastUsedAt,
-    last6Chars: raw.last6Chars ?? raw.last_6_chars ?? (apiKeyValue ? apiKeyValue.slice(-6) : undefined),
+    last6Chars: (raw.last6Chars as string | undefined) ?? (raw.last_6_chars as string | undefined) ?? (apiKeyValue ? apiKeyValue.slice(-6) : undefined),
     consumptionLimits: consumption
       ? {
           usd: consumption.usd ?? null,
@@ -67,7 +67,7 @@ function normalizeApiKeyPayload(raw: any, keyValue?: string): ApiKey {
     created_at: createdAt,
     expires_at: expiresAt,
     last_used_at: lastUsedAt,
-    is_revoked: raw.isRevoked ?? raw.is_revoked ?? false,
+    is_revoked: ((raw.isRevoked ?? raw.is_revoked ?? false) as boolean | undefined),
   };
 }
 
@@ -116,7 +116,7 @@ function buildCreatePayload(request: CreateApiKeyRequest): Record<string, unknow
 /**
  * Prepare payload for update requests (when supported).
  */
-function buildUpdatePayload(request: UpdateApiKeyRequest): Record<string, unknown> {
+function _buildUpdatePayload(request: UpdateApiKeyRequest): Record<string, unknown> {
   const payload: Record<string, unknown> = {};
 
   const description = request.description ?? request.name;
@@ -170,11 +170,11 @@ export class KeysEndpoint extends ApiEndpoint {
     this.emit('request', { type: 'keys.list' });
 
     // Make the API request
-    const response = await this.http.get<{ object: string; data: any[] }>(
+    const response = await this.http.get<{ object: string; data: Record<string, unknown>[] }>(
       this.getPath('')
     );
 
-    const normalized = (response.data?.data ?? []).map((item: any) => normalizeApiKeyPayload(item));
+    const normalized = (response.data?.data ?? []).map((item: Record<string, unknown>) => normalizeApiKeyPayload(item));
 
     // Emit a response event
     this.emit('response', {
@@ -203,13 +203,13 @@ export class KeysEndpoint extends ApiEndpoint {
     // Make the API request
     const response = await this.http.post<{
       success?: boolean;
-      data: any;
+      data: Record<string, unknown>;
     }>(
       this.getPath(''),
       payload
     );
 
-    const apiKey = normalizeApiKeyPayload(response.data?.data, response.data?.data?.apiKey);
+    const apiKey = normalizeApiKeyPayload(response.data?.data, response.data?.data?.apiKey as string | undefined);
 
     // Emit a response event
     this.emit('response', {
@@ -238,7 +238,7 @@ export class KeysEndpoint extends ApiEndpoint {
     this.emit('request', { type: 'keys.retrieve', data: { id } });
 
     // Make the API request
-    const response = await this.http.get<{ data?: any; api_key?: any }>(
+    const response = await this.http.get<{ data?: Record<string, unknown>; api_key?: Record<string, unknown> }>(
       this.getPath(`/${id}`)
     );
 
@@ -356,12 +356,12 @@ export class KeysEndpoint extends ApiEndpoint {
    * Get API key rate limits
    * @returns A promise that resolves to the rate limits
    */
-  public async getRateLimits(): Promise<{ data: any }> {
+  public async getRateLimits(): Promise<{ data: unknown }> {
     // Emit a request event
     this.emit('request', { type: 'keys.rateLimits' });
 
     // Make the API request
-    const response = await this.http.get<{ data: any }>(
+    const response = await this.http.get<{ data: unknown }>(
       this.getPath('/rate_limits')
     );
 
@@ -489,7 +489,7 @@ export class KeysEndpoint extends ApiEndpoint {
    * @param params - The parameters to prepare
    * @returns The prepared payload
    */
-  private prepareWeb3Payload(params: CreateWeb3ApiKeyRequest): any {
+  private prepareWeb3Payload(params: CreateWeb3ApiKeyRequest): Record<string, unknown> {
     return {
       address: params.address,
       signature: params.signature,

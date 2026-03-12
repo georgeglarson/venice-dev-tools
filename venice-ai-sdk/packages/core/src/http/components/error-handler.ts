@@ -27,15 +27,15 @@ export function handleRequestError(
 ): never {
   if (error.response) {
     // The request was made and the server responded with a status code outside the range of 2xx
-    const responseData = error.response.data as Record<string, any> || {};
-    const errorMessage = responseData.error || 'API request failed';
-    const details = responseData.details;
-    
+    const responseData = error.response.data as Record<string, unknown> || {};
+    const errorMessage = (responseData.error as string) || 'API request failed';
+    const details = responseData.details as Record<string, unknown> | undefined;
+
     logger.error(`API error: ${errorMessage}`, {
       status: error.response.status,
       details: details
     });
-    
+
     throw new VeniceApiError(errorMessage, error.response.status, details);
   } else if (error.request) {
     // The request was made but no response was received
@@ -65,7 +65,7 @@ export function handleRequestError(
  * @throws A transformed SDK-specific error
  */
 export function handleStreamError(
-  error: any,
+  error: unknown,
   logger: Logger,
   requestId: string
 ): never {

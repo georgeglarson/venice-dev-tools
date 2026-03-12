@@ -1,4 +1,4 @@
-import { VeniceError, VeniceRateLimitError, VeniceCapacityError, VeniceNetworkError, VeniceTimeoutError } from '../errors';
+import { VeniceRateLimitError, VeniceCapacityError, VeniceNetworkError, VeniceTimeoutError } from '../errors';
 import { delay } from './index';
 
 export interface RetryOptions {
@@ -6,6 +6,7 @@ export interface RetryOptions {
   initialDelayMs?: number;
   maxDelayMs?: number;
   backoffMultiplier?: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- constructor types require any for argument spread
   retryableErrors?: Array<new (...args: any[]) => Error>;
   onRetry?: (error: Error, attempt: number, delayMs: number) => void;
 }

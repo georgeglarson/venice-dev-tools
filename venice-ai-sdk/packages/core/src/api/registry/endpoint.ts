@@ -63,8 +63,8 @@ export abstract class ApiEndpoint {
    * @param event - The event name.
    * @param args - The event arguments.
    */
-  protected emit(event: string, ...args: any[]): boolean {
-    return (this.client as any).emit(event, ...args);
+  protected emit(event: string, ...args: unknown[]): boolean {
+    return (this.client as unknown as { emit(event: string, ...args: unknown[]): boolean }).emit(event, ...args);
   }
 }
 

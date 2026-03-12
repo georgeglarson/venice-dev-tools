@@ -1,7 +1,7 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { BaseHttpClient } from '../base/base-http-client';
 import { ErrorHandler } from '../error/error-handler';
-import { HttpMethod, HttpRequestOptions, HttpResponse } from '../../types';
+import { HttpRequestOptions, HttpResponse } from '../../types';
 import { RateLimiter } from '../../utils/rate-limiter';
 import { Logger } from '../../utils/logger';
 import { MiddlewareManager } from '../../middleware/middleware-manager';
@@ -106,7 +106,7 @@ export class StandardHttpClient extends BaseHttpClient {
    * @param options - Request options.
    * @returns The response data.
    */
-  public async request<T = any>(path: string, options: HttpRequestOptions = {}): Promise<HttpResponse<T>> {
+  public async request<T = unknown>(path: string, options: HttpRequestOptions = {}): Promise<HttpResponse<T>> {
     const startTime = Date.now();
     
     let requestContext = await this.middlewareManager.executeRequest(path, options);
@@ -183,7 +183,7 @@ export class StandardHttpClient extends BaseHttpClient {
           requestContext.metadata
         );
 
-        return this.errorHandler.handleRequestError(error as any);
+        return this.errorHandler.handleRequestError(error as AxiosError);
       }
     };
 
@@ -203,7 +203,7 @@ export class StandardHttpClient extends BaseHttpClient {
    * @param options - Request options.
    * @returns The response data.
    */
-  public async get<T = any>(path: string, options: Omit<HttpRequestOptions, 'method'> = {}): Promise<HttpResponse<T>> {
+  public async get<T = unknown>(path: string, options: Omit<HttpRequestOptions, 'method'> = {}): Promise<HttpResponse<T>> {
     return this.request<T>(path, { ...options, method: 'GET' });
   }
 
@@ -214,9 +214,9 @@ export class StandardHttpClient extends BaseHttpClient {
    * @param options - Additional request options.
    * @returns The response data.
    */
-  public async post<T = any>(
+  public async post<T = unknown>(
     path: string,
-    body?: any,
+    body?: unknown,
     options: Omit<HttpRequestOptions, 'method' | 'body'> = {}
   ): Promise<HttpResponse<T>> {
     return this.request<T>(path, { ...options, method: 'POST', body });
@@ -228,7 +228,7 @@ export class StandardHttpClient extends BaseHttpClient {
    * @param options - Request options.
    * @returns The response data.
    */
-  public async delete<T = any>(
+  public async delete<T = unknown>(
     path: string,
     options: Omit<HttpRequestOptions, 'method'> = {}
   ): Promise<HttpResponse<T>> {

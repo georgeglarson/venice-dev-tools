@@ -7,7 +7,7 @@ export interface LogEntry {
   level: LogLevel;
   message: string;
   timestamp: string;
-  data?: any;
+  data?: unknown;
 }
 
 /**
@@ -67,7 +67,7 @@ export class Logger {
    * @param message - The message to log
    * @param data - Additional data to log
    */
-  debug(message: string, data?: any): void {
+  debug(message: string, data?: unknown): void {
     this.log(0, message, data);
   }
   
@@ -77,7 +77,7 @@ export class Logger {
    * @param message - The message to log
    * @param data - Additional data to log
    */
-  info(message: string, data?: any): void {
+  info(message: string, data?: unknown): void {
     this.log(1, message, data);
   }
   
@@ -87,7 +87,7 @@ export class Logger {
    * @param message - The message to log
    * @param data - Additional data to log
    */
-  warn(message: string, data?: any): void {
+  warn(message: string, data?: unknown): void {
     this.log(2, message, data);
   }
   
@@ -97,7 +97,7 @@ export class Logger {
    * @param message - The message to log
    * @param data - Additional data to log
    */
-  error(message: string, data?: any): void {
+  error(message: string, data?: unknown): void {
     this.log(3, message, data);
   }
   
@@ -108,7 +108,7 @@ export class Logger {
    * @param message - The message to log
    * @param data - Additional data to log
    */
-  private log(level: LogLevel, message: string, data?: any): void {
+  private log(level: LogLevel, message: string, data?: unknown): void {
     if (level < this.level) return;
     
     const entry: LogEntry = {
@@ -140,7 +140,7 @@ export class Logger {
           ? entry.data 
           : JSON.stringify(entry.data, null, 2);
         logMessage += `\n${dataStr}`;
-      } catch (e) {
+      } catch {
         logMessage += '\n[Unable to stringify data]';
       }
     }

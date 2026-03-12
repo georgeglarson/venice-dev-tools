@@ -6,7 +6,7 @@
  * Options for collecting stream chunks into a complete response.
  */
 export interface CollectStreamOptions {
-  onChunk?: (chunk: any, index: number) => void;
+  onChunk?: (chunk: unknown, index: number) => void;
   signal?: AbortSignal;
   timeout?: number;
 }
@@ -19,7 +19,7 @@ export interface CollectStreamOptions {
  * @returns Complete collected content
  */
 export async function collectStream(
-  stream: AsyncIterable<any>,
+  stream: AsyncIterable<unknown>,
   options: CollectStreamOptions = {}
 ): Promise<string> {
   const { onChunk, signal, timeout } = options;
@@ -38,7 +38,10 @@ export async function collectStream(
         throw new Error('Stream collection aborted');
       }
 
-      const content = chunk.choices?.[0]?.delta?.content || '';
+      const chunkObj = chunk as Record<string, unknown>;
+      const choices = chunkObj.choices as Array<Record<string, unknown>> | undefined;
+      const delta = choices?.[0]?.delta as Record<string, unknown> | undefined;
+      const content = (delta?.content as string) || '';
       if (content) {
         chunks.push(content);
         if (onChunk) {
@@ -334,10 +337,13 @@ export async function* arrayToStream<T>(array: T[]): AsyncIterable<T> {
  * @returns Text-only stream
  */
 export async function* textOnlyStream(
-  stream: AsyncIterable<any>
+  stream: AsyncIterable<unknown>
 ): AsyncIterable<string> {
   for await (const chunk of stream) {
-    const content = chunk.choices?.[0]?.delta?.content;
+    const chunkObj = chunk as Record<string, unknown>;
+    const choices = chunkObj.choices as Array<Record<string, unknown>> | undefined;
+    const delta = choices?.[0]?.delta as Record<string, unknown> | undefined;
+    const content = delta?.content as string | undefined;
     if (content) {
       yield content;
     }

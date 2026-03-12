@@ -62,7 +62,7 @@ export class StreamingHttpClient extends BaseHttpClient {
    */
   public async stream(
     path: string,
-    body?: any,
+    body?: Record<string, unknown> | null,
     options: Omit<HttpRequestOptions, 'method' | 'body'> = {}
   ): Promise<Response> {
     const url = `${this.baseUrl}${path}`;
@@ -137,7 +137,7 @@ export class StreamingHttpClient extends BaseHttpClient {
    */
   public async processStream(
     response: Response,
-    onEvent: (event: any) => void,
+    onEvent: (event: unknown) => void,
     onComplete?: () => void,
     onError?: (error: Error) => void
   ): Promise<void> {
@@ -173,7 +173,7 @@ export class StreamingHttpClient extends BaseHttpClient {
               const event = JSON.parse(buffer);
               onEvent(event);
               eventCount++;
-            } catch (e) {
+            } catch {
               // Ignore parsing errors for incomplete data
               if (this.logger) {
                 this.logger.debug('Ignoring parsing error for incomplete data at stream end');
@@ -201,7 +201,7 @@ export class StreamingHttpClient extends BaseHttpClient {
               if (this.logger && eventCount % 10 === 0) {
                 this.logger.debug(`Processed ${eventCount} stream events`);
               }
-            } catch (e) {
+            } catch {
               const errorMsg = `Failed to parse event: ${line}`;
               if (this.logger) {
                 this.logger.error(errorMsg);

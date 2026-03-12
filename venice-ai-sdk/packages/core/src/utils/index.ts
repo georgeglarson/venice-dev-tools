@@ -5,10 +5,10 @@
  * @param text - The JSON string to parse.
  * @returns The parsed object or undefined if parsing fails.
  */
-export function safeJsonParse(text: string): any | undefined {
+export function safeJsonParse(text: string): unknown | undefined {
   try {
     return JSON.parse(text);
-  } catch (e) {
+  } catch {
     return undefined;
   }
 }
@@ -19,7 +19,7 @@ export function safeJsonParse(text: string): any | undefined {
  * @param value - The value to check.
  * @returns Whether the value is a plain object.
  */
-export function isPlainObject(value: any): boolean {
+export function isPlainObject(value: unknown): boolean {
   return (
     value !== null &&
     typeof value === 'object' &&
@@ -34,7 +34,7 @@ export function isPlainObject(value: any): boolean {
  * @param source - The source object.
  * @returns The merged object.
  */
-export function deepMerge(target: Record<string, any>, source: Record<string, any>): Record<string, any> {
+export function deepMerge(target: Record<string, unknown>, source: Record<string, unknown>): Record<string, unknown> {
   const output = { ...target };
   
   if (isPlainObject(target) && isPlainObject(source)) {
@@ -43,7 +43,7 @@ export function deepMerge(target: Record<string, any>, source: Record<string, an
         if (!(key in target)) {
           Object.assign(output, { [key]: source[key] });
         } else {
-          output[key] = deepMerge(target[key], source[key]);
+          output[key] = deepMerge(target[key] as Record<string, unknown>, source[key] as Record<string, unknown>);
         }
       } else {
         Object.assign(output, { [key]: source[key] });
@@ -60,16 +60,16 @@ export function deepMerge(target: Record<string, any>, source: Record<string, an
  * @param obj - The object to convert.
  * @returns The query string.
  */
-export function objectToQueryString(obj?: Record<string, any>): string {
+export function objectToQueryString(obj?: Record<string, unknown>): string {
   if (!obj) return '';
   
   return Object.entries(obj)
     .filter(([_, value]) => value !== undefined && value !== null)
     .map(([key, value]) => {
       if (Array.isArray(value)) {
-        return value.map(item => `${encodeURIComponent(key)}=${encodeURIComponent(item)}`).join('&');
+        return value.map(item => `${encodeURIComponent(key)}=${encodeURIComponent(String(item))}`).join('&');
       }
-      return `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
+      return `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`;
     })
     .join('&');
 }

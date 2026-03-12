@@ -4,7 +4,7 @@
  * This module provides request and response interceptors for the HTTP client.
  * Interceptors are used for logging, adding request IDs, and other cross-cutting concerns.
  */
-import { AxiosRequestConfig, AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'axios';
+import { AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { Logger } from '../../utils/logger';
 import { sanitizeHeaders, sanitizeData } from './sanitizer';
 
