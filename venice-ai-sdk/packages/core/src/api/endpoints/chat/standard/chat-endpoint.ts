@@ -1,4 +1,5 @@
 import { ApiEndpoint } from '../../../registry/endpoint';
+import type { VeniceClient } from '../../../../client';
 import {
   ChatCompletionRequest,
   ChatCompletionResponse
@@ -38,7 +39,7 @@ export class ChatEndpoint extends ApiEndpoint {
    *
    * @param client - The Venice client instance
    */
-  constructor(client: any) {
+  constructor(client: VeniceClient) {
     super(client);
     this.validator = new ChatValidator();
   }

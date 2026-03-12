@@ -11,13 +11,17 @@ import {
   ImagesEndpoint,
   ImageGenerationEndpoint,
   ImageUpscaleEndpoint,
-  ImageStylesEndpoint
+  ImageStylesEndpoint,
+  ImageEditEndpoint,
+  ImageMultiEditEndpoint,
+  ImageRemoveBackgroundEndpoint
 } from './api/endpoints/images';
 import { KeysEndpoint } from './api/endpoints/keys';
 import { CharactersEndpoint } from './api/endpoints/characters';
 import { EmbeddingsEndpoint } from './api/endpoints/embeddings';
 import { BillingEndpoint } from './api/endpoints/billing';
-import { AudioSpeechEndpoint } from './api/endpoints/audio';
+import { AudioSpeechEndpoint, AudioTranscriptionEndpoint } from './api/endpoints/audio';
+import { VideoGenerationEndpoint } from './api/endpoints/video';
 
 /**
  * Main client for interacting with the Venice AI API.
@@ -60,14 +64,19 @@ export class VeniceAI extends VeniceClient {
       .register('embeddings', EmbeddingsEndpoint)
       .register('billing', BillingEndpoint)
       .register('audio.speech', AudioSpeechEndpoint)
-      
+      .register('audio.transcription', AudioTranscriptionEndpoint)
+      .register('video.generation', VideoGenerationEndpoint)
+
       // Register specialized chat endpoints
       .register('chat.stream', ChatStreamEndpoint)
       
       // Register specialized image endpoints
       .register('images.generation', ImageGenerationEndpoint)
       .register('images.upscale', ImageUpscaleEndpoint)
-      .register('images.styles', ImageStylesEndpoint);
+      .register('images.styles', ImageStylesEndpoint)
+      .register('images.edit', ImageEditEndpoint)
+      .register('images.multiEdit', ImageMultiEditEndpoint)
+      .register('images.removeBackground', ImageRemoveBackgroundEndpoint);
   }
   
   /**
@@ -87,7 +96,7 @@ export class VeniceAI extends VeniceClient {
    * @param EndpointClass - The endpoint class constructor.
    * @returns This client instance.
    */
-  public registerEndpoint(name: string, EndpointClass: any): this {
+  public registerEndpoint(name: string, EndpointClass: new (client: VeniceClient) => ApiEndpoint): this {
     this.endpointManager.register(name, EndpointClass);
     return this;
   }
@@ -218,9 +227,19 @@ export class VeniceAI extends VeniceClient {
    *
    * @returns The audio endpoint.
    */
-  public get audio(): { speech: AudioSpeechEndpoint } {
+  public get audio(): { speech: AudioSpeechEndpoint; transcription: AudioTranscriptionEndpoint } {
     return {
-      speech: this.endpoint<AudioSpeechEndpoint>('audio.speech')
+      speech: this.endpoint<AudioSpeechEndpoint>('audio.speech'),
+      transcription: this.endpoint<AudioTranscriptionEndpoint>('audio.transcription')
+    };
+  }
+
+  /**
+   * Get the video API endpoint.
+   */
+  public get video(): { generation: VideoGenerationEndpoint } {
+    return {
+      generation: this.endpoint<VideoGenerationEndpoint>('video.generation')
     };
   }
   

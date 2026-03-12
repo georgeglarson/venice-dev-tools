@@ -1,4 +1,5 @@
 import { ApiEndpoint } from '../../../registry/endpoint';
+import type { VeniceClient } from '../../../../client';
 import { ChatCompletionRequest } from '../../../../types';
 import { ChatValidator } from '../../../../utils/validators/chat-validator';
 import { parseSSEStream } from '../../../../utils/stream-parser';
@@ -38,7 +39,7 @@ export class ChatStreamEndpoint extends ApiEndpoint {
    *
    * @param client - The Venice client instance
    */
-  constructor(client: any) {
+  constructor(client: VeniceClient) {
     super(client);
     this.validator = new ChatValidator();
   }

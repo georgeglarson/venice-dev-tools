@@ -110,7 +110,7 @@ export class StreamingHttpClient extends BaseHttpClient {
       } catch (error) {
         if (this.logger) {
           this.logger.error(`Streaming request to ${path} failed`, {
-            error: (error as any).message
+            error: error instanceof Error ? error.message : String(error)
           });
         }
         return this.errorHandler.handleStreamError(error);
@@ -145,16 +145,16 @@ export class StreamingHttpClient extends BaseHttpClient {
       this.logger.debug('Processing stream response');
     }
     
-    try {
-      const reader = response.body?.getReader();
-      if (!reader) {
-        const errorMsg = 'Response body is not readable';
-        if (this.logger) {
-          this.logger.error(errorMsg);
-        }
-        throw new Error(errorMsg);
+    const reader = response.body?.getReader();
+    if (!reader) {
+      const errorMsg = 'Response body is not readable';
+      if (this.logger) {
+        this.logger.error(errorMsg);
       }
+      throw new Error(errorMsg);
+    }
 
+    try {
       const decoder = new TextDecoder();
       let buffer = '';
       let eventCount = 0;
@@ -165,7 +165,7 @@ export class StreamingHttpClient extends BaseHttpClient {
 
       while (true) {
         const { done, value } = await reader.read();
-        
+
         if (done) {
           // Process any remaining data in the buffer
           if (buffer.trim()) {
@@ -197,7 +197,7 @@ export class StreamingHttpClient extends BaseHttpClient {
               const event = JSON.parse(line);
               onEvent(event);
               eventCount++;
-              
+
               if (this.logger && eventCount % 10 === 0) {
                 this.logger.debug(`Processed ${eventCount} stream events`);
               }
@@ -217,22 +217,24 @@ export class StreamingHttpClient extends BaseHttpClient {
       if (this.logger) {
         this.logger.debug(`Stream processing complete, processed ${eventCount} events`);
       }
-      
+
       if (onComplete) {
         onComplete();
       }
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
-      
+
       if (this.logger) {
         this.logger.error(`Stream processing error: ${errorMsg}`);
       }
-      
+
       if (onError) {
         onError(error instanceof Error ? error : new Error(String(error)));
       } else {
         throw error;
       }
+    } finally {
+      try { reader.releaseLock(); } catch { /* already released */ }
     }
   }
 }

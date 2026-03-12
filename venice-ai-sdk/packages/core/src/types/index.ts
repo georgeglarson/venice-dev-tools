@@ -8,3 +8,4 @@ export * from './models';
 export * from './keys';
 export * from './characters';
 export * from './billing';
+export * from './video';

@@ -93,7 +93,7 @@ for await (const chunk of stream) {
 ### Working with images
 
 ```ts
-const image = await venice.imageGeneration.generate({
+const image = await venice.images.generate({
   model: 'hidream',
   prompt: 'A minimal Venice sunset poster',
   width: 1024,

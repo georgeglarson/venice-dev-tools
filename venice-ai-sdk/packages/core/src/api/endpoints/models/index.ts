@@ -1,11 +1,12 @@
 import { ApiEndpoint } from '../../registry/endpoint';
+import type { VeniceClient } from '../../../client';
 import {
   ListModelsParams,
   ListModelsResponse,
   ListModelTraitsResponse,
   ListModelCompatibilityResponse
 } from '../../../types';
-import { ModelRequest } from '../../../types/models';
+import { Model, ModelRequest } from '../../../types/models';
 import { ModelValidator } from '../../../utils/validators/model-validator';
 
 /**
@@ -20,7 +21,7 @@ export class ModelsEndpoint extends ApiEndpoint {
   /**
    * Constructor
    */
-  constructor(client: any) {
+  constructor(client: VeniceClient) {
     super(client);
     this.validator = new ModelValidator();
   }
@@ -180,7 +181,7 @@ export class ModelsEndpoint extends ApiEndpoint {
    * @param modelId - The ID of the model to retrieve.
    * @returns The model details.
    */
-  public async retrieve(modelId: string): Promise<any> {
+  public async retrieve(modelId: string): Promise<Model> {
     // Validate model ID
     if (!modelId || typeof modelId !== 'string') {
       throw new Error('Model ID must be a non-empty string');
@@ -190,7 +191,7 @@ export class ModelsEndpoint extends ApiEndpoint {
     this.emit('request', { type: 'models.retrieve', data: { modelId } });
 
     // Make the API request
-    const response = await this.http.get<any>(
+    const response = await this.http.get<Model>(
       this.getPath(`/${modelId}`)
     );
 
@@ -205,7 +206,7 @@ export class ModelsEndpoint extends ApiEndpoint {
    * @param request - The model generation request.
    * @returns The generated model response.
    */
-  public async generate(request: ModelRequest): Promise<any> {
+  public async generate(request: ModelRequest): Promise<Record<string, unknown>> {
     // Validate request parameters
     this.validator.validateModelRequest(request);
 
@@ -213,7 +214,7 @@ export class ModelsEndpoint extends ApiEndpoint {
     this.emit('request', { type: 'models.generate', data: request });
 
     // Make the API request
-    const response = await this.http.post<any>(
+    const response = await this.http.post<Record<string, unknown>>(
       this.getPath('/generate'),
       request
     );

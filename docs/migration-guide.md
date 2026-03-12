@@ -111,7 +111,7 @@ const styles = await venice.images.listStyles();
 Add request/response interception:
 
 ```typescript
-import { loggingMiddleware, timingMiddleware } from '@venice/core/middleware';
+import { loggingMiddleware, timingMiddleware } from '@venice-dev-tools/core/middleware';
 
 const client = new VeniceClient({ apiKey: process.env.VENICE_API_KEY });
 
@@ -145,7 +145,7 @@ import {
   filterStream,
   takeStream,
   textOnlyStream,
-} from '@venice/core/utils';
+} from '@venice-dev-tools/core/utils';
 
 // Collect entire stream
 const fullText = await collectStream(stream);
@@ -195,12 +195,12 @@ Modern module imports:
 
 ```typescript
 // ESM
-import { VeniceClient } from '@venice/core';
+import { VeniceClient } from '@venice-dev-tools/core';
 
 // Tree-shakeable subpaths
-import { loggingMiddleware } from '@venice/core/middleware';
-import { VeniceAuthError } from '@venice/core/errors';
-import { collectStream } from '@venice/core/utils';
+import { loggingMiddleware } from '@venice-dev-tools/core/middleware';
+import { VeniceAuthError } from '@venice-dev-tools/core/errors';
+import { collectStream } from '@venice-dev-tools/core/utils';
 ```
 
 #### 5. Retry Configuration
@@ -227,7 +227,7 @@ const client = new VeniceClient({
 ### Step 1: Update Package
 
 ```bash
-npm install @venice/ai@latest
+npm install @venice-dev-tools/core@latest
 # or
 pnpm update @venice-dev-tools/core
 ```
@@ -236,17 +236,17 @@ pnpm update @venice-dev-tools/core
 
 **Before:**
 ```typescript
-const VeniceAI = require('@venice/ai');
+const VeniceAI = require('@venice-dev-tools/core');
 ```
 
 **After (ESM):**
 ```typescript
-import { VeniceClient } from '@venice/core';
+import { VeniceClient } from '@venice-dev-tools/core';
 ```
 
 **After (CJS - still supported):**
 ```typescript
-const { VeniceClient } = require('@venice/core');
+const { VeniceClient } = require('@venice-dev-tools/core');
 ```
 
 ### Step 3: Update Chat API Calls
@@ -287,13 +287,13 @@ Check console for deprecation warnings and update accordingly.
 
 #### Add Middleware
 ```typescript
-import { loggingMiddleware } from '@venice/core/middleware';
+import { loggingMiddleware } from '@venice-dev-tools/core/middleware';
 client.use(loggingMiddleware(client.getLogger()));
 ```
 
 #### Use Stream Helpers
 ```typescript
-import { collectStream } from '@venice/core/utils';
+import { collectStream } from '@venice-dev-tools/core/utils';
 const fullText = await collectStream(stream);
 ```
 
@@ -324,7 +324,7 @@ const response = await openai.chat.completions.create({
 
 **To Venice SDK:**
 ```typescript
-import { VeniceClient } from '@venice/core';
+import { VeniceClient } from '@venice-dev-tools/core';
 
 const venice = new VeniceClient({
   apiKey: process.env.VENICE_API_KEY,
@@ -393,7 +393,7 @@ async function loggedRequest() {
 
 **After:**
 ```typescript
-import { loggingMiddleware, timingMiddleware } from '@venice/core/middleware';
+import { loggingMiddleware, timingMiddleware } from '@venice-dev-tools/core/middleware';
 
 client
   .use(loggingMiddleware(client.getLogger()))
@@ -418,7 +418,7 @@ const fullText = chunks.join('');
 
 **After:**
 ```typescript
-import { collectStream } from '@venice/core/utils';
+import { collectStream } from '@venice-dev-tools/core/utils';
 
 const stream = await venice.chat.completions.create({ ..., stream: true });
 const fullText = await collectStream(stream);
@@ -432,7 +432,7 @@ const fullText = await collectStream(stream);
 
 **Solution:**
 ```bash
-npm install @venice/core@latest typescript@latest
+npm install @venice-dev-tools/core@latest typescript@latest
 ```
 
 ### Deprecation Warnings in Console
@@ -452,10 +452,10 @@ Use chat.completions.create() instead.
 **Solution:**
 ```typescript
 // ✅ Correct
-import { VeniceClient } from '@venice/core';
+import { VeniceClient } from '@venice-dev-tools/core';
 
 // ❌ Incorrect
-import VeniceClient from '@venice/core';
+import VeniceClient from '@venice-dev-tools/core';
 ```
 
 ### Type Errors After Update

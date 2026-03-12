@@ -47,6 +47,28 @@ export interface CreateSpeechRequest {
    * @default false
    */
   streaming?: boolean;
+
+  /**
+   * Language selection (Auto, English, Chinese, etc.)
+   */
+  language?: string;
+
+  /**
+   * Emotional/delivery style (Qwen 3 only, max 500 chars)
+   */
+  prompt?: string;
+
+  /**
+   * Variation level 0-2 (Qwen 3 only)
+   * @default 0.9
+   */
+  temperature?: number;
+
+  /**
+   * Nucleus sampling 0-1 (Qwen 3 only)
+   * @default 1.0
+   */
+  top_p?: number;
 }
 
 /**
@@ -159,3 +181,58 @@ export type Voice = typeof VOICES[keyof typeof VOICES];
 export interface CreateSpeechResponse {
   data: ArrayBuffer;
 }
+
+/**
+ * Request to transcribe audio to text
+ */
+export interface CreateTranscriptionRequest {
+  /** Audio file (WAV, FLAC, M4A, AAC, MP4, MP3) */
+  file: Blob | ArrayBuffer;
+  /** Transcription model */
+  model?: string;
+  /** Response format */
+  response_format?: 'json' | 'text';
+  /** Include timestamps in response */
+  timestamps?: boolean;
+  /** ISO 639-1 language code (e.g., "en") — auto-detected if omitted */
+  language?: string;
+}
+
+/**
+ * Transcription segment with timing info
+ */
+export interface TranscriptionSegment {
+  id: number;
+  start: number;
+  end: number;
+  text: string;
+}
+
+/**
+ * Response from transcription API
+ */
+export interface CreateTranscriptionResponse {
+  text: string;
+  segments?: TranscriptionSegment[];
+}
+
+/**
+ * Available TTS models — updated with new Qwen models
+ */
+export const TTS_MODELS = {
+  TTS_KOKORO: 'tts-kokoro',
+  TTS_QWEN3_0_6B: 'tts-qwen3-0-6b',
+  TTS_QWEN3_1_7B: 'tts-qwen3-1-7b',
+} as const;
+
+export type TTSModel = typeof TTS_MODELS[keyof typeof TTS_MODELS];
+
+/**
+ * Available transcription models
+ */
+export const TRANSCRIPTION_MODELS = {
+  NVIDIA_PARAKEET: 'nvidia/parakeet-tdt-0.6b-v3',
+  OPENAI_WHISPER: 'openai/whisper-large-v3',
+} as const;
+
+export type TranscriptionModel = typeof TRANSCRIPTION_MODELS[keyof typeof TRANSCRIPTION_MODELS];

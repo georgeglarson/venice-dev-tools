@@ -26,7 +26,7 @@ The Venice AI SDK is designed to be AI-agent friendly with:
 ### Get Complete Metadata
 
 ```typescript
-import { getSDKMetadata } from '@venice/core';
+import { getSDKMetadata } from '@venice-dev-tools/core';
 
 const metadata = getSDKMetadata();
 
@@ -46,7 +46,7 @@ console.log(JSON.stringify(metadata, null, 2));
 ### Capability Discovery
 
 ```typescript
-import { getCapability, getCapabilitiesByCategory } from '@venice/core';
+import { getCapability, getCapabilitiesByCategory } from '@venice-dev-tools/core';
 
 // Get specific capability
 const chatCap = getCapability('chat_completion');
@@ -60,7 +60,7 @@ const chatCaps = getCapabilitiesByCategory('chat');
 ### Export for AI Processing
 
 ```typescript
-import { exportMetadataJSON } from '@venice/core';
+import { exportMetadataJSON } from '@venice-dev-tools/core';
 
 // Get metadata as JSON string
 const json = exportMetadataJSON();
@@ -72,7 +72,7 @@ fs.writeFileSync('sdk-metadata.json', json);
 ### Detect Recoverable Errors
 
 ```typescript
-import { VeniceError } from '@venice/core';
+import { VeniceError } from '@venice-dev-tools/core';
 
 function canAutoRecover(error: unknown): boolean {
   if (error instanceof VeniceError) {
@@ -141,7 +141,7 @@ try {
 ### List All Capabilities
 
 ```typescript
-import { getSDKMetadata } from '@venice/core';
+import { getSDKMetadata } from '@venice-dev-tools/core';
 
 const metadata = getSDKMetadata();
 
@@ -206,10 +206,10 @@ function generateClientCode(options: {
   withRetry?: boolean;
   withLogging?: boolean;
 }): string {
-  const lines = ["import { VeniceClient } from '@venice/core';"];
+  const lines = ["import { VeniceClient } from '@venice-dev-tools/core';"];
   
   if (options.withLogging) {
-    lines.push("import { loggingMiddleware } from '@venice/core/middleware';");
+    lines.push("import { loggingMiddleware } from '@venice-dev-tools/core/middleware';");
   }
   
   lines.push('');
@@ -400,7 +400,7 @@ metadata.capabilities.forEach(cap => {
 ## Complete AI Agent Example
 
 ```typescript
-import { VeniceClient, getSDKMetadata, VeniceError } from '@venice/core';
+import { VeniceClient, getSDKMetadata, VeniceError } from '@venice-dev-tools/core';
 
 class AIAgent {
   private client: VeniceClient;

@@ -1,8 +1,9 @@
 import { ApiEndpoint } from '../../../registry/endpoint';
-import { 
-  GenerateImageRequest, 
-  GenerateImageResponse, 
-  GenerateImageResponseHeaders 
+import type { VeniceClient } from '../../../../client';
+import {
+  GenerateImageRequest,
+  GenerateImageResponse,
+  GenerateImageResponseHeaders
 } from '../../../../types';
 import { ImageValidator } from '../../../../utils/validators/image-validator';
 
@@ -18,7 +19,7 @@ export class ImageGenerationEndpoint extends ApiEndpoint {
   /**
    * Constructor
    */
-  constructor(client: any) {
+  constructor(client: VeniceClient) {
     super(client);
     this.validator = new ImageValidator();
   }

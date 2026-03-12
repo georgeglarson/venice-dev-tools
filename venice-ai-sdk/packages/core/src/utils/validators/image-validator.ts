@@ -1,8 +1,12 @@
-import { 
-  ImageRequest, 
-  GenerateImageRequest, 
-  UpscaleImageRequest 
+import {
+  ImageRequest,
+  GenerateImageRequest,
+  UpscaleImageRequest,
+  EditImageRequest,
+  MultiEditImageRequest,
+  RemoveBackgroundRequest
 } from '../../types/images';
+import { VeniceValidationError } from '../../errors';
 import { BaseValidator } from './base-validator';
 
 /**
@@ -88,6 +92,43 @@ export class ImageValidator extends BaseValidator {
     
     if (params.scale !== undefined) {
       this.validateEnum(params.scale, 'scale', [2, 4]);
+    }
+  }
+
+  public validateEditImageRequest(request: EditImageRequest): void {
+    this.validateRequired(request, 'request');
+    this.validateString(request.prompt, 'prompt');
+    if (request.prompt.length > 32768) {
+      throw new VeniceValidationError('prompt must be 32768 characters or less', { prompt: 'Must be 32768 characters or less' });
+    }
+    this.validateRequired(request.image, 'image');
+    if (request.aspect_ratio !== undefined) {
+      this.validateEnum(request.aspect_ratio, 'aspect_ratio', ['auto', '1:1', '3:2', '16:9', '21:9', '9:16', '2:3', '3:4', '4:5']);
+    }
+  }
+
+  public validateMultiEditImageRequest(request: MultiEditImageRequest): void {
+    this.validateRequired(request, 'request');
+    this.validateString(request.prompt, 'prompt');
+    if (request.prompt.length > 32768) {
+      throw new VeniceValidationError('prompt must be 32768 characters or less', { prompt: 'Must be 32768 characters or less' });
+    }
+    this.validateNonEmptyArray(request.images, 'images');
+    if (request.images.length > 3) {
+      throw new VeniceValidationError('images must contain at most 3 items', { images: 'Maximum 3 images allowed' });
+    }
+  }
+
+  public validateRemoveBackgroundRequest(request: RemoveBackgroundRequest): void {
+    this.validateRequired(request, 'request');
+    if (!request.image && !request.image_url) {
+      throw new VeniceValidationError('Either image or image_url is required');
+    }
+    if (request.image && request.image_url) {
+      throw new VeniceValidationError('Only one of image or image_url should be provided');
+    }
+    if (request.image_url !== undefined) {
+      this.validateUrl(request.image_url, 'image_url');
     }
   }
 

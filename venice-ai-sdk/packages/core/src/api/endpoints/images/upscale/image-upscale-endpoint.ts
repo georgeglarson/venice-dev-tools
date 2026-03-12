@@ -1,4 +1,5 @@
 import { ApiEndpoint } from '../../../registry/endpoint';
+import type { VeniceClient } from '../../../../client';
 import { UpscaleImageRequest } from '../../../../types';
 import { ImageValidator } from '../../../../utils/validators/image-validator';
 import { VeniceApiError } from '../../../../errors';
@@ -15,7 +16,7 @@ export class ImageUpscaleEndpoint extends ApiEndpoint {
   /**
    * Constructor
    */
-  constructor(client: any) {
+  constructor(client: VeniceClient) {
     super(client);
     this.validator = new ImageValidator();
   }
@@ -54,7 +55,7 @@ export class ImageUpscaleEndpoint extends ApiEndpoint {
     const response = await fetch(url, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${(this.client as any).getApiKey()}`
+        'Authorization': `Bearer ${this.client.getApiKey()}`
       },
       body: formData
     });
@@ -129,7 +130,9 @@ export class ImageUpscaleEndpoint extends ApiEndpoint {
       return bytes.buffer.slice(0);
     }
 
-    const globalBuffer = typeof globalThis !== 'undefined' ? (globalThis as any).Buffer : undefined;
+    const globalBuffer = typeof globalThis !== 'undefined' && 'Buffer' in globalThis
+      ? (globalThis as unknown as { Buffer: typeof Buffer }).Buffer
+      : undefined;
     if (globalBuffer && typeof globalBuffer.from === 'function') {
       const buffer = globalBuffer.from(base64, 'base64');
       const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);

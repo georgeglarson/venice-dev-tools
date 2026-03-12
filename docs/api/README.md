@@ -294,8 +294,8 @@ The API returns structured error responses:
 **SDK Error Classes:**
 ```typescript
 import {
-  VeniceAPIError,
-  VeniceAuthenticationError,
+  VeniceApiError,
+  VeniceAuthError,
   VeniceRateLimitError,
   VeniceValidationError,
   VeniceNetworkError,

@@ -1,6 +1,9 @@
 import { ImageGenerationEndpoint } from './generation/image-generation-endpoint';
 import { ImageUpscaleEndpoint } from './upscale/image-upscale-endpoint';
 import { ImageStylesEndpoint } from './styles/image-styles-endpoint';
+import { ImageEditEndpoint } from './edit/image-edit-endpoint';
+import { ImageMultiEditEndpoint } from './multi-edit/image-multi-edit-endpoint';
+import { ImageRemoveBackgroundEndpoint } from './remove-background/image-remove-background-endpoint';
 import { ApiEndpoint } from '../../registry/endpoint';
 import { VeniceClient } from '../../../client';
 
@@ -12,6 +15,9 @@ export class ImagesEndpoint extends ApiEndpoint {
   private generationEndpoint: ImageGenerationEndpoint;
   private upscaleEndpoint: ImageUpscaleEndpoint;
   private stylesEndpoint: ImageStylesEndpoint;
+  private editEndpoint: ImageEditEndpoint;
+  private multiEditEndpoint: ImageMultiEditEndpoint;
+  private removeBackgroundEndpoint: ImageRemoveBackgroundEndpoint;
 
   /**
    * Create a new images endpoint.
@@ -22,6 +28,9 @@ export class ImagesEndpoint extends ApiEndpoint {
     this.generationEndpoint = new ImageGenerationEndpoint(client);
     this.upscaleEndpoint = new ImageUpscaleEndpoint(client);
     this.stylesEndpoint = new ImageStylesEndpoint(client);
+    this.editEndpoint = new ImageEditEndpoint(client);
+    this.multiEditEndpoint = new ImageMultiEditEndpoint(client);
+    this.removeBackgroundEndpoint = new ImageRemoveBackgroundEndpoint(client);
   }
 
   /**
@@ -55,10 +64,25 @@ export class ImagesEndpoint extends ApiEndpoint {
   public async listStyles(...args: Parameters<ImageStylesEndpoint['listStyles']>) {
     return this.stylesEndpoint.listStyles(...args);
   }
+
+  /** Edit an image using text directions. */
+  public async edit(...args: Parameters<ImageEditEndpoint['edit']>) {
+    return this.editEndpoint.edit(...args);
+  }
+
+  /** Edit multiple images with layered composition. */
+  public async multiEdit(...args: Parameters<ImageMultiEditEndpoint['edit']>) {
+    return this.multiEditEndpoint.edit(...args);
+  }
+
+  /** Remove background from an image. */
+  public async removeBackground(...args: Parameters<ImageRemoveBackgroundEndpoint['remove']>) {
+    return this.removeBackgroundEndpoint.remove(...args);
+  }
 }
 
 // Export individual endpoints
-export { ImageGenerationEndpoint, ImageUpscaleEndpoint, ImageStylesEndpoint };
+export { ImageGenerationEndpoint, ImageUpscaleEndpoint, ImageStylesEndpoint, ImageEditEndpoint, ImageMultiEditEndpoint, ImageRemoveBackgroundEndpoint };
 
 // For backward compatibility, export ImagesEndpoint as default
 export default ImagesEndpoint;

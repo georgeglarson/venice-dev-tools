@@ -1,5 +1,5 @@
 import { BaseValidator } from './base-validator';
-import type { CreateSpeechRequest } from '../../types/audio';
+import type { CreateSpeechRequest, CreateTranscriptionRequest } from '../../types/audio';
 import { VeniceValidationError } from '../../errors';
 
 /**
@@ -35,6 +35,23 @@ export class AudioValidator extends BaseValidator {
 
     if (request.speed !== undefined) {
       this.validateNumber(request.speed, 'speed', 0.25, 4.0);
+    }
+  }
+
+  /**
+   * Validate a transcription request
+   */
+  public validateTranscription(request: CreateTranscriptionRequest): void {
+    this.validateRequired(request, 'request');
+    this.validateObject(request, 'request');
+    this.validateRequired(request.file, 'file');
+
+    if (request.response_format !== undefined) {
+      this.validateEnum(request.response_format, 'response_format', ['json', 'text']);
+    }
+
+    if (request.language !== undefined) {
+      this.validateString(request.language, 'language');
     }
   }
 }

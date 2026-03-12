@@ -265,8 +265,8 @@ The SDK provides structured error types:
 
 ```typescript
 import {
-  VeniceAPIError,
-  VeniceAuthenticationError,
+  VeniceApiError,
+  VeniceAuthError,
   VeniceRateLimitError,
   VeniceValidationError,
   VeniceNetworkError,
@@ -275,7 +275,7 @@ import {
 try {
   const response = await client.chat.completions.create({ /* ... */ });
 } catch (error) {
-  if (error instanceof VeniceAuthenticationError) {
+  if (error instanceof VeniceAuthError) {
     console.error('Invalid API key');
   } else if (error instanceof VeniceRateLimitError) {
     console.error('Rate limit exceeded, retry after:', error.retryAfter);
@@ -283,7 +283,7 @@ try {
     console.error('Invalid parameters:', error.message);
   } else if (error instanceof VeniceNetworkError) {
     console.error('Network error, retrying...');
-  } else if (error instanceof VeniceAPIError) {
+  } else if (error instanceof VeniceApiError) {
     console.error('API error:', error.statusCode, error.message);
   }
 }

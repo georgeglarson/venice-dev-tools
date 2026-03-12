@@ -73,6 +73,21 @@ export interface GenerateImageRequest extends ImageRequest {
    * Number of image variants to generate (typically 1).
    */
   variants?: number;
+
+  /**
+   * Desired aspect ratio for the generated image, e.g. "1:1", "16:9".
+   */
+  aspect_ratio?: string;
+
+  /**
+   * Target resolution tier: "1K", "2K", or "4K".
+   */
+  resolution?: string;
+
+  /**
+   * When true, the model may use web search for up-to-date context.
+   */
+  enable_web_search?: boolean;
 }
 
 export type GeneratedImageData =
@@ -176,24 +191,45 @@ export interface UpscaleImageResponse {
 }
 
 export interface EditImageRequest {
-  /**
-   * The text directions to edit or modify the image. Does best with
-   * short but descriptive prompts. IE: "Change the color of", "remove
-   * object", "change the sky to a sunrise", etc.
-   */
+  /** Text directions to edit the image (1-32768 chars) */
   prompt: string;
-
-  /**
-   * The image to edit. Can be either a file upload, a
-   * base64-encoded string, or a URL starting with http:// or https://. Image dimensions
-   * must be at least 65536 pixels and must not exceed 33177600 pixels.
-   * Image URLs must be less than 10MB.
-   */
+  /** Source image: file upload, base64 string, or URL */
   image: Blob | ArrayBuffer | string;
+  /** Editor model ID */
+  modelId?: string;
+  /** Output aspect ratio */
+  aspect_ratio?: 'auto' | '1:1' | '3:2' | '16:9' | '21:9' | '9:16' | '2:3' | '3:4' | '4:5';
 }
 
 export interface EditImageResponse {
-  data: ArrayBuffer;
+  created: number;
+  data: GeneratedImageData[];
+}
+
+export interface MultiEditImageRequest {
+  /** Edit instructions (1-32768 chars) */
+  prompt: string;
+  /** Array of 1-3 images: base64 strings or HTTPS URLs. First is base, rest are layers */
+  images: (Blob | ArrayBuffer | string)[];
+  /** Editor model ID */
+  modelId?: string;
+}
+
+export interface MultiEditImageResponse {
+  created: number;
+  data: GeneratedImageData[];
+}
+
+export interface RemoveBackgroundRequest {
+  /** Image as file upload or base64 string (mutually exclusive with image_url) */
+  image?: Blob | ArrayBuffer | string;
+  /** HTTPS image URL (mutually exclusive with image) */
+  image_url?: string;
+}
+
+export interface RemoveBackgroundResponse {
+  created: number;
+  data: GeneratedImageData[];
 }
 
 // Legacy interfaces for backward compatibility

@@ -171,7 +171,7 @@ export class StandardHttpClient extends BaseHttpClient {
       } catch (error) {
         if (this.logger) {
           this.logger.error(`${method} request to ${requestContext.path} failed`, {
-            error: (error as any).message
+            error: error instanceof Error ? error.message : String(error)
           });
         }
 
