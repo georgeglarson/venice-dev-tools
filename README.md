@@ -1,5 +1,7 @@
 # Venice AI SDK Monorepo
 
+> Also on [Codeberg](https://codeberg.org/georgelarson/venice-dev-tools)
+
 **Calendar-versioned TypeScript & JavaScript tooling for the Venice.ai platform.**
 Release `v2025.12.4` aligns with the Venice API updates published on **2025‑12‑04**.
 
