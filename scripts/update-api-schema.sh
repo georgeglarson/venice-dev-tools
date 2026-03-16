@@ -4,7 +4,7 @@
 
 set -e
 
-SCHEMA_URL="https://api.venice.ai/api/openapi.json"
+SCHEMA_URL="https://docs.venice.ai/swagger.yaml"
 SCHEMA_FILE="docs/api/openapi.yaml"
 
 echo "🔄 Fetching latest Venice API schema..."

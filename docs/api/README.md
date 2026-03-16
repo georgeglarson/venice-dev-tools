@@ -43,7 +43,7 @@ The schema is updated automatically via GitHub Actions, but you can also update 
 ./scripts/update-api-schema.sh
 ```
 
-This downloads the latest OpenAPI schema from `https://api.venice.ai/api/openapi.json` and saves it to this directory.
+This downloads the latest OpenAPI schema from `https://docs.venice.ai/swagger.yaml` and saves it to this directory.
 
 ## API Endpoints
 

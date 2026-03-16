@@ -19,7 +19,7 @@ jobs:
       - name: Fetch latest OpenAPI schema
         run: |
           mkdir -p docs/api
-          curl -fsSL https://api.venice.ai/api/openapi.json -o docs/api/openapi.yaml
+          curl -fsSL https://docs.venice.ai/swagger.yaml -o docs/api/openapi.yaml
       
       - name: Check for changes
         id: check
