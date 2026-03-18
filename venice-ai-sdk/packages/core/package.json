@@ -1,6 +1,6 @@
 {
   "name": "@venice-dev-tools/core",
-  "version": "2026.3.12",
+  "version": "2026.3.18",
   "type": "module",
   "description": "Core package for the Venice AI unOfficial SDK",
   "main": "./dist/index.cjs",

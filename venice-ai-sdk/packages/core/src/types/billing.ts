@@ -165,3 +165,77 @@ export interface GetBillingUsageResponse {
    */
   warningMessage?: string;
 }
+
+/**
+ * Balance information
+ */
+export interface BillingBalanceResponse {
+  /** Whether user can make API requests */
+  canConsume: boolean;
+  /** Currency used for consumption */
+  consumptionCurrency: 'USD' | 'VCU' | 'DIEM' | null;
+  /** Balance amounts */
+  balances: {
+    /** Remaining DIEM balance (null if not staking) */
+    diem: number | null;
+    /** Remaining USD balance (null if not available) */
+    usd: number | null;
+  };
+  /** Total DIEM allocation for current epoch */
+  diemEpochAllocation: number;
+}
+
+/**
+ * Usage analytics request parameters
+ */
+export interface GetBillingUsageAnalyticsRequest {
+  /** Lookback period (e.g. "7d", "30d", max "90d") */
+  lookback?: string;
+  /** Start date (YYYY-MM-DD) */
+  startDate?: string;
+  /** End date (YYYY-MM-DD) */
+  endDate?: string;
+}
+
+/**
+ * Model usage breakdown entry
+ */
+export interface UsageByModel {
+  modelName: string;
+  unitType: string;
+  modelType: string | null;
+  totalUsd: number;
+  totalDiem: number;
+  totalUnits: number;
+  breakdown?: Array<{
+    type: string;
+    usd: number;
+    diem: number;
+    units: number;
+  }>;
+}
+
+/**
+ * Key usage breakdown entry
+ */
+export interface UsageByKey {
+  apiKeyId: string | null;
+  description: string;
+  totalUsd: number;
+  totalDiem: number;
+  totalUnits: number;
+}
+
+/**
+ * Usage analytics response
+ */
+export interface GetBillingUsageAnalyticsResponse {
+  lookback: string;
+  byDate: Array<{ date: string; USD: number; DIEM: number }>;
+  byModel: UsageByModel[];
+  byModelDaily: Array<Record<string, number>>;
+  topModels: string[];
+  byKey: UsageByKey[];
+  byKeyDaily: Array<Record<string, number>>;
+  topKeyNames: string[];
+}

@@ -2,6 +2,9 @@ import { ApiEndpoint } from '../../registry/endpoint';
 import type {
   GetBillingUsageRequest,
   GetBillingUsageResponse,
+  BillingBalanceResponse,
+  GetBillingUsageAnalyticsRequest,
+  GetBillingUsageAnalyticsResponse,
 } from '../../../types/billing';
 import type { VeniceClient } from '../../../client';
 
@@ -134,6 +137,47 @@ export class BillingEndpoint extends ApiEndpoint {
       },
     });
 
+    return response.data;
+  }
+
+  /**
+   * Get current balance information.
+   *
+   * @returns Promise resolving to balance data
+   */
+  public async getBalance(): Promise<BillingBalanceResponse> {
+    const response = await this.http.get<BillingBalanceResponse>('/billing/balance');
+    return response.data;
+  }
+
+  /**
+   * Get aggregated usage analytics with breakdowns by date, model, and API key.
+   *
+   * NOTE: This is a beta endpoint and may be subject to change.
+   *
+   * @param request - Optional query parameters
+   * @returns Promise resolving to usage analytics data
+   */
+  public async getUsageAnalytics(
+    request?: GetBillingUsageAnalyticsRequest
+  ): Promise<GetBillingUsageAnalyticsResponse> {
+    const params = new URLSearchParams();
+
+    if (request?.lookback) {
+      params.append('lookback', request.lookback);
+    }
+    if (request?.startDate) {
+      params.append('startDate', request.startDate);
+    }
+    if (request?.endDate) {
+      params.append('endDate', request.endDate);
+    }
+
+    const path = params.toString()
+      ? `/billing/usage-analytics?${params.toString()}`
+      : '/billing/usage-analytics';
+
+    const response = await this.http.get<GetBillingUsageAnalyticsResponse>(path);
     return response.data;
   }
 }

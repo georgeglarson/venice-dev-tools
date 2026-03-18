@@ -48,6 +48,22 @@ export class ImageUpscaleEndpoint extends ApiEndpoint {
       formData.append('scale', params.scale.toString());
     }
 
+    if (params.enhance !== undefined) {
+      formData.append('enhance', params.enhance.toString());
+    }
+
+    if (params.enhanceCreativity !== undefined) {
+      formData.append('enhanceCreativity', params.enhanceCreativity.toString());
+    }
+
+    if (params.enhancePrompt) {
+      formData.append('enhancePrompt', params.enhancePrompt);
+    }
+
+    if (params.replication !== undefined) {
+      formData.append('replication', params.replication.toString());
+    }
+
     // Make the API request with a custom client to handle FormData
     // We can't use the standard http client as it expects JSON
     const url = `${this.http.getBaseUrl()}${this.getPath('/upscale')}`;

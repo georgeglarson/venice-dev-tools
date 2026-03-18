@@ -3,158 +3,117 @@
 > Also on [Codeberg](https://codeberg.org/georgelarson/venice-dev-tools)
 
 **Calendar-versioned TypeScript & JavaScript tooling for the Venice.ai platform.**
-Release `v2025.12.4` aligns with the Venice API updates published on **2025‑12‑04**.
 
 [![npm version](https://img.shields.io/npm/v/@venice-dev-tools/core?style=flat-square)](https://www.npmjs.com/package/@venice-dev-tools/core)
 [![Node.js Version](https://img.shields.io/node/v/@venice-dev-tools/core?style=flat-square)](https://nodejs.org)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue?style=flat-square)](https://www.typescriptlang.org/)
-[![CI Status](https://img.shields.io/github/actions/workflow/status/georgeglarson/venice-dev-tools/validate-examples.yml?style=flat-square&label=CI)](https://github.com/georgeglarson/venice-dev-tools/actions)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue?style=flat-square)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
 
 ---
 
-## Why teams ship with this SDK
-
-- **Full-stack coverage** – shared core package with dedicated Node.js and browser builds.
-- **Production hardening** – rate limiting, retries, streaming, and granular logging out of the box.
-- **Privacy-forward defaults** – client-side redaction helpers and zero-retention request pipeline.
-- **Battle-tested** – 170+ automated unit, integration, and workflow tests executed against the live Venice API.
-- **Docs that convert** – task-oriented guides, API references, and archived research for audits.
-
-> **New:** Calendar versioning (`YYYY.MM.D`) keeps releases in step with Venice's platform cadence. The `2025.12.4` tag represents the 2025‑12‑04 drop.
-
----
-
-## Install in your project
+## Install
 
 ```bash
-# Core runtime (Node.js & browser friendly)
+# Core runtime (Node.js & browser)
 pnpm add @venice-dev-tools/core
 
 # Optional: Node CLI helpers
-pnpm add -D @venice-dev-tools/node
+pnpm add @venice-dev-tools/node
 
 # Optional: Web bundler entry
-pnpm add -D @venice-dev-tools/web
+pnpm add @venice-dev-tools/web
 ```
 
-> **Installation tip:** `npm install venice-dev-tools` now auto-links the scoped `@venice-dev-tools/*` packages. If you previously installed manually, delete `node_modules` and reinstall.
-
-### CLI Installation
-
-To use the `venice` CLI globally:
-
-```bash
-pnpm add -g venice-dev-tools
-```
-
-The CLI is automatically linked during installation. For troubleshooting, see [`bin/venice-cli.js`](venice-ai-sdk/bin/venice-cli.js:12).
-
-Minimal initialisation:
+## Quick Start
 
 ```typescript
 import { VeniceAI } from '@venice-dev-tools/core';
 
 const venice = new VeniceAI({
   apiKey: process.env.VENICE_API_KEY!,
-  logLevel: 1 // INFO
 });
 
+// Chat completions
 const completion = await venice.chat.completions.create({
   model: 'llama-3.3-70b',
   messages: [{ role: 'user', content: 'Summarise Venice.ai in one sentence.' }]
 });
-
 console.log(completion.choices[0].message.content);
+
+// Responses API (Alpha)
+const response = await venice.responses.create({
+  model: 'llama-3.3-70b',
+  input: 'What is Venice.ai?',
+});
+console.log(response.output);
+
+// Image generation
+const image = await venice.images.generate({
+  model: 'fluently-xl',
+  prompt: 'A canal in Venice at sunset',
+});
+
+// Audio generation (queue-based)
+const job = await venice.audio.queue.queue({
+  model: 'elevenlabs-music',
+  prompt: 'A calm piano melody',
+});
+
+// Video generation (queue-based)
+const video = await venice.video.queue.queue({
+  model: 'wan-2.5-preview-image-to-video',
+  prompt: 'Commerce in Venice, Italy',
+  duration: '5s',
+  image_url: 'https://example.com/image.png',
+});
 ```
 
-> **Note:** `VeniceAI` is the recommended high-level client. For lower-level access, use `VeniceClient`.
-
-Need an API key? Visit [venice.ai/settings/api](https://venice.ai/settings/api), generate a token, and export it:  
-`export VENICE_API_KEY="your-key"`
+Need an API key? Visit [venice.ai/settings/api](https://venice.ai/settings/api).
 
 ---
 
-## Documentation map
-
-- **Quickstarts & patterns:** `docs/guides/`
-- **In-depth reference:** `docs/technical/`
-- **Venice API field notes:** `docs/venice-api/`
-- **Historical reports:** `docs/archive/` (testing analyses & legacy decision logs)
-
-The package-level README files (`venice-ai-sdk/README.md`, `packages/*/README.md`) dive into environment-specific details.
-
----
-
-## Calendar versioning & support policy
-
-- Releases follow the format `YYYY.MM.D`.  
-  Example: `2025.11.5` → 2025 (year) . 11 (month) . 5 (day).
-- Each drop tracks the public Venice API behaviour on that date.  
-  Breaking API changes trigger a new calendar release.
-- We publish hotfixes as needed using an additional patch suffix (`2025.11.5-1`, `2025.11.5-2`, …).
-- The previous two calendar releases remain in “active fix” status; older calendars are archived in `docs/archive/`.
-
----
-
-## Workspace layout
+## Workspace Layout
 
 ```
 .
-├── package.json                # Monorepo metadata (calendar-versioned)
-├── docs/
-│   ├── archive/                # Legacy analyses & decision logs
-│   ├── guides/                 # Task-first tutorials
-│   ├── technical/              # Architecture & API reference
-│   └── venice-api/             # Endpoint research & changelog diffs
-├── examples/                   # End-to-end scripts by scenario
-├── organized/                  # Curated request/response captures
-├── tests/                      # CLI smoke suites for release validation
-└── venice-ai-sdk/
-    ├── packages/
-    │   ├── core/               # Shared runtime, typings, and HTTP stack
-    │   ├── node/               # CLI tooling + Node-flavoured helpers
-    │   └── web/                # Browser-friendly bundle entry
-    ├── bin/                    # CLI launcher
-    ├── CHANGELOG.md            # Calendar release notes
-    └── README.md               # Package-level usage guide
+├── venice-ai-sdk/
+│   └── packages/
+│       ├── core/       # Shared runtime, types, HTTP stack
+│       ├── node/       # CLI tooling + Node helpers
+│       └── web/        # Browser bundle entry
+├── docs/               # Guides, technical notes, API schema
+└── examples/           # End-to-end usage scripts
 ```
 
 ---
 
-## Testing matrix
+## Testing
 
 ```bash
-# Fast unit suite (no network calls)
-pnpm -C venice-ai-sdk/packages/core test
+# Unit tests (no network)
+pnpm test
 
-# Core integration tests (require VENICE_API_KEY / VENICE_ADMIN_API_KEY)
-pnpm -C venice-ai-sdk/packages/core test:integration
+# Integration tests (requires VENICE_API_KEY)
+pnpm test:integration
 
-# Full workflow matrix with live Venice endpoints
-pnpm -C venice-ai-sdk/packages/core vitest run src/__integration__/workflows.integration.test.ts
+# Coverage
+pnpm test:coverage
 ```
 
-Integration suites will gracefully skip Web3 or media flows when the live API does not return usable assets—look for informative log lines in test output.
+---
+
+## Calendar Versioning
+
+Releases follow `YYYY.M.D` format, tracking the Venice API on that date.
 
 ---
 
 ## Contributing
 
-1. Fork & clone the repo.
-2. Run `pnpm install` at the root.
-3. Export `VENICE_API_KEY` (and `VENICE_ADMIN_API_KEY` for admin features).
-4. Use `pnpm -r test` before opening a PR.
-
-Please read the [contribution guidelines](CONTRIBUTING.md) for coding standards, commit conventions, and security disclosures.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ---
 
-## SEO-friendly quick answers
+## License
 
-- **What is the Venice AI SDK?** A TypeScript/JavaScript client for the Venice.ai API with Node.js and browser targets.
-- **Does it support streaming chat completions?** Yes—use `venice.chat.completions.createStream`.
-- **How do I handle billing and usage?** Call `venice.billing.getUsage` and `venice.billing.exportCSV` with calendar-aware rate limiting baked in.
-- **Where are past test plans?** Under `docs/archive/testing`.
-
-Need something else? Open an issue or discuss it in your next PR.
+[MIT](LICENSE)

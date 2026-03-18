@@ -20,8 +20,9 @@ import { KeysEndpoint } from './api/endpoints/keys';
 import { CharactersEndpoint } from './api/endpoints/characters';
 import { EmbeddingsEndpoint } from './api/endpoints/embeddings';
 import { BillingEndpoint } from './api/endpoints/billing';
-import { AudioSpeechEndpoint, AudioTranscriptionEndpoint } from './api/endpoints/audio';
-import { VideoGenerationEndpoint } from './api/endpoints/video';
+import { AudioSpeechEndpoint, AudioTranscriptionEndpoint, AudioQueueEndpoint } from './api/endpoints/audio';
+import { VideoGenerationEndpoint, VideoQueueEndpoint } from './api/endpoints/video';
+import { ResponsesEndpoint } from './api/endpoints/responses';
 
 /**
  * Main client for interacting with the Venice AI API.
@@ -66,6 +67,9 @@ export class VeniceAI extends VeniceClient {
       .register('audio.speech', AudioSpeechEndpoint)
       .register('audio.transcription', AudioTranscriptionEndpoint)
       .register('video.generation', VideoGenerationEndpoint)
+      .register('video.queue', VideoQueueEndpoint)
+      .register('audio.queue', AudioQueueEndpoint)
+      .register('responses', ResponsesEndpoint)
 
       // Register specialized chat endpoints
       .register('chat.stream', ChatStreamEndpoint)
@@ -227,20 +231,29 @@ export class VeniceAI extends VeniceClient {
    *
    * @returns The audio endpoint.
    */
-  public get audio(): { speech: AudioSpeechEndpoint; transcription: AudioTranscriptionEndpoint } {
+  public get audio(): { speech: AudioSpeechEndpoint; transcription: AudioTranscriptionEndpoint; queue: AudioQueueEndpoint } {
     return {
       speech: this.endpoint<AudioSpeechEndpoint>('audio.speech'),
-      transcription: this.endpoint<AudioTranscriptionEndpoint>('audio.transcription')
+      transcription: this.endpoint<AudioTranscriptionEndpoint>('audio.transcription'),
+      queue: this.endpoint<AudioQueueEndpoint>('audio.queue')
     };
   }
 
   /**
    * Get the video API endpoint.
    */
-  public get video(): { generation: VideoGenerationEndpoint } {
+  public get video(): { generation: VideoGenerationEndpoint; queue: VideoQueueEndpoint } {
     return {
-      generation: this.endpoint<VideoGenerationEndpoint>('video.generation')
+      generation: this.endpoint<VideoGenerationEndpoint>('video.generation'),
+      queue: this.endpoint<VideoQueueEndpoint>('video.queue')
     };
+  }
+
+  /**
+   * Get the responses API endpoint (Alpha).
+   */
+  public get responses(): ResponsesEndpoint {
+    return this.endpoint<ResponsesEndpoint>('responses');
   }
   
   /**

@@ -8,6 +8,11 @@
 export type AudioResponseFormat = 'mp3' | 'opus' | 'aac' | 'flac' | 'wav' | 'pcm';
 
 /**
+ * Supported speech languages
+ */
+export type AudioLanguage = 'Auto' | 'English' | 'Chinese' | 'Spanish' | 'French' | 'German' | 'Italian' | 'Japanese' | 'Korean' | 'Portuguese' | 'Russian';
+
+/**
  * Request to create speech from text
  */
 export interface CreateSpeechRequest {
@@ -51,7 +56,7 @@ export interface CreateSpeechRequest {
   /**
    * Language selection (Auto, English, Chinese, etc.)
    */
-  language?: string;
+  language?: AudioLanguage;
 
   /**
    * Emotional/delivery style (Qwen 3 only, max 500 chars)
@@ -236,3 +241,87 @@ export const TRANSCRIPTION_MODELS = {
 } as const;
 
 export type TranscriptionModel = typeof TRANSCRIPTION_MODELS[keyof typeof TRANSCRIPTION_MODELS];
+
+/**
+ * Request to queue an audio generation job
+ */
+export interface QueueAudioRequest {
+  /** Audio generation model */
+  model: string;
+  /** Description of audio to generate */
+  prompt: string;
+  /** Lyrics/text for lyric-capable models */
+  lyrics_prompt?: string;
+  /** Duration hint in seconds */
+  duration_seconds?: number | string;
+  /** Force instrumental mode */
+  force_instrumental?: boolean;
+  /** Voice selection for voice-enabled models */
+  voice?: string;
+  /** ISO 639-1 language code */
+  language_code?: string;
+  /** Audio speed multiplier (0.25-4) */
+  speed?: number;
+}
+
+/**
+ * Response from queuing an audio generation job
+ */
+export interface QueueAudioResponse {
+  /** Model used */
+  model: string;
+  /** Queue job ID */
+  queue_id: string;
+  /** Job status */
+  status: 'QUEUED';
+}
+
+/**
+ * Request for an audio generation price quote
+ */
+export interface QuoteAudioRequest {
+  /** Model to quote */
+  model: string;
+  /** Duration hint in seconds */
+  duration_seconds?: number | string;
+  /** Character count for character-based pricing */
+  character_count?: number;
+}
+
+/**
+ * Audio price quote response
+ */
+export interface QuoteAudioResponse {
+  /** Price in USD */
+  quote: number;
+}
+
+/**
+ * Request to retrieve an audio generation result
+ */
+export interface RetrieveAudioRequest {
+  /** Model used */
+  model: string;
+  /** Queue job ID */
+  queue_id: string;
+  /** Delete media from storage after retrieval */
+  delete_media_on_completion?: boolean;
+}
+
+/**
+ * Request to mark an audio generation as complete
+ */
+export interface CompleteAudioRequest {
+  /** Model used */
+  model: string;
+  /** Queue job ID */
+  queue_id: string;
+}
+
+/**
+ * Audio completion response
+ */
+export interface CompleteAudioResponse {
+  /** Whether cleanup was successful */
+  success: boolean;
+}
