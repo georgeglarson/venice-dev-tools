@@ -7,6 +7,14 @@ and releases now follow a calendar versioning scheme `YYYY.MM.D` aligned with Ve
 
 ## [Unreleased]
 
+## [2026.3.20] - 2026-03-20
+
+### Fixed
+- **Responses API Export**: Added missing `responses` barrel export to endpoints index, making the Responses API (added in v2026.3.18) actually accessible to consumers
+
+### Removed
+- Cleaned up unused `README-IMPROVED.md`
+
 ## [2025.12.4] - 2025-12-04
 
 ### Fixed

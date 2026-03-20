@@ -8,3 +8,4 @@ export * from './images';
 export * from './keys';
 export * from './models';
 export * from './characters';
+export * from './responses';
