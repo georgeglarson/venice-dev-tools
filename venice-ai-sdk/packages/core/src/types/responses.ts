@@ -44,7 +44,7 @@ export interface OutputTextContent {
  * Input message
  */
 export interface ResponseInputMessage {
-  type?: 'message';
+  type: 'message';
   role: 'user' | 'assistant' | 'system' | 'developer';
   content: string | (InputTextContent | InputImageContent | OutputTextContent)[];
   id?: string;
@@ -131,9 +131,57 @@ export interface ResponseWebSearchTool {
 }
 
 /**
+ * X/Twitter search tool definition
+ */
+export interface ResponseXSearchTool {
+  type: 'x_search';
+  allowed_x_handles?: string[];
+  excluded_x_handles?: string[];
+  from_date?: string;
+  to_date?: string;
+  enable_image_understanding?: boolean;
+  enable_video_understanding?: boolean;
+}
+
+/**
+ * Code interpreter tool definition
+ */
+export interface ResponseCodeInterpreterTool {
+  type: 'code_interpreter';
+  container?: { image?: string };
+}
+
+/**
+ * File search tool definition
+ */
+export interface ResponseFileSearchTool {
+  type: 'file_search';
+  vector_store_ids?: string[];
+  max_num_results?: number;
+  ranking_options?: { ranker?: string; score_threshold?: number };
+}
+
+/**
+ * Computer use tool definition (preview)
+ */
+export interface ResponseComputerUseTool {
+  type: 'computer_use_preview';
+  display_width?: number;
+  display_height?: number;
+  environment?: string;
+}
+
+/**
  * Tool definitions for Responses API
  */
-export type ResponseTool = ResponseFunctionTool | ResponseWebSearchTool | { type: string; [key: string]: unknown };
+export type ResponseTool =
+  | ResponseFunctionTool
+  | ResponseWebSearchTool
+  | ResponseXSearchTool
+  | ResponseCodeInterpreterTool
+  | ResponseFileSearchTool
+  | ResponseComputerUseTool
+  | { type: string; [key: string]: unknown };
 
 /**
  * Tool choice for Responses API

@@ -111,7 +111,30 @@ Production-ready patterns for experienced developers.
 | [12-streaming-with-abort.ts](typescript/12-streaming-with-abort.ts) | Cancellable streaming requests | AbortController, cleanup, timeouts |
 | [13-api-keys-management.ts](typescript/13-api-keys-management.ts) | Programmatic API key CRUD | Key management, metadata |
 | [14-rate-limit-handling.ts](typescript/14-rate-limit-handling.ts) | Rate limit strategies | Queuing, backoff, batch processing |
-| [15-custom-parameters.ts](typescript/15-custom-parameters.ts) | Venice-specific features | Web search, characters, parameters |
+| [15-custom-parameters.ts](typescript/15-custom-parameters.ts) | Venice-specific features | Web search, web scraping, characters, parameters |
+
+### Professional Patterns
+
+Production-ready patterns and SDK internals.
+
+| Example | Description | Key Concepts |
+|---------|-------------|--------------|
+| [16-middleware-system.ts](typescript/16-middleware-system.ts) | Request/response middleware | Middleware pipeline, logging, timing |
+| [17-streaming-utilities.ts](typescript/17-streaming-utilities.ts) | Stream transformation utilities | Stream filtering, buffering, transforms |
+| [18-error-recovery.ts](typescript/18-error-recovery.ts) | Structured error recovery | Recovery hints, graceful degradation |
+| [19-model-discovery.ts](typescript/19-model-discovery.ts) | Finding models by capability | Model traits, filtering, compatibility |
+
+### API Features
+
+Examples demonstrating specific API capabilities.
+
+| Example | Description | Key Concepts |
+|---------|-------------|--------------|
+| [20-function-calling.ts](typescript/20-function-calling.ts) | Tool/function calling | Tools, tool_choice, tool_calls, multi-turn |
+| [21-structured-output.ts](typescript/21-structured-output.ts) | Structured JSON responses | JSON schema, response_format, extraction |
+| [22-reasoning-config.ts](typescript/22-reasoning-config.ts) | Reasoning/thinking models | Reasoning effort, summary, thinking content |
+| [23-video-generation.ts](typescript/23-video-generation.ts) | Video generation workflow | Queue, retrieve, complete, polling |
+| [24-audio-transcription.ts](typescript/24-audio-transcription.ts) | Speech-to-text transcription | Audio transcription, timestamps, segments |
 
 ### Language-Specific Examples
 
@@ -169,9 +192,9 @@ VENICE_LOG_LEVEL=1
 ### Text Generation
 
 ```typescript
-import { VeniceClient } from '@venice-dev-tools/core';
+import { VeniceAI } from '@venice-dev-tools/core';
 
-const client = new VeniceClient({ apiKey: process.env.VENICE_API_KEY });
+const client = new VeniceAI({ apiKey: process.env.VENICE_API_KEY! });
 
 const response = await client.chat.completions.create({
   model: 'llama-3.3-70b',
@@ -235,7 +258,7 @@ See: [11-vision-multimodal.ts](typescript/11-vision-multimodal.ts)
 
 ```typescript
 const response = await client.embeddings.create({
-  model: 'text-embedding-004',
+  model: 'text-embedding-bge-m3',
   input: 'The quick brown fox jumps over the lazy dog',
 });
 
@@ -249,9 +272,9 @@ See: [07-embeddings.ts](typescript/07-embeddings.ts)
 
 ```typescript
 const audio = await client.audio.speech.create({
-  model: 'musicgen-stereo-small',
+  model: 'tts-kokoro',
   input: 'Hello, this is a test of the Venice AI text to speech system.',
-  voice: 'alloy',
+  voice: 'af_sky',
 });
 
 await fs.promises.writeFile('output.mp3', Buffer.from(await audio.arrayBuffer()));
@@ -294,7 +317,7 @@ See: [03-error-handling.ts](typescript/03-error-handling.ts)
 ## Configuration Options
 
 ```typescript
-const client = new VeniceClient({
+const client = new VeniceAI({
   apiKey: process.env.VENICE_API_KEY,
   
   // Timeout settings
@@ -372,7 +395,7 @@ bun run examples/typescript/01-hello-world.ts
 
 **Solution:**
 ```typescript
-const client = new VeniceClient({
+const client = new VeniceAI({
   apiKey: process.env.VENICE_API_KEY,
   timeout: 120000, // Increase to 120 seconds
 });
@@ -410,12 +433,12 @@ pnpm install
 
 ```typescript
 // ✅ Good
-const client = new VeniceClient({ 
+const client = new VeniceAI({ 
   apiKey: process.env.VENICE_API_KEY 
 });
 
 // ❌ Bad - never hardcode keys
-const client = new VeniceClient({ 
+const client = new VeniceAI({ 
   apiKey: 'sk-1234567890' 
 });
 ```
@@ -481,7 +504,7 @@ const stream = await client.chat.completions.create({
 
 ```typescript
 // ✅ Good - robust retry configuration
-const client = new VeniceClient({
+const client = new VeniceAI({
   apiKey: process.env.VENICE_API_KEY,
   retry: {
     maxRetries: 3,
@@ -493,7 +516,7 @@ const client = new VeniceClient({
 });
 
 // ❌ Bad - default retry may not suit production needs
-const client = new VeniceClient({
+const client = new VeniceAI({
   apiKey: process.env.VENICE_API_KEY,
 });
 ```

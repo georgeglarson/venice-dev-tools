@@ -22,6 +22,19 @@ export interface ChatCompletionMessage {
    * Can be a string for simple text messages or an array of content items for multimodal messages
    */
   content: string | ContentItem[];
+
+  /** Reasoning content from thinking models */
+  reasoning_content?: string | null;
+  /** Detailed reasoning steps */
+  reasoning_details?: Array<{ type: string; [key: string]: unknown }> | null;
+  /** Tool calls made by the assistant */
+  tool_calls?: Array<{
+    id: string;
+    type: 'function';
+    function: { name: string; arguments: string };
+  }> | null;
+  /** Tool call ID (for tool role messages) */
+  tool_call_id?: string;
 }
 
 /**
@@ -38,6 +51,10 @@ export interface VeniceParameters {
   enable_web_search?: 'on' | 'off' | 'auto';
   /** Enable web page scraping for context */
   enable_web_scraping?: boolean;
+  /** Enable end-to-end encryption */
+  enable_e2ee?: boolean;
+  /** Enable X/Twitter search integration */
+  enable_x_search?: boolean;
   /** Enable web citation annotations in response */
   enable_web_citations?: boolean;
   /** Include search results in the stream */
@@ -171,6 +188,16 @@ export interface ChatCompletionRequest {
   prompt_cache_retention?: 'default' | 'extended' | '24h';
   /** Request tracking metadata */
   metadata?: Record<string, string>;
+  /** Stop token IDs to halt generation */
+  stop_token_ids?: number[];
+  /** End-user identifier (accepted for compatibility) */
+  user?: string;
+  /** Whether to store the output (accepted for compatibility) */
+  store?: boolean;
+  /** Text output configuration */
+  text?: { verbosity?: 'low' | 'medium' | 'high' | 'auto' };
+  /** Additional fields to include in the response */
+  include?: string[];
   /** Venice-specific parameters */
   venice_parameters?: VeniceParameters;
 }
@@ -193,6 +220,22 @@ export interface ChatCompletionChoice {
    * The finish reason
    */
   finish_reason: string | null;
+
+  /**
+   * Log probability information (when requested)
+   */
+  logprobs?: {
+    content?: Array<{
+      token: string;
+      logprob: number;
+      top_logprobs?: Array<{ token: string; logprob: number }>;
+    }>;
+  } | null;
+
+  /**
+   * Stop reason
+   */
+  stop_reason?: 'stop' | 'length' | null;
 }
 
 /**
@@ -209,6 +252,11 @@ export interface ChatCompletionUsage {
   input_tokens?: number;
   /** Output tokens (alias for completion_tokens) */
   output_tokens?: number;
+  /** Detailed prompt token breakdown */
+  prompt_tokens_details?: {
+    cached_tokens?: number;
+    cache_creation_input_tokens?: number;
+  } | null;
 }
 
 /**
@@ -224,6 +272,13 @@ export interface ChatCompletionChunk {
     delta: {
       role?: string;
       content?: string;
+      reasoning_content?: string | null;
+      tool_calls?: Array<{
+        index: number;
+        id?: string;
+        type?: string;
+        function?: { name?: string; arguments?: string };
+      }>;
     };
     finish_reason: string | null;
   }[];
@@ -262,4 +317,21 @@ export interface ChatCompletionResponse {
    * Usage statistics
    */
   usage: ChatCompletionUsage;
+
+  /**
+   * Log probabilities for the prompt tokens
+   */
+  prompt_logprobs?: unknown | null;
+
+  /**
+   * Echo of Venice parameters used, with web search citations
+   */
+  venice_parameters?: VeniceParameters & {
+    web_search_citations?: Array<{
+      content?: string;
+      date?: string;
+      title: string;
+      url: string;
+    }>;
+  };
 }

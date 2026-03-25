@@ -497,6 +497,56 @@ describe('ChatEndpoint', () => {
       expect(body.venice_parameters.include_venice_system_prompt).toBe(false);
     });
 
+    it('passes venice_parameters web scraping and citations', async () => {
+      const req = minimalRequest({
+        venice_parameters: {
+          enable_web_scraping: true,
+          enable_web_citations: true,
+        },
+      });
+      await endpoint.completions.create(req);
+      const body = client._mockHttp.post.mock.calls[0][1];
+      expect(body.venice_parameters.enable_web_scraping).toBe(true);
+      expect(body.venice_parameters.enable_web_citations).toBe(true);
+    });
+
+    it('passes venice_parameters e2ee and x_search', async () => {
+      const req = minimalRequest({
+        venice_parameters: {
+          enable_e2ee: true,
+          enable_x_search: true,
+        },
+      });
+      await endpoint.completions.create(req);
+      const body = client._mockHttp.post.mock.calls[0][1];
+      expect(body.venice_parameters.enable_e2ee).toBe(true);
+      expect(body.venice_parameters.enable_x_search).toBe(true);
+    });
+
+    it('passes stop_token_ids and user fields', async () => {
+      const req = minimalRequest({
+        stop_token_ids: [50256, 50257],
+        user: 'test-user',
+        store: true,
+      });
+      await endpoint.completions.create(req);
+      const body = client._mockHttp.post.mock.calls[0][1];
+      expect(body.stop_token_ids).toEqual([50256, 50257]);
+      expect(body.user).toBe('test-user');
+      expect(body.store).toBe(true);
+    });
+
+    it('passes text verbosity and include fields', async () => {
+      const req = minimalRequest({
+        text: { verbosity: 'high' },
+        include: ['usage', 'logprobs'],
+      });
+      await endpoint.completions.create(req);
+      const body = client._mockHttp.post.mock.calls[0][1];
+      expect(body.text).toEqual({ verbosity: 'high' });
+      expect(body.include).toEqual(['usage', 'logprobs']);
+    });
+
     it('passes reasoning config', async () => {
       const req = minimalRequest({
         reasoning: { effort: 'high', summary: 'concise' },

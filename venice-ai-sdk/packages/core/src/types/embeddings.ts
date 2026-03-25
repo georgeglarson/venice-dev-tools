@@ -14,9 +14,8 @@ export interface CreateEmbeddingRequest {
 
   /**
    * ID of the model to use.
-   * @default "text-embedding-bge-m3"
    */
-  model?: string;
+  model: string;
 
   /**
    * The format to return the embeddings in.

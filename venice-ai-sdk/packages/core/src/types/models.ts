@@ -1,18 +1,113 @@
 /**
+ * Price tier with USD and DIEM values
+ */
+export interface ModelPriceTier {
+  usd: number;
+  diem: number;
+}
+
+/**
+ * Text model pricing (per million tokens)
+ */
+export interface TextModelPricing {
+  input: ModelPriceTier;
+  output: ModelPriceTier;
+  cache_input?: ModelPriceTier;
+  cache_write?: ModelPriceTier;
+  extended?: {
+    context_token_threshold: number;
+    input: ModelPriceTier;
+    output: ModelPriceTier;
+  };
+}
+
+/**
+ * Image model pricing
+ */
+export interface ImageModelPricing {
+  generation: ModelPriceTier;
+  resolutions?: Record<string, ModelPriceTier>;
+  upscale?: {
+    '2x'?: ModelPriceTier;
+    '4x'?: ModelPriceTier;
+  };
+}
+
+/**
+ * Audio/TTS model pricing
+ */
+export interface AudioModelPricing {
+  input?: ModelPriceTier;
+  per_audio_second?: ModelPriceTier;
+  generation?: ModelPriceTier;
+  per_second?: ModelPriceTier;
+  durations?: Record<string, ModelPriceTier>;
+  per_thousand_characters?: ModelPriceTier;
+}
+
+/**
+ * Model pricing (varies by model type)
+ */
+export type ModelPricing = TextModelPricing | ImageModelPricing | AudioModelPricing | Record<string, unknown>;
+
+/**
+ * Model capabilities
+ */
+export interface ModelCapabilities {
+  supportsFunctionCalling?: boolean;
+  supportsResponseSchema?: boolean;
+  supportsWebSearch?: boolean;
+  supportsReasoning?: boolean;
+  optimizedForCode?: boolean;
+  supportsReasoningEffort?: boolean;
+  supportsVision?: boolean;
+  supportsMultipleImages?: boolean;
+  maxImages?: number;
+  supportsLogProbs?: boolean;
+  supportsTeeAttestation?: boolean;
+  supportsE2EE?: boolean;
+  supportsXSearch?: boolean;
+  quantization?: 'fp4' | 'fp8' | 'fp16' | 'bf16' | 'int8' | 'int4' | 'not-available';
+}
+
+/**
  * Interface representing a model specification.
  */
 export interface ModelSpec {
   availableContextTokens?: number;
-  capabilities?: {
-    supportsFunctionCalling?: boolean;
-    supportsResponseSchema?: boolean;
-    supportsWebSearch?: boolean;
-    supportsReasoning?: boolean;
-  };
+  maxCompletionTokens?: number;
+  capabilities?: ModelCapabilities;
   traits?: string[];
   modelSource?: string;
   beta?: boolean;
+  betaModel?: boolean;
   offline?: boolean;
+  name?: string;
+  description?: string;
+  privacy?: 'private' | 'anonymized';
+  deprecation?: { date: string };
+  pricing?: ModelPricing;
+  constraints?: Record<string, unknown>;
+  /** Audio/music model fields */
+  supports_lyrics?: boolean;
+  lyrics_required?: boolean;
+  supports_force_instrumental?: boolean;
+  voices?: string[];
+  default_voice?: string;
+  supports_language_code?: boolean;
+  supports_speed?: boolean;
+  default_speed?: number;
+  min_speed?: number;
+  max_speed?: number;
+  duration_options?: number[];
+  min_duration?: number;
+  max_duration?: number;
+  default_duration?: number;
+  supported_formats?: string[];
+  default_format?: string;
+  prompt_character_limit?: number;
+  min_prompt_length?: number;
+  lyrics_character_limit?: number;
 }
 
 /**
@@ -20,7 +115,7 @@ export interface ModelSpec {
  */
 export interface Model {
   id: string;
-  type: 'image' | 'text';
+  type: 'asr' | 'embedding' | 'image' | 'music' | 'text' | 'tts' | 'upscale' | 'inpaint' | 'video';
   object: 'model';
   created: number;
   owned_by: string;
@@ -32,7 +127,7 @@ export interface Model {
  */
 export interface ListModelsResponse {
   object: 'list';
-  type: 'text' | 'image' | 'all' | 'code';
+  type: 'asr' | 'embedding' | 'image' | 'music' | 'text' | 'tts' | 'upscale' | 'inpaint' | 'video' | 'all' | 'code';
   data: Model[];
 }
 
@@ -48,7 +143,7 @@ export interface ModelTraits {
  */
 export interface ListModelTraitsResponse {
   object: 'list';
-  type: 'text' | 'image' | 'all' | 'code';
+  type: 'asr' | 'embedding' | 'image' | 'music' | 'text' | 'tts' | 'upscale' | 'inpaint' | 'video' | 'all' | 'code';
   data: ModelTraits;
 }
 
@@ -64,7 +159,7 @@ export interface ModelCompatibility {
  */
 export interface ListModelCompatibilityResponse {
   object: 'list';
-  type: 'text' | 'image' | 'all' | 'code';
+  type: 'asr' | 'embedding' | 'image' | 'music' | 'text' | 'tts' | 'upscale' | 'inpaint' | 'video' | 'all' | 'code';
   data: ModelCompatibility;
 }
 
@@ -72,7 +167,7 @@ export interface ListModelCompatibilityResponse {
  * Interface representing parameters for listing models.
  */
 export interface ListModelsParams {
-  type?: 'text' | 'image' | 'all' | 'code';
+  type?: 'asr' | 'embedding' | 'image' | 'music' | 'text' | 'tts' | 'upscale' | 'inpaint' | 'video' | 'all' | 'code';
 }
 
 /**

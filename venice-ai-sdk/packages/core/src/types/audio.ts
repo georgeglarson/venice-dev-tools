@@ -176,6 +176,17 @@ export const VOICES = {
   // Spanish male voices
   EM_ALEX: 'em_alex',
   EM_SANTA: 'em_santa',
+
+  // Qwen 3 voices
+  QWEN_VIVIAN: 'Vivian',
+  QWEN_SERENA: 'Serena',
+  QWEN_ONO_ANNA: 'Ono_Anna',
+  QWEN_SOHEE: 'Sohee',
+  QWEN_UNCLE_FU: 'Uncle_Fu',
+  QWEN_DYLAN: 'Dylan',
+  QWEN_ERIC: 'Eric',
+  QWEN_RYAN: 'Ryan',
+  QWEN_AIDEN: 'Aiden',
 } as const;
 
 export type Voice = typeof VOICES[keyof typeof VOICES];
@@ -214,11 +225,43 @@ export interface TranscriptionSegment {
 }
 
 /**
+ * Transcription word with timing
+ */
+export interface TranscriptionWord {
+  word: string;
+  start: number;
+  end: number;
+}
+
+/**
+ * Transcription character with timing
+ */
+export interface TranscriptionChar {
+  char: string;
+  start: number;
+  end: number;
+}
+
+/**
+ * Transcription timestamps (word, segment, and character level)
+ */
+export interface TranscriptionTimestamps {
+  word?: TranscriptionWord[];
+  segment?: TranscriptionSegment[];
+  char?: TranscriptionChar[];
+}
+
+/**
  * Response from transcription API
  */
 export interface CreateTranscriptionResponse {
   text: string;
+  /** @deprecated Use timestamps.segment instead */
   segments?: TranscriptionSegment[];
+  /** Audio duration in seconds */
+  duration?: number;
+  /** Detailed timestamps at word, segment, and character level */
+  timestamps?: TranscriptionTimestamps;
 }
 
 /**

@@ -1,5 +1,5 @@
 import { ApiEndpoint } from '../../registry/endpoint';
-import { ListCharactersResponse } from '../../../types/characters';
+import { ListCharactersResponse, CharacterReviewsResponse, ListCharacterReviewsParams } from '../../../types/characters';
 
 /**
  * API endpoint for character-related operations
@@ -31,6 +31,31 @@ export class CharactersEndpoint extends ApiEndpoint {
       type: 'characters.list',
       data: { count: response.data.data.length }
     });
+
+    return response.data;
+  }
+
+  /**
+   * Get reviews for a character
+   * @param params - The character slug and optional pagination parameters
+   * @returns A promise that resolves to a list of reviews with summary
+   */
+  public async getReviews(params: ListCharacterReviewsParams): Promise<CharacterReviewsResponse> {
+    this.emit('request', { type: 'characters.getReviews', slug: params.slug });
+
+    const queryParams: Record<string, string> = {};
+    if (params.page !== undefined) queryParams.page = String(params.page);
+    if (params.pageSize !== undefined) queryParams.pageSize = String(params.pageSize);
+
+    const query = Object.keys(queryParams).length
+      ? '?' + new URLSearchParams(queryParams).toString()
+      : '';
+
+    const response = await this.http.get<CharacterReviewsResponse>(
+      this.getPath(`/${params.slug}/reviews${query}`)
+    );
+
+    this.emit('response', { type: 'characters.getReviews', data: response.data });
 
     return response.data;
   }

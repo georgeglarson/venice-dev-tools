@@ -6,6 +6,7 @@
  * 
  * Features:
  * - Web search integration
+ * - Web scraping (Firecrawl) for URL content extraction
  * - Character personas
  * - Custom system prompts
  * - Temperature and creativity controls
@@ -69,8 +70,35 @@ async function main() {
     console.error('❌ Error:', error.message);
   }
 
-  // Example 2: Character Personas
-  console.log('\n👤 Example 2: Character Personas');
+  // Example 2: Web Scraping (Firecrawl)
+  console.log('\n🔍 Example 2: Web Scraping (URL Content Extraction)');
+  console.log('═'.repeat(50));
+
+  try {
+    const rawScrapingResponse = await venice.chat.completions.create({
+      model: 'llama-3.3-70b',
+      messages: [
+        {
+          role: 'user',
+          content: 'Summarize the content at https://venice.ai/blog'
+        }
+      ],
+      venice_parameters: {
+        enable_web_scraping: true,  // Scrapes URLs in the user message via Firecrawl
+      } as any
+    });
+    const scrapingResponse = ensureChatCompletionResponse(rawScrapingResponse, 'Web scraping example');
+
+    console.log('✅ Response with web scraping:');
+    console.log(toText(scrapingResponse.choices[0].message.content));
+    console.log('');
+
+  } catch (error: any) {
+    console.error('❌ Error:', error.message);
+  }
+
+  // Example 3: Character Personas
+  console.log('\n👤 Example 3: Character Personas');
   console.log('═'.repeat(50));
 
   try {
@@ -109,8 +137,8 @@ async function main() {
     console.error('❌ Error:', error.message);
   }
 
-  // Example 3: Creativity Controls
-  console.log('\n🎨 Example 3: Creativity Controls');
+  // Example 4: Creativity Controls
+  console.log('\n🎨 Example 4: Creativity Controls');
   console.log('═'.repeat(50));
 
   const prompt = 'Write a creative tagline for a coffee shop';
@@ -143,8 +171,8 @@ async function main() {
   console.log(toText(creativeResponse.choices[0].message.content));
   console.log('');
 
-  // Example 4: Response Format Control
-  console.log('\n📋 Example 4: Response Format Control');
+  // Example 5: Response Format Control
+  console.log('\n📋 Example 5: Response Format Control');
   console.log('═'.repeat(50));
 
   const rawFormatResponse = await venice.chat.completions.create({
@@ -175,6 +203,8 @@ async function main() {
   console.log('');
   console.log('   Venice-specific:');
   console.log('   • enable_web_search: real-time web results');
+  console.log('   • enable_web_scraping: extract content from URLs via Firecrawl');
+  console.log('   • enable_web_citations: annotate responses with sources');
   console.log('   • character_slug: use character personas');
   console.log('   • include_venice_system_prompt: use Venice defaults');
 }

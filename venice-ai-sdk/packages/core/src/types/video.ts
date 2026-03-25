@@ -60,7 +60,7 @@ export interface QueueVideoRequest {
   resolution?: '1080p' | '720p' | '480p';
   /** Whether to generate audio */
   audio?: boolean;
-  /** Reference image URL or data URL for image-to-video models */
+  /** Reference image URL or data URL (required for image-to-video models) */
   image_url?: string;
   /** Optional end frame image URL or data URL */
   end_image_url?: string;

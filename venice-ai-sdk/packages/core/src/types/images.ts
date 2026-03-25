@@ -270,7 +270,18 @@ export interface GenerateImageResponseLegacy {
   };
 }
 
+/**
+ * Response from listing available image styles
+ */
 export interface ListImageStylesResponse {
+  object: 'list';
+  data: string[];
+}
+
+/**
+ * @deprecated Use ListImageStylesResponse instead
+ */
+export interface ListImageStylesResponseLegacy {
   styles: {
     name: string;
     description: string;
